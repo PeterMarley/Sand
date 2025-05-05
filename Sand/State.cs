@@ -8,5 +8,5 @@ namespace Sand;
 
 public class State
 {
-	public static bool BreakLatch = false;
+	//public static bool BreakLatch = false;
 }

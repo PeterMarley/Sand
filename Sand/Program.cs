@@ -43,9 +43,11 @@ namespace Sand
 			catch (Exception ex)
 			{
 				Logger.Instance.LogError(ex, "caught in Main()");
-				Logger.Instance.FinaliseBeforeClose(ex);
 			}
-			
+			finally 
+			{
+				Logger.Instance.Dispose();
+			}
 		}
 	}
 }

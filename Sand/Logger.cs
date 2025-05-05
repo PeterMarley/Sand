@@ -6,17 +6,17 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using static Sand.Constants;
 
 namespace Sand;
 
-public class Logger
+public class Logger : IDisposable
 {
 
 	[DllImport("kernel32.dll")]
 	static extern bool AllocConsole();
 
 	#region File Log
-	private bool _pushLogsToFile;
 	private ConcurrentQueue<string> _logStrings = [];
 	private StreamWriter _logFileWriter;
 	#endregion
@@ -34,16 +34,21 @@ public class Logger
 
 	private const string LOG_TEMPLATE__INFO = "[{0}] (INFO) {1} {2}";
 	private const string LOG_TEMPLATE__ERROR = "[{0}] (ERROR) {1} {2}\nExMessage=\"{3}\"\nExStackTrace=\n{4}";
-	private const string DATE_FORMAT = "yy-MM-dd HH:mm:ss:ffff";
+	private const string DATE_FORMAT = "yy-MM-dd_HH:mm:ss.ffff";
 
 	private Logger()
 	{
-		AllocConsole();
-
 		try
 		{
+#pragma warning disable CS0162 // Unreachable code detected
+			if (LOG_TO_CONSOLE)
+			{
+				AllocConsole();
+			}
+#pragma warning restore CS0162 // Unreachable code detected
+
 			var path = AppContext.BaseDirectory;
-			var filename = $"SandLog_{DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified).ToString("yy-MM-dd_HH-mm-ss-fff")}.txt";
+			var filename = $"SandLog_{DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Unspecified).ToString("yy-MM-dd_HH-mm-ss-ffff")}.log";
 			var logDir = Path.Combine(path, "SandLogs");
 			if (!Directory.Exists(logDir))
 			{ 
@@ -52,16 +57,17 @@ public class Logger
 			var combined = Regex.Replace(Path.Combine(logDir, filename), "[^a-zA-Z0-9\\\\.:\\-_]", string.Empty);
 			var filestream = File.OpenWrite(combined);
 			_logFileWriter = new StreamWriter(filestream);
-			_pushLogsToFile = true;
-		}
+	}
 		catch (Exception ex)
 		{
 			LogInfo($"Failed to create file log = {ex.Message}");
-			_pushLogsToFile = false;
+			throw;
 		}
 		
 		LogInfo("Logger initialised");
 	}
+
+	#region Public API
 
 	public void LogInfo(string message, [CallerMemberName] string caller = "", [CallerFilePath] string filePath = "")
 	{
@@ -76,7 +82,7 @@ public class Logger
 		}
 		var logString = string.Format(LOG_TEMPLATE__INFO, GetDateStr(), loggedCaller, message);
 		LogInternal(logString);
-		if (_pushLogsToFile)
+		if (LOG_TO_FILE)
 		{
 			_logStrings.Enqueue(logString);
 			if (_logStrings.Count > 5)
@@ -98,7 +104,7 @@ public class Logger
 		);
 
 		LogInternal(logString);
-		if (_pushLogsToFile)
+		if (LOG_TO_FILE)
 		{
 			_logStrings.Enqueue(logString);
 			if (_logStrings.Count > 5)
@@ -107,6 +113,18 @@ public class Logger
 			}
 		}
 	}
+	public void Dispose()
+	{
+		if (LOG_TO_FILE)
+		{
+			DrumpStringsToFile();
+		}
+		_logFileWriter.Dispose();
+	}
+	
+	#endregion
+
+	#region Private API
 
 	private bool _currentlyDumpingStrings = false;
 	private void DrumpStringsToFile() 
@@ -130,21 +148,16 @@ public class Logger
 		sb.Clear();
 		_currentlyDumpingStrings = false;
 	}
-	private static string GetDateStr() => DateTime.Now.ToString();
-	
+	private static string GetDateStr() => DateTime.Now.ToString(DATE_FORMAT);
 	private static void LogInternal(string message)
 	{
 		System.Diagnostics.Debug.WriteLine(message);
 		Console.WriteLine(message);
 	}
 
-	public void FinaliseBeforeClose(Exception ex)
-	{
-		if (_pushLogsToFile)
-		{
-			DrumpStringsToFile();
-		}
-	}
+	#endregion
+
+
 
 
 }

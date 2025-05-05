@@ -8,24 +8,6 @@ namespace Sand;
 
 public class Stuff : IStuff
 {
-	#region Color
-	//private static readonly Texture2D _SINGLE_PIXEL_WHITE = FlatRedBallServices.Load<Texture2D>("Content/TextureImages/WhitePixel.png");
-	//private static readonly Texture2D _SINGLE_PIXEL_CYAN = FlatRedBallServices.Load<Texture2D>("Content/TextureImages/CyanPixel.png");
-	//private static readonly Texture2D _SINGLE_PIXEL_RED = FlatRedBallServices.Load<Texture2D>("Content/TextureImages/RedPixel.png");
-	//private static readonly Texture2D _SINGLE_PIXEL_BLUE = new Texture2D(FlatRedBallServices.GraphicsDevice, WIDTH * STUFF_SCALE, HEIGHT * STUFF_SCALE);
-	//private static readonly Texture2D[] _P_COLOUR_TEXTURES = [_SINGLE_PIXEL_WHITE, _SINGLE_PIXEL_CYAN, _SINGLE_PIXEL_RED];
-	//private static int _lastUsedColourIndex = 0;
-	//private static int _NextColourIndex()
-	//{
-	//		_lastUsedColourIndex++;
-	//		if (_lastUsedColourIndex > _P_COLOUR_TEXTURES.Length - 1)
-	//		{
-	//			_lastUsedColourIndex = 0;
-	//		}
-	//		return _lastUsedColourIndex;
-	//}
-	#endregion Color
-
 	#region Id
 	private Guid _id = Guid.NewGuid();
 	public Guid Id => _id;
@@ -33,8 +15,11 @@ public class Stuff : IStuff
 
 	private readonly Sprite _sprite;
 
-	public Stuff()
+	//public float Weight { get; private set; } = 1f;
+
+	public Stuff(float weight = 1f)
 	{
+		//Weight = weight;
 		_sprite = SpriteService.Instance.GetNextStuffSprite();
 		_sprite.TextureScale = STUFF_SCALE/*1*//*Constants.WINDOW_SCALE*/;
 	}
@@ -45,9 +30,4 @@ public class Stuff : IStuff
 		_sprite.Y = (y * STUFF_SCALE) /*+ (_sprite.Height / 2)*/;
 		return this;
 	}
-
-	//public Tuple<int,int> GetPosition()
-	//{
-	//	return new ((int)(_sprite.X /*/ Constants.WINDOW_SCALE*/),(int)(_sprite.Y /*/ Constants.WINDOW_SCALE*/));
-	//}
 }
