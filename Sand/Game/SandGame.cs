@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Input;
 using FlatRedBall.Input;
 using static FlatRedBall.Input.Mouse;
 using static Sand.Constants;
+using Sand.Stuff;
 
 namespace Sand;
 
@@ -42,7 +43,6 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 #endif
 		#endregion preprocessor directive
 
-		#region move window to left of dev's monitor
 		//----------------------------------------
 		//move window left a bit for dev comfort |
 		//----------------------------------------
@@ -51,16 +51,13 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		pos.Y -= 250;
 		Window.Position = pos;
 		//----------------------------------------
-		#endregion
 
 		FlatRedBallServices.InitializeFlatRedBall(this, graphics);
 
-		#region View port
-		Camera.Main.UsePixelCoordinates(true, WIDTH * STUFF_SCALE, HEIGHT * STUFF_SCALE); // makes the camera 2x as big (1 => 4 squares)
-		FlatRedBallServices.GraphicsOptions.SetResolution(WIDTH * STUFF_SCALE, HEIGHT * STUFF_SCALE); // Makes the viewport twice as big
-		#endregion
-
+		Camera.Main.UsePixelCoordinates(true, STUFF_WIDTH * STUFF_SCALE, STUFF_HEIGHT * STUFF_SCALE); // makes the camera 2x as big (1 => 4 squares)
+		FlatRedBallServices.GraphicsOptions.SetResolution(STUFF_WIDTH * STUFF_SCALE, STUFF_HEIGHT * STUFF_SCALE); // Makes the viewport twice as big
 		IsMouseVisible = true;
+		Window.AllowUserResizing = false;
 
 		base.Initialize();
 	}
@@ -69,24 +66,18 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 	{
 		FlatRedBallServices.Update(gameTime);
 
-		//if (InputManager.Mouse.ButtonPushed(MouseButtons.RightButton) || TimeManager.CurrentFrame % 5 == 0)
+		//if (TimeManager.CurrentFrame % 5 == 0)
 		//{
-			_world.AddStuffTopMiddle();
+		//	_world.AddStuffTopMiddle(new StuffSand());
 		//}
 
-		if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)) && InputManager.Mouse.IsInGameWindow())
+		if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.RightButton)) && InputManager.Mouse.IsInGameWindow())
 		{
 			var h =FlatRedBallServices.GraphicsDevice.Viewport.Height;
-			_world.AddStuffTo((int)(InputManager.Mouse.X / STUFF_SCALE), (int)((h - InputManager.Mouse.Y) / STUFF_SCALE));
-			Logger.Instance.LogInfo($"MouseX:{InputManager.Mouse.X} MouseY:{InputManager.Mouse.Y}");
+			_world.AddStuffIfEmpty(new StuffWater(), InputManager.Mouse.X / STUFF_SCALE, (h - InputManager.Mouse.Y) / STUFF_SCALE);
 		}
 
-		if (TimeManager.CurrentFrame % 1 == 0)
-		{
-			_world.Update();
-			//_world.Print();
-			
-		}
+		_world.Update();
 
 		if (TimeManager.CurrentFrame % PRINT_STUFF_WORLD_FRAMES == 0)
 		{
@@ -95,7 +86,10 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 		if (InputManager.Keyboard.KeyReleased(Keys.Escape))
 		{
-			throw new Exception("End game triggered with ESC");
+			Logger.Instance.Dispose();
+			this.Exit();
+			return;
+			//throw new Exception("End game triggered with ESC");
 		}
 
 		base.Update(gameTime);
