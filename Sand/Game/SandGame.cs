@@ -1,5 +1,3 @@
-using System;
-
 using FlatRedBall;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -7,6 +5,7 @@ using FlatRedBall.Input;
 using static FlatRedBall.Input.Mouse;
 using static Sand.Constants;
 using Sand.Stuff;
+using System.Threading.Tasks;
 
 namespace Sand;
 
@@ -15,7 +14,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 	GraphicsDeviceManager graphics;
 
 	private StuffWorld _world;
-
+	private Task _tLoadMaterials;
 	public SandGame() : base()
 	{
 		graphics = new GraphicsDeviceManager(this);
@@ -59,11 +58,19 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		IsMouseVisible = true;
 		Window.AllowUserResizing = false;
 
+		_tLoadMaterials = Task.Run(StuffFactory.Instance.LoadMaterialsAsync);
+
 		base.Initialize();
 	}
 
+	private int FRAME_COUNT_BETWEEN_UPDATE_DRAW = 1;
 	protected override void Update(GameTime gameTime)
 	{
+		if (!_tLoadMaterials.IsCompleted)
+		{
+			return;
+		}
+
 		FlatRedBallServices.Update(gameTime);
 
 		//if (TimeManager.CurrentFrame % 5 == 0)
@@ -71,15 +78,31 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		//	_world.AddStuffTopMiddle(new StuffSand());
 		//}
 
-		if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.RightButton)) && InputManager.Mouse.IsInGameWindow())
+		if (InputManager.Mouse.IsInGameWindow())
 		{
-			var h =FlatRedBallServices.GraphicsDevice.Viewport.Height;
-			_world.AddStuffIfEmpty(new StuffWater(), InputManager.Mouse.X / STUFF_SCALE, (h - InputManager.Mouse.Y) / STUFF_SCALE);
+			if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)))
+			{
+				var h = FlatRedBallServices.GraphicsDevice.Viewport.Height;
+				var water = StuffFactory.Instance.Get(Stuffs.BASIC_WATER);
+				_world.AddStuffIfEmpty(water, InputManager.Mouse.X / STUFF_SCALE, (h - InputManager.Mouse.Y) / STUFF_SCALE);
+			}
+
+			if ((InputManager.Mouse.ButtonPushed(MouseButtons.RightButton) || InputManager.Mouse.ButtonDown(MouseButtons.RightButton)))
+			{
+				var h = FlatRedBallServices.GraphicsDevice.Viewport.Height;
+				var sand = StuffFactory.Instance.Get(Stuffs.BASIC_SAND);
+				_world.AddStuffIfEmpty(sand, InputManager.Mouse.X / STUFF_SCALE, (h - InputManager.Mouse.Y) / STUFF_SCALE);
+			}
 		}
 
-		_world.Update();
+		
 
-		if (TimeManager.CurrentFrame % PRINT_STUFF_WORLD_FRAMES == 0)
+		if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE_DRAW == 0)
+		{
+			_world.Update();
+		}
+
+		if (TimeManager.CurrentFrame % (PRINT_STUFF_WORLD_FRAMES*3) == 0)
 		{
 			_world.Print();
 		}
@@ -98,7 +121,12 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 	protected override void Draw(GameTime gameTime)
 	{
 		FlatRedBallServices.Draw();
-		_world.Draw();
+
+		if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE_DRAW == 0)
+		{
+			_world.Draw();
+		}
+
 		base.Draw(gameTime);
 	}
 }

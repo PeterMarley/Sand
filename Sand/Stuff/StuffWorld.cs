@@ -1,49 +1,43 @@
-﻿using FlatRedBall.Math.Statistics;
-using Sand.Stuff;
+﻿using Sand.Stuff;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Reflection;
 using System.Text;
 using static Sand.Constants;
 
-namespace Sand;
+namespace Sand.Stuff;
 
 public class StuffWorld
 {
 	#region ctor
 	/// <summary>
-	/// Outer array is X, inner array is Y.<br/><em>[0, 0]</em> represents bottom left of viewport. <em>[xMax, yMax]</em> represents top right
+	/// Outer array is X, inner array is Y.
+	/// <br/><em>[0, 0]</em> represents bottom left of viewport.
+	/// <br/><em>[0, yMax]</em> represents top left.
+	/// <br/><em>[xMax, yMax]</em> represents top right.
 	/// </summary>
-	private IStuff[][] _world;
+	private StuffBasic[][] _world;
 	private StringBuilder _stringBuilder = new();
 	private readonly Random _random = new();
 	public StuffWorld()
 	{
-		_world = new IStuff[STUFF_WIDTH][];
+		_world = new StuffBasic[STUFF_WIDTH][];
 		for (int x = 0; x < _world.Length; x++)
 		{
-			_world[x] = new IStuff[STUFF_HEIGHT];
+			_world[x] = new StuffBasic[STUFF_HEIGHT];
 		}
 	}
 	#endregion
 
 	#region Public API
 
-	public void AddStuffTopMiddle(IStuff stuff)
+	public void AddStuffTopMiddle(StuffBasic stuff)
 	{
 		var middle = (STUFF_WIDTH / 2) - 1;
 		var top = STUFF_HEIGHT - 1;
 		AddStuffIfEmpty(stuff, middle, top);
 	}
 
-	//public void AddStuffTo(int x, int y)
-	//{
-	//	AddStuffTo(new StuffSand(), x, y);
-	//}
-
-	public void AddStuffIfEmpty(IStuff stuff, int x, int y)
+	public void AddStuffIfEmpty(StuffBasic stuff, int x, int y)
 	{
 		if (_world[x][y] == null)
 		{
@@ -143,63 +137,5 @@ public class StuffWorld
 	}
 	
 	#endregion
-
-	//private void ApplyGravity(IStuff stuff, int xIndex, int yIndex)
-	//{
-	//	//---------------------------------------------------
-	//	//Check 3 spots below, if all are filled then move on
-	//	//---------------------------------------------------
-
-	//	// if bottom row outside array range just continue as this Stuff cant fall anywhere
-	//	var rowBelowIndex = yIndex - 1;
-	//	if (rowBelowIndex < 0) return;
-
-	//	// check directly below
-	//	if (GravitateStuffTo(stuff, xIndex, yIndex, xIndex, rowBelowIndex))
-	//	{
-	//		return;
-	//	}
-
-	//	// check below and left (but alterate sides randomly)
-	//	bool leftSide = _random.Next(2) == 1;
-	//	var colLeftIndex = xIndex - 1;
-	//	var colRightIndex = xIndex + 1;
-
-	//	for (var lateralGravAttempts = 2; lateralGravAttempts > 0; lateralGravAttempts--)
-	//	{
-	//		if (leftSide)
-	//		{
-	//			// check below and left
-	//			if (colLeftIndex >= 0 && GravitateStuffTo(stuff, xIndex, yIndex, colLeftIndex, rowBelowIndex))
-	//			{
-	//				break;
-	//			}
-	//		}
-	//		else
-	//		{
-	//			// check below and right
-	//			if (colRightIndex < STUFF_WIDTH && GravitateStuffTo(stuff, xIndex, yIndex, colRightIndex, rowBelowIndex))
-	//			{
-	//				break;
-	//			}
-	//		}
-	//		leftSide = _random.Next(2) == 1;
-	//	}
-
-	//	bool GravitateStuffTo(IStuff stuffSource, int xFrom, int yFrom, int xTo, int yTo)
-	//	{
-	//		// check for stuff at target
-	//		var stuffTarget = _world[xTo][yTo];
-	//		// if not stuff at target fall to here and finish
-	//		if (stuffTarget == null)
-	//		{
-	//			// update world
-	//			_world[xFrom][yFrom] = null;
-	//			_world[xTo][yTo] = stuffSource;
-	//			return true;
-	//		}
-	//		return false;
-	//	}
-	//}
 
 }

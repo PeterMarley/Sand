@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using static Sand.Constants;
 
 namespace Sand;
@@ -33,6 +34,7 @@ public class Logger : IDisposable
 	#endregion
 
 	private const string LOG_TEMPLATE__INFO = "[{0}] (INFO) {1} {2}";
+	private const string LOG_TEMPLATE__WARN = "[{0}] (WARN) {1} {2}";
 	private const string LOG_TEMPLATE__ERROR = "[{0}] (ERROR) {1} {2}\nExMessage=\"{3}\"\nExStackTrace=\n{4}";
 	private const string DATE_FORMAT = "yy-MM-dd_HH:mm:ss.ffff";
 
@@ -91,10 +93,32 @@ public class Logger : IDisposable
 			}
 		}
 	}
+	public void LogWarning(string message, [CallerMemberName] string caller = "", [CallerFilePath] string filePath = "")
+	{
+		string loggedCaller;
+		if (filePath.Length > 0)
+		{
+			loggedCaller = filePath.Split(System.IO.Path.DirectorySeparatorChar).LastOrDefault();
+		}
+		else
+		{
+			loggedCaller = caller;
+		}
+		var logString = string.Format(LOG_TEMPLATE__WARN, GetDateStr(), loggedCaller, message);
+		LogInternal(logString);
+		if (LOG_TO_FILE)
+		{
+			_logStrings.Enqueue(logString);
+			if (_logStrings.Count > 5)
+			{
+				DrumpStringsToFile();
+			}
+		}
+	}
 	public void LogError(Exception ex, string message, [CallerMemberName] string caller = "", [CallerFilePath] string filePath = "")
 	{
 		string loggedCaller = $"{(filePath.Length > 0 ? filePath.Split(System.IO.Path.DirectorySeparatorChar).LastOrDefault() : string.Empty)} {caller}";
-		
+
 		var logString = string.Format(LOG_TEMPLATE__ERROR,
 			GetDateStr(),
 			loggedCaller,

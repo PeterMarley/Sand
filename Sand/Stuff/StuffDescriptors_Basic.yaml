@@ -1,0 +1,14 @@
+﻿
+# Basic Sand
+- Name: BasicSand
+  Version: 1
+  Phase: Solid
+  SpriteSource: GetRandomSandStuffSprite
+  Notes: Simple falling sand
+
+# Basic Water
+- Name: BasicWater
+  Version: 1
+  Phase: Liquid
+  SpriteSource: GetWaterStuffSprite
+  Notes: Simple falling and flowing water

@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace Sand;
+﻿namespace Sand;
 
 public class Constants
 {
@@ -8,9 +6,9 @@ public class Constants
 	//	DIMENSIONS										|
 	//---------------------------------------------------
 	/// <summary>The number of X-axis elements.</summary>
-	public const int STUFF_WIDTH = 80;//51;
+	public const int STUFF_WIDTH = 40;//51;
 	/// <summary>The number of Y-axis elements.</summary>
-	public const int STUFF_HEIGHT = 100;//200;
+	public const int STUFF_HEIGHT = 40;//200;
 	/// <summary>A Stuff element is this many pixels per side.</summary>
 	public const int STUFF_SCALE = 10/*2*/;
 
@@ -29,5 +27,10 @@ public class Constants
 	public const bool LOG_TO_FILE = true;
 	/// <summary>Controls whether logging goes to console window (still goes to visual studio output)</summary>]
 	public const bool LOG_TO_CONSOLE = false;
+}
 
+public class Stuffs
+{
+	public const string BASIC_SAND = "BasicSand";
+	public const string BASIC_WATER = "BasicWater";
 }

@@ -1,12 +1,6 @@
 ﻿using FlatRedBall;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static Sand.Constants;
 
 namespace Sand.Game;
@@ -66,7 +60,13 @@ public class SpriteService
 		_sandTextures = [_sand01, _sand02, _sand03, _sand04, _sand05, _sand06, _sand07];
 	}
 
-	/// <summary>Gets a random colour from <em>_textureArray</em></summary>
+	#region Sprite Gets
+
+	//======================================================================
+	// Do not rename these are they are referred to by the Material YAMLs
+	// and invoked by reflection targeting the method names
+	//======================================================================
+
 	public Sprite GetRandomDebugSprite()
 	{
 		var t = _textureArray[_NextColourIndex()];
@@ -75,7 +75,6 @@ public class SpriteService
 		return sprite;
 	}
 
-	/// <summary>Returns a random element from a Texture2D[]</summary>
 	public Sprite GetRandomSandStuffSprite()
 	{
 		var sprite = SpriteManager.AddSprite(RandomTextureFrom(_sandTextures));
@@ -83,10 +82,12 @@ public class SpriteService
 		return sprite;
 	}
 
-	internal Sprite GetWaterSprite()
+	public Sprite GetWaterStuffSprite()
 	{
 		var sprite = SpriteManager.AddSprite(_water);
 		sprite.TextureScale = STUFF_SCALE;
 		return sprite;
 	}
+
+	#endregion
 }
