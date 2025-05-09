@@ -1,20 +1,21 @@
 ﻿using System;
 using Sprite = FlatRedBall.Sprite;
-using static Sand.Constants;
-using Sand.Game;
+using static Sand.Config.Constants;
 using FlatRedBall;
+using Sand.Services;
+using Sand.Config;
+using Sand.Stuff.StuffDescriptors;
 
-namespace Sand.Stuff;
+namespace Sand.Models.Stuff;
 
 /// <summary>
-/// Describes a world "pixel", isnt a pixel really, but its a pixel scaled up as per configuration <see cref="Constants.STUFF_SCALE"/>.
+/// Describes a world "pixel", isnt a pixel really, but its a pixel scaled up as per configuration <see cref="STUFF_SCALE"/>.
 /// 
 /// Finaliser removes from SpriteManage so fugeddaboudit
 /// </summary>
 public abstract class AbstractStuff
 {
 	protected Random _random = new();
-	//protected Sprite _sprite;
 
 	public Guid Id { get; init; } = Guid.NewGuid();
 	public bool MovedThisUpdate { get; set; }
@@ -32,15 +33,6 @@ public abstract class AbstractStuff
 		Phase = phase;
 	}
 
-	///// <summary>
-	///// Finaliser, ensures garbage collector remove sprite from scene
-	///// </summary>
-	//~StuffBasic()
-	//{
-	//	//this._sprite.Visible = false;
-	//	//SpriteManager.RemoveSprite(this._sprite);
-	//}
-
 	public AbstractStuff(StuffDescriptor descriptor)
 	{
 		Name = descriptor.Name;
@@ -53,19 +45,6 @@ public abstract class AbstractStuff
 			phase = Phase.Solid;
 		}
 		Phase = phase;
-
-		//try
-		//{
-		//	_sprite = (Sprite) (SpriteService.Instance.GetType()
-		//		.GetMethod(descriptor.SpriteSource)
-		//		.Invoke(SpriteService.Instance, null));
-		//}
-		//catch (Exception ex)
-		//{
-		//	Logger.Instance.LogError(ex, "Failed to automatically get sprite using MaterialDescriptor.SpriteSource and reflection. Using random debug sprite.");
-		//	_sprite = SpriteService.Instance.GetRandomDebugSprite();
-		//	throw;
-		//}
 	}
 
 	public abstract AbstractStuff SetPosition(int x, int y);

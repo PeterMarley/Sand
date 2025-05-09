@@ -26,6 +26,6 @@ public class Randoms
 	/// </summary>
 	public void Refresh() 
 	{
-		Ind_leftRightMid = Ind_leftRightMid.OrderBy(x => _random.Next(1)).ToArray();
+		Ind_leftRightMid = Ind_leftRightMid.OrderBy(x => _random.Next(2)).ToArray();
 	}
 }

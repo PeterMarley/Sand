@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Sand.Stuff;
+namespace Sand.Stuff.StuffDescriptors;
 
 public struct StuffDescriptor
 {

@@ -1,8 +1,8 @@
-﻿using Sand.Stuff;
+﻿using Sand.Models.Stuff;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using static Sand.Constants;
+using static Sand.Config.Constants;
 
 namespace Sand;
 

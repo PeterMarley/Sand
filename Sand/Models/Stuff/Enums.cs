@@ -1,4 +1,4 @@
-﻿namespace Sand.Stuff;
+﻿namespace Sand.Models.Stuff;
 
 public enum Phase
 {

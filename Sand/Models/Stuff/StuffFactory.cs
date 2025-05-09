@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Sand.Models.Stuff;
+using Sand.Services;
+using Sand.Stuff.StuffDescriptors;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -13,7 +16,7 @@ public partial class StuffFactory
 {
 	#region Singleton
 	private static StuffFactory _instance;
-	public static StuffFactory Instance = _instance ??= new StuffFactory();
+	public static StuffFactory Instance { get; set; } = _instance ??= new StuffFactory();
 	#endregion
 
 	private ConcurrentDictionary<string, StuffDescriptor> _stuffDescriptors = [];
@@ -31,7 +34,7 @@ public partial class StuffFactory
 		string dir = null;
 		try
 		{
-			dir = Path.Combine(AppContext.BaseDirectory, "Stuff");
+			dir = Path.Combine(AppContext.BaseDirectory, "Data");
 			var filenames = Directory.EnumerateFiles(dir);
 			var filereadtasks = new List<Task>();
 			foreach (var filename in filenames.Where(f => StuffDescriptorFilenames().IsMatch(Path.GetFileName(f))))
@@ -60,7 +63,7 @@ public partial class StuffFactory
 			return new FileSpriteStuff(descriptor);
 		}
 
-		// this one has descriptor.ColorRgba by default, or should do
+		//// this one has descriptor.ColorRgba by default, or should do
 		//return new PolygonStuff(descriptor);
 		throw new InvalidOperationException("Unhandles stuff name dpassed to Get");
 	}

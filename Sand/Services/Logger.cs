@@ -7,9 +7,9 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using static Sand.Constants;
+using static Sand.Config.Constants;
 
-namespace Sand;
+namespace Sand.Services;
 
 public class Logger : IDisposable
 {

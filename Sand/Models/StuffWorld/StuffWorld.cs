@@ -1,4 +1,7 @@
 ﻿using FlatRedBall;
+using Microsoft.Xna.Framework;
+using Sand.Config;
+using Sand.Models.Stuff;
 using Sand.Services;
 using Sand.Stuff;
 using System;
@@ -8,9 +11,9 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Sand.Constants;
-
-namespace Sand.Stuff;
+using static Sand.Config.Constants;
+using Point = System.Drawing.Point;
+namespace Sand.Models.StuffWorld;
 
 public class StuffWorld
 {
@@ -22,17 +25,21 @@ public class StuffWorld
 	/// <br/><em>[0, yMax]</em> represents top left.
 	/// <br/><em>[xMax, yMax]</em> represents top right.
 	/// </summary>
-	private AbstractStuff[][] _world;
+	public AbstractStuff[][] World { get; private set; }
+
 	private StringBuilder _stringBuilder = new();
 	private readonly Random _random = new();
 
+	public Vector2 Dimensions { get; private set; }
+
 	public StuffWorld()
 	{
-		_world = new AbstractStuff[STUFF_WIDTH][];
-		for (int x = 0; x < _world.Length; x++)
+		World = new AbstractStuff[STUFF_WIDTH][];
+		for (int x = 0; x < World.Length; x++)
 		{
-			_world[x] = new AbstractStuff[STUFF_HEIGHT];
+			World[x] = new AbstractStuff[STUFF_HEIGHT];
 		}
+		Dimensions = new Vector2(World.Length, World[0].Length);
 	}
 	#endregion
 
@@ -42,17 +49,17 @@ public class StuffWorld
 
 	public void AddStuffTopMiddle(string stuffType)
 	{
-		var middle = (STUFF_WIDTH / 2) - 1;
+		var middle = STUFF_WIDTH / 2 - 1;
 		var top = STUFF_HEIGHT - 1;
 		SafeAddStuffIfEmpty(stuffType, middle, top);
 	}
 
 	public void SafeAddStuffIfEmpty(string stuffType, int x, int y)
 	{
-		if (_world.IsValidIndex(x, y) && _world[x][y] == null)
+		if (World.IsValidIndex(x, y) && World[x][y] == null)
 		{
 			var stuff = StuffFactory.Instance.Get(stuffType);
-			_world[x][y] = stuff.SetPosition(x, y);
+			World[x][y] = stuff.SetPosition(x, y);
 		}
 	}
 
@@ -75,15 +82,15 @@ public class StuffWorld
 
 	public void ApplyGravity(int xIndex, int yIndex)
 	{
-		var stuff = _world[xIndex][yIndex];
+		var stuff = World[xIndex][yIndex];
 		if (stuff == null) return;
 		switch (stuff.Phase)
 		{
 			case Phase.Solid:
-				ApplyGravityPhaseSolid(_world, xIndex, yIndex);
+				ApplyGravityPhaseSolid(World, xIndex, yIndex);
 				break;
 			case Phase.Liquid:
-				ApplyGravityPhaseLiquid(_world, xIndex, yIndex);
+				ApplyGravityPhaseLiquid(World, xIndex, yIndex);
 				break;
 			case Phase.Gas:
 			default:
@@ -108,7 +115,7 @@ public class StuffWorld
 			}
 
 			// check below and left (but alterate sides randomly)
-			bool leftSide = this._random.Next(2) == 1;
+			bool leftSide = _random.Next(2) == 1;
 			int colLeftIndex = xIndex - 1;
 			int colRightIndex = xIndex + 1;
 
@@ -157,7 +164,7 @@ public class StuffWorld
 			{
 				return;
 			}
-			bool leftFirst = this._random.Next(2) == 1;
+			bool leftFirst = _random.Next(2) == 1;
 
 			// check below and left (but alterate sides randomly)
 			bool leftSide = leftFirst;
@@ -222,11 +229,11 @@ public class StuffWorld
 
 	public bool Move(Point from, Point to)
 	{	
-		if (_world.IsValidIndex(from) && _world.IsValidIndex(to))
+		if (World.IsValidIndex(from) && World.IsValidIndex(to))
 		//if (from is { X: >= 0 and < STUFF_WIDTH, Y: >= 0 and < STUFF_HEIGHT } &&
 		//to is { X: >= 0 and < STUFF_WIDTH, Y: >= 0 and < STUFF_HEIGHT })
 		{
-			var stuffAtSource = _world[from.X][from.Y];
+			var stuffAtSource = World[from.X][from.Y];
 
 			if (stuffAtSource == null) return true;
 
@@ -252,15 +259,15 @@ public class StuffWorld
 			// check for stuff at target
 			var didMove = false;
 
-			var sourceHasStuff = _world.TryGetStuff(from.X, from.Y, out AbstractStuff stuffSource);
-			var targetHasStuff = _world.TryGetStuff(to.X, to.Y, out AbstractStuff stuffTarget);
+			var sourceHasStuff = World.TryGetStuff(from.X, from.Y, out AbstractStuff stuffSource);
+			var targetHasStuff = World.TryGetStuff(to.X, to.Y, out AbstractStuff stuffTarget);
 
 			// if not stuff at target fall to here and finish
-			if ((!targetHasStuff || stuffTarget is not { Phase: Phase.Solid }))
+			if (!targetHasStuff || stuffTarget is not { Phase: Phase.Solid })
 			{
 
-				_world[to.X][to.Y] = stuffSource.SetPosition(to.X, to.Y); // taretSource effectively removed but we have a ref above
-				_world[from.X][from.Y] = null;
+				World[to.X][to.Y] = stuffSource.SetPosition(to.X, to.Y); // taretSource effectively removed but we have a ref above
+				World[from.X][from.Y] = null;
 				stuffSource.MovedThisUpdate = true;
 				didMove = true;
 			}
@@ -281,7 +288,7 @@ public class StuffWorld
 				// garbage awaiting collection.
 				var hasDisplaced = false;
 				var waterColumnX = to.X;
-				for (int cursorY = to.Y; !hasDisplaced && _world.IsValidIndex(waterColumnX, cursorY); cursorY++)
+				for (int cursorY = to.Y; !hasDisplaced && World.IsValidIndex(waterColumnX, cursorY); cursorY++)
 				{
 
 					///////////////////////////////////////////////////////
@@ -291,10 +298,10 @@ public class StuffWorld
 					for (var i = 0; !hasDisplaced && i < Randoms.Instance.Ind_leftRightMid.Length; i++)
 					{
 						var adjCursorX = waterColumnX + Randoms.Instance.Ind_leftRightMid[i];
-						if (_world.IsValidIndex(adjCursorX, cursorY) && _world[adjCursorX][cursorY] == null)
+						if (World.IsValidIndex(adjCursorX, cursorY) && World[adjCursorX][cursorY] == null)
 						{
 							// move this displaced liquid to here
-							_world[adjCursorX][cursorY] = stuffTarget.SetPosition(adjCursorX, cursorY); ;
+							World[adjCursorX][cursorY] = stuffTarget.SetPosition(adjCursorX, cursorY); ;
 							hasDisplaced = true;// BREAKS both loops
 						}
 					}
@@ -311,19 +318,19 @@ public class StuffWorld
 		bool MoveLiquid(Point from, Point to)
 		{
 			// check for stuff at target
-			if (_world.IsValidIndex(from) && _world.IsValidIndex(to))
+			if (World.IsValidIndex(from) && World.IsValidIndex(to))
 			//if (from is { X: >= 0 and < STUFF_WIDTH, Y: >= 0 and < STUFF_HEIGHT } &&
 			//	to is { X: >= 0 and < STUFF_WIDTH, Y: >= 0 and < STUFF_HEIGHT })
 			{
 
-				var stuffSource = _world[from.X][from.Y];
-				var stuffTarget = _world[to.X][to.Y];
+				var stuffSource = World[from.X][from.Y];
+				var stuffTarget = World[to.X][to.Y];
 				// if not stuff at target fall to here and finish
 				if (stuffTarget == null)
 				{
 					// update world
-					_world[to.X][to.Y] = stuffSource;
-					_world[from.X][from.Y] = null;
+					World[to.X][to.Y] = stuffSource;
+					World[from.X][from.Y] = null;
 
 					if (stuffSource != null)
 					{
@@ -366,7 +373,7 @@ public class StuffWorld
 					p.Y = yIndex;
 
 					// get stuff here
-					var targetStuff = _world[xIndex][yIndex];
+					var targetStuff = World[xIndex][yIndex];
 					// if nothing here then move on to next Stuff
 					if (targetStuff == null || targetStuff.MovedThisUpdate) continue;
 
@@ -393,7 +400,7 @@ public class StuffWorld
 		_stringBuilder.AppendLine("\n\n\n\n\n\n\n\n\n\n\n\n");
 
 
-		foreach (var i in _world)
+		foreach (var i in World)
 		{
 			foreach (var j in i)
 			{
@@ -413,12 +420,12 @@ public class StuffWorld
 		int y = 0;
 		try
 		{
-			for (var xIndex = 0; xIndex < _world.Length; xIndex++)
+			for (var xIndex = 0; xIndex < World.Length; xIndex++)
 			{
-				for (var yIndex = 0; yIndex < _world[xIndex].Length; yIndex++)
+				for (var yIndex = 0; yIndex < World[xIndex].Length; yIndex++)
 				{
 					// get stuff here
-					var targetStuff = _world[xIndex][yIndex];
+					var targetStuff = World[xIndex][yIndex];
 					// if nothing here then move on to next Stuff
 					if (targetStuff == null) continue;
 
@@ -436,29 +443,29 @@ public class StuffWorld
 
 	#endregion
 
-	#region StuffWorld preconfigured setups for dev testing
-	public void PrepareWaterBottom3Y()
-	{
-		for (int x = 0; x < _world.Length; x++)
-		{
-			for (int y = 0; y < 3 && y < _world[x].Length; y++)
-			{
-				SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
-			}
-		}
-	}
+	//#region StuffWorld preconfigured setups for dev testing
+	//public void PrepareWaterBottom3Y()
+	//{
+	//	for (int x = 0; x < _world.Length; x++)
+	//	{
+	//		for (int y = 0; y < 3 && y < _world[x].Length; y++)
+	//		{
+	//			SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
+	//		}
+	//	}
+	//}
 
-	public void PrepareWaterBottomHalf()
-	{
-		for (int x = 0; x < _world.Length; x++)
-		{
-			for (int y = 0; y < _world[x].Length / 2; y++)
-			{
-				SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
-			}
-		}
-	}
-	#endregion
+	//public void PrepareWaterBottomHalf()
+	//{
+	//	for (int x = 0; x < _world.Length; x++)
+	//	{
+	//		for (int y = 0; y < _world[x].Length / 2; y++)
+	//		{
+	//			SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
+	//		}
+	//	}
+	//}
+	//#endregion
 
 	#endregion
 

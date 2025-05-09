@@ -3,11 +3,14 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using FlatRedBall.Input;
 using static FlatRedBall.Input.Mouse;
-using static Sand.Constants;
+using static Sand.Config.Constants;
 using Sand.Stuff;
 using System.Threading.Tasks;
 using System;
 using Sand.Services;
+using Sand.Config;
+using FlatRedBall.Screens;
+using Sand.Models.StuffWorld;
 
 namespace Sand;
 
@@ -28,7 +31,6 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		graphics.PreferredBackBufferHeight = 600;
 #endif
 		#endregion preprocessor directive
-		_world = new StuffWorld();
 	}
 
 	protected override void Initialize()
@@ -44,13 +46,13 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 #endif
 		#endregion preprocessor directive
 
-		//----------------------------------------
-		//move window left a bit for dev comfort |
-		//----------------------------------------
-		var pos = Window.Position;
-		pos.X -= 1300;
-		pos.Y -= 250;
-		Window.Position = pos;
+
+		//FlatRedBallServices.Game.Window.Position = new Point(0, 0);
+
+		//var pos = Window.Position;
+		//pos.X -= 3000;
+		//pos.Y -= 250;
+		//Window.Position = pos;
 		//----------------------------------------
 
 		//boiler plate
@@ -62,8 +64,33 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		IsMouseVisible = true;
 		Window.AllowUserResizing = false;
 
-		_tLoadMaterials = Task.Run(StuffFactory.Instance.LoadMaterialsAsync);
+#if DEBUG
 
+		//============================================================================
+		// SETs to comfy dev left screen
+		//============================================================================
+		var pos = Window.Position;
+		pos.X -= 2500;
+		//pos.Y -= 250;
+		Window.Position = pos;
+		//============================================================================
+#else
+		//============================================================================
+		// SETs to full screen borderless windowed
+		//============================================================================
+		var p = new Point(Window.ClientBounds.Left, Window.ClientBounds.Bottom);
+		Window.Position = new Point(0, 0);//p;
+		var w = FlatRedBallServices.Game.GraphicsDevice.Adapter.CurrentDisplayMode.Width;
+		var h = FlatRedBallServices.Game.GraphicsDevice.Adapter.CurrentDisplayMode.Height;
+		FlatRedBallServices.GraphicsOptions.SetResolution(w, h);
+		//============================================================================
+#endif
+
+
+
+
+		_tLoadMaterials = Task.Run(StuffFactory.Instance.LoadMaterialsAsync);
+		
 		base.Initialize();
 	}
 
@@ -75,15 +102,11 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		{
 			return;
 		}
-#if DEBUG
 		else if (!didPrep)
 		{
-			//_world.PrepareWaterBottom3Y();
-			//_world.PrepareWaterBottomHalf();
-
+			_world = StuffWorldFactory.WaterBottom3Y();
 			didPrep = true;
 		}
-#endif
 
 		FlatRedBallServices.Update(gameTime);
 
@@ -99,22 +122,13 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 			{
 
 				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 2);
-				//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
 
 			}
 
 			if ((InputManager.Mouse.ButtonPushed(MouseButtons.RightButton) || InputManager.Mouse.ButtonDown(MouseButtons.RightButton)))
 			{
-				//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
-				//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x + 1, y + 1);
-
 				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 2);
 			}
-
-			//if ((InputManager.Mouse.ButtonPushed(MouseButtons.MiddleButton) || InputManager.Mouse.ButtonDown(MouseButtons.MiddleButton)))
-			//{
-			//	_world.AddStuffIfEmpty(Stuffs.FLAT_WATER, x, y);
-			//}
 		}
 
 		if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE_DRAW == 0)
@@ -140,6 +154,11 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 	protected override void Draw(GameTime gameTime)
 	{
 		FlatRedBallServices.Draw();
+
+		if (!didPrep)
+		{
+			return;
+		}
 
 		if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE_DRAW == 0)
 		{

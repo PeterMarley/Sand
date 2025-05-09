@@ -1,6 +1,6 @@
 ﻿using Sand.Stuff;
 
-namespace Sand;
+namespace Sand.Config;
 
 public class Constants
 {
@@ -10,9 +10,9 @@ public class Constants
 	/// <summary>A Stuff element is this many pixels per side.</summary>
 	public const int STUFF_SCALE = 15;
 	/// <summary>Window resolution x</summary>
-	public const int RESOLUTION_X = 1920;
+	public const int RESOLUTION_X = 1000;
 	/// <summary>Window resolution y</summary>
-	public const int RESOLUTION_Y = 1080;
+	public const int RESOLUTION_Y = 800;
 	/// <summary>The number of X-axis elements</summary>
 	public const int STUFF_WIDTH = RESOLUTION_X / STUFF_SCALE;
 	/// <summary>The number of Y-axis elements</summary>
