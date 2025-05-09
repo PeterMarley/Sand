@@ -49,7 +49,7 @@ public class StuffWorld
 
 	public void SafeAddStuffIfEmpty(string stuffType, int x, int y)
 	{
-		if (_world.IsValidIndex(x,y) && _world[x][y] == null)
+		if (_world.IsValidIndex(x, y) && _world[x][y] == null)
 		{
 			var stuff = StuffFactory.Instance.Get(stuffType);
 			_world[x][y] = stuff.SetPosition(x, y);
@@ -102,7 +102,7 @@ public class StuffWorld
 			if (rowBelowIndex < 0) return;
 
 			// check directly below
-			if (Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex)))
+			if (Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 2)) || Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)))
 			{
 				return;
 			}
@@ -119,7 +119,8 @@ public class StuffWorld
 					// check below and left
 					if (colLeftIndex >= 0 && Move(new(xIndex, yIndex), new(colLeftIndex, rowBelowIndex)))
 					{
-						break;
+						return;
+						//break;
 					}
 				}
 				else
@@ -127,10 +128,17 @@ public class StuffWorld
 					// check below and right
 					if (colRightIndex < STUFF_WIDTH && Move(new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
 					{
-						break;
+						return;
+						//break;
 					}
 				}
 				leftSide = !leftSide;
+			}
+
+			// check directly below
+			if (Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex)))
+			{
+				return;
 			}
 		}
 
@@ -145,7 +153,7 @@ public class StuffWorld
 			if (rowBelowIndex < 0) return;
 
 			// check directly below
-			if (Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex)))
+			if (Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 2)) || Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)))
 			{
 				return;
 			}
@@ -213,12 +221,13 @@ public class StuffWorld
 	}
 
 	public bool Move(Point from, Point to)
-	{
-		if (from is { X: >= 0 and < STUFF_WIDTH, Y: >= 0 and < STUFF_HEIGHT } &&
-			to is { X: >= 0 and < STUFF_WIDTH, Y: >= 0 and < STUFF_HEIGHT })
+	{	
+		if (_world.IsValidIndex(from) && _world.IsValidIndex(to))
+		//if (from is { X: >= 0 and < STUFF_WIDTH, Y: >= 0 and < STUFF_HEIGHT } &&
+		//to is { X: >= 0 and < STUFF_WIDTH, Y: >= 0 and < STUFF_HEIGHT })
 		{
 			var stuffAtSource = _world[from.X][from.Y];
-			
+
 			if (stuffAtSource == null) return true;
 
 			switch (stuffAtSource.Phase)
@@ -229,7 +238,7 @@ public class StuffWorld
 				case Phase.Liquid:
 					//if (TimeManager.CurrentFrame % 2 == 0)
 					//{
-						MoveLiquid(from, to);
+					MoveLiquid(from, to);
 					//}
 					break;
 				default: throw new NotImplementedException($"{stuffAtSource.Phase} phase movement not implemented");
@@ -247,9 +256,9 @@ public class StuffWorld
 			var targetHasStuff = _world.TryGetStuff(to.X, to.Y, out AbstractStuff stuffTarget);
 
 			// if not stuff at target fall to here and finish
-			if ((!targetHasStuff || stuffTarget is not {Phase: Phase.Solid }))
+			if ((!targetHasStuff || stuffTarget is not { Phase: Phase.Solid }))
 			{
-				
+
 				_world[to.X][to.Y] = stuffSource.SetPosition(to.X, to.Y); // taretSource effectively removed but we have a ref above
 				_world[from.X][from.Y] = null;
 				stuffSource.MovedThisUpdate = true;
@@ -257,43 +266,43 @@ public class StuffWorld
 			}
 			//else
 			//{
-				//=======================================================================
-				// LIQUID DISPLACEMENT
-				//=======================================================================
+			//=======================================================================
+			// LIQUID DISPLACEMENT
+			//=======================================================================
 
-				// if stuff at the target, but target NOT solid (we know that source IS solid), then
-				// fall here - liquid, gas displacement means the thing pushed out of the way has
-				// to go up
-				if (targetHasStuff && stuffTarget is not { Phase: Phase.Solid })
+			// if stuff at the target, but target NOT solid (we know that source IS solid), then
+			// fall here - liquid, gas displacement means the thing pushed out of the way has
+			// to go up
+			if (targetHasStuff && stuffTarget is not { Phase: Phase.Solid })
+			{
+				// up upwards in Y-axis (checkling one left and right also) from displaced liqud
+				// until empty stuff found - staying within the water column.
+				// Once we fall out of bounds of array just stop looping as the target is already
+				// garbage awaiting collection.
+				var hasDisplaced = false;
+				var waterColumnX = to.X;
+				for (int cursorY = to.Y; !hasDisplaced && _world.IsValidIndex(waterColumnX, cursorY); cursorY++)
 				{
-					// up upwards in Y-axis (checkling one left and right also) from displaced liqud
-					// until empty stuff found - staying within the water column.
-					// Once we fall out of bounds of array just stop looping as the target is already
-					// garbage awaiting collection.
-					var hasDisplaced = false;
-					var waterColumnX = to.X;
-					for (int cursorY = to.Y; !hasDisplaced && _world.IsValidIndex(waterColumnX, cursorY); cursorY++)
-					{
 
-						///////////////////////////////////////////////////////
-						// lets try randomly going left, on or right of yCoord in water column droping
-						// there if empty, so 1/3 itll land left, on or right of cursorY
-						///////////////////////////////////////////////////////
-						for (var i = 0; !hasDisplaced && i < Randoms.Instance.Ind_leftRightMid.Length; i++)
+					///////////////////////////////////////////////////////
+					// lets try randomly going left, on or right of yCoord in water column droping
+					// there if empty, so 1/3 itll land left, on or right of cursorY
+					///////////////////////////////////////////////////////
+					for (var i = 0; !hasDisplaced && i < Randoms.Instance.Ind_leftRightMid.Length; i++)
+					{
+						var adjCursorX = waterColumnX + Randoms.Instance.Ind_leftRightMid[i];
+						if (_world.IsValidIndex(adjCursorX, cursorY) && _world[adjCursorX][cursorY] == null)
 						{
-							var adjCursorX = waterColumnX + Randoms.Instance.Ind_leftRightMid[i];
-							if (_world.IsValidIndex(adjCursorX, cursorY) && _world[adjCursorX][cursorY] == null)
-							{
-								// move this displaced liquid to here
-								_world[adjCursorX][cursorY] = stuffTarget.SetPosition(adjCursorX, cursorY); ;
-								hasDisplaced = true;// BREAKS both loops
-							}
+							// move this displaced liquid to here
+							_world[adjCursorX][cursorY] = stuffTarget.SetPosition(adjCursorX, cursorY); ;
+							hasDisplaced = true;// BREAKS both loops
 						}
 					}
-
-					// no empty spot found so "destroy" the displayers stuff (for now)
-					// TODO this will need updated when screen can move
 				}
+
+				// no empty spot found so "destroy" the displayers stuff (for now)
+				// TODO this will need updated when screen can move
+			}
 			//}
 
 			return didMove;
@@ -302,9 +311,9 @@ public class StuffWorld
 		bool MoveLiquid(Point from, Point to)
 		{
 			// check for stuff at target
-
-			if (from is { X: >= 0 and < STUFF_WIDTH, Y: >= 0 and < STUFF_HEIGHT } &&
-				to is { X: >= 0 and < STUFF_WIDTH, Y: >= 0 and < STUFF_HEIGHT })
+			if (_world.IsValidIndex(from) && _world.IsValidIndex(to))
+			//if (from is { X: >= 0 and < STUFF_WIDTH, Y: >= 0 and < STUFF_HEIGHT } &&
+			//	to is { X: >= 0 and < STUFF_WIDTH, Y: >= 0 and < STUFF_HEIGHT })
 			{
 
 				var stuffSource = _world[from.X][from.Y];

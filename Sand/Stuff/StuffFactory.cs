@@ -57,7 +57,7 @@ public partial class StuffFactory
 
 		if (!string.IsNullOrEmpty(descriptor.SpriteSource))
 		{
-			return new SpriteStuff(descriptor);
+			return new FileSpriteStuff(descriptor);
 		}
 
 		// this one has descriptor.ColorRgba by default, or should do

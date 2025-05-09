@@ -67,7 +67,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		base.Initialize();
 	}
 
-	private int FRAME_COUNT_BETWEEN_UPDATE_DRAW = 1;
+	private int FRAME_COUNT_BETWEEN_UPDATE_DRAW = 2;
 	private bool didPrep = false;
 	protected override void Update(GameTime gameTime)
 	{

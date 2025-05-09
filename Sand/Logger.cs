@@ -73,69 +73,69 @@ public class Logger : IDisposable
 
 	public void LogInfo(string message, [CallerMemberName] string caller = "", [CallerFilePath] string filePath = "")
 	{
-		string loggedCaller;
-		if (filePath.Length > 0)
-		{
-			loggedCaller = filePath.Split(System.IO.Path.DirectorySeparatorChar).LastOrDefault();
-		}
-		else
-		{
-			loggedCaller = caller;
-		}
-		var logString = string.Format(LOG_TEMPLATE__INFO, GetDateStr(), loggedCaller, message);
-		LogInternal(logString);
-		if (LOG_TO_FILE)
-		{
-			_logStrings.Enqueue(logString);
-			if (_logStrings.Count > 5)
-			{
-				DrumpStringsToFile();
-			}
-		}
+		//string loggedCaller;
+		//if (filePath.Length > 0)
+		//{
+		//	loggedCaller = filePath.Split(System.IO.Path.DirectorySeparatorChar).LastOrDefault();
+		//}
+		//else
+		//{
+		//	loggedCaller = caller;
+		//}
+		//var logString = string.Format(LOG_TEMPLATE__INFO, GetDateStr(), loggedCaller, message);
+		//LogInternal(logString);
+		//if (LOG_TO_FILE)
+		//{
+		//	_logStrings.Enqueue(logString);
+		//	if (_logStrings.Count > 5)
+		//	{
+		//		DrumpStringsToFile();
+		//	}
+		//}
 	}
 	public void LogWarning(string message, [CallerMemberName] string caller = "", [CallerFilePath] string filePath = "")
 	{
-		string loggedCaller;
-		if (filePath.Length > 0)
-		{
-			loggedCaller = filePath.Split(System.IO.Path.DirectorySeparatorChar).LastOrDefault();
-		}
-		else
-		{
-			loggedCaller = caller;
-		}
-		var logString = string.Format(LOG_TEMPLATE__WARN, GetDateStr(), loggedCaller, message);
-		LogInternal(logString);
-		if (LOG_TO_FILE)
-		{
-			_logStrings.Enqueue(logString);
-			if (_logStrings.Count > 5)
-			{
-				DrumpStringsToFile();
-			}
-		}
+		//string loggedCaller;
+		//if (filePath.Length > 0)
+		//{
+		//	loggedCaller = filePath.Split(System.IO.Path.DirectorySeparatorChar).LastOrDefault();
+		//}
+		//else
+		//{
+		//	loggedCaller = caller;
+		//}
+		//var logString = string.Format(LOG_TEMPLATE__WARN, GetDateStr(), loggedCaller, message);
+		//LogInternal(logString);
+		//if (LOG_TO_FILE)
+		//{
+		//	_logStrings.Enqueue(logString);
+		//	if (_logStrings.Count > 5)
+		//	{
+		//		DrumpStringsToFile();
+		//	}
+		//}
 	}
 	public void LogError(Exception ex, string message, [CallerMemberName] string caller = "", [CallerFilePath] string filePath = "")
 	{
-		string loggedCaller = $"{(filePath.Length > 0 ? filePath.Split(System.IO.Path.DirectorySeparatorChar).LastOrDefault() : string.Empty)} {caller}";
+		//string loggedCaller = $"{(filePath.Length > 0 ? filePath.Split(System.IO.Path.DirectorySeparatorChar).LastOrDefault() : string.Empty)} {caller}";
 
-		var logString = string.Format(LOG_TEMPLATE__ERROR,
-			GetDateStr(),
-			loggedCaller,
-			message,
-			ex.Message,
-			ex.StackTrace
-		);
+		//var logString = string.Format(LOG_TEMPLATE__ERROR,
+		//	GetDateStr(),
+		//	loggedCaller,
+		//	message,
+		//	ex.Message,
+		//	ex.StackTrace
+		//);
 
-		LogInternal(logString);
-		if (LOG_TO_FILE)
-		{
-			_logStrings.Enqueue(logString);
-			if (_logStrings.Count > 5)
-			{
-				DrumpStringsToFile();
-			}
-		}
+		//LogInternal(logString);
+		//if (LOG_TO_FILE)
+		//{
+		//	_logStrings.Enqueue(logString);
+		//	if (_logStrings.Count > 5)
+		//	{
+		//		DrumpStringsToFile();
+		//	}
+		//}
 	}
 	public void Dispose()
 	{
@@ -153,24 +153,25 @@ public class Logger : IDisposable
 	private bool _currentlyDumpingStrings = false;
 	private void DrumpStringsToFile() 
 	{
-		if (_currentlyDumpingStrings) return;
+		//if (_currentlyDumpingStrings) return;
 
-		_currentlyDumpingStrings = true;
-		var sb = new StringBuilder();
+		//_currentlyDumpingStrings = true;
+		//var sb = new StringBuilder();
 
-		var iTerminate = _logStrings.Count;
-		for (var i = 0; i < iTerminate; i++)
-		{
-			_logStrings.TryDequeue(out string str);
-			if (str != null)
-			{
-				sb.AppendLine(str);
-			}
-		}
-		_logFileWriter.Write(sb.ToString());
-		_logFileWriter.Flush();
-		sb.Clear();
-		_currentlyDumpingStrings = false;
+		//var iTerminate = _logStrings.Count;
+		//for (var i = 0; i < iTerminate; i++)
+		//{
+		//	_logStrings.TryDequeue(out string str);
+		//	if (str != null)
+		//	{
+		//		sb.AppendLine(str);
+		//	}
+		//}
+		//_logFileWriter.Write(sb.ToString());
+
+		//_logFileWriter.Flush();
+		//sb.Clear();
+		//_currentlyDumpingStrings = false;
 	}
 	private static string GetDateStr() => DateTime.Now.ToString(DATE_FORMAT);
 	private static void LogInternal(string message)

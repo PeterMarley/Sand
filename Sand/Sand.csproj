@@ -44,7 +44,7 @@
     <Compile Include="Game\SandGame.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Stuff\Enums.cs" />
-    <Compile Include="Stuff\SpriteStuff.cs" />
+    <Compile Include="Stuff\FileSpriteStuff.cs" />
     <Compile Include="Stuff\StuffDescriptor.cs" />
     <Compile Include="Stuff\AbstractStuff.cs" />
     <Compile Include="Stuff\StuffWorld.cs" />

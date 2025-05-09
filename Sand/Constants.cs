@@ -7,13 +7,16 @@ public class Constants
 	//---------------------------------------------------
 	//	DIMENSIONS										|
 	//---------------------------------------------------
-	//TODO SEE BELOW COMMENT
-	/// <summary>The number of X-axis elements.TODO convert width and height to resolution (ie real pixels) and calculate the number of <see cref="Sand.Stuff.AbstractStuff"/>'s wide and high</summary>
-	public const int STUFF_WIDTH = 100;//20;//51;
-	/// <summary>The number of Y-axis elements.</summary>
-	public const int STUFF_HEIGHT = 60;//40;//200;
 	/// <summary>A Stuff element is this many pixels per side.</summary>
-	public const int STUFF_SCALE = 15/*10*//*2*/;
+	public const int STUFF_SCALE = 15;
+	/// <summary>Window resolution x</summary>
+	public const int RESOLUTION_X = 1920;
+	/// <summary>Window resolution y</summary>
+	public const int RESOLUTION_Y = 1080;
+	/// <summary>The number of X-axis elements</summary>
+	public const int STUFF_WIDTH = RESOLUTION_X / STUFF_SCALE;
+	/// <summary>The number of Y-axis elements</summary>
+	public const int STUFF_HEIGHT = RESOLUTION_Y / STUFF_SCALE;
 
 	//---------------------------------------------------
 	//	PRINTING										|

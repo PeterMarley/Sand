@@ -31,6 +31,11 @@ public static class ArrayExtensions
 		return _ARE_THESE_INDICES_ALRIGHT_BAI(arr2d, x) && _ARE_THESE_INDICES_ALRIGHT_BAI(arr2d[x], y);
 	}
 
+	public static bool IsValidIndex(this AbstractStuff[][] arr2d, Point p)
+	{
+		return _ARE_THESE_INDICES_ALRIGHT_BAI(arr2d, p.X) && _ARE_THESE_INDICES_ALRIGHT_BAI(arr2d[p.X], p.Y);
+	}
+
 	public static bool IsValidIndex(this AbstractStuff[] arr, int i)
 	{
 		return _ARE_THESE_INDICES_ALRIGHT_BAI(arr, i);

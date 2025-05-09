@@ -11,13 +11,13 @@ using static Sand.Constants;
 
 namespace Sand.Stuff;
 
-public class SpriteStuff : AbstractStuff
+public class FileSpriteStuff : AbstractStuff
 {
 	protected Sprite _sprite;
 
 	//public SpriteStuff(Phase phase) : base(phase) { }
 
-	public SpriteStuff(StuffDescriptor descriptor) : base(descriptor)
+	public FileSpriteStuff(StuffDescriptor descriptor) : base(descriptor)
 	{
 		try
 		{
@@ -33,7 +33,7 @@ public class SpriteStuff : AbstractStuff
 		}
 	}
 
-	~SpriteStuff()
+	~FileSpriteStuff()
 	{
 		this._sprite.Visible = false;
 		SpriteManager.RemoveSprite(this._sprite);
