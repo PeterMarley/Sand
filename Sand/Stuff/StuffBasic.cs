@@ -2,20 +2,25 @@
 using Sprite = FlatRedBall.Sprite;
 using static Sand.Constants;
 using Sand.Game;
+using FlatRedBall;
 
 namespace Sand.Stuff;
 
+/// <summary>
+/// Describes a world "pixel", isnt a pixel really, but its a pixel scaled up as per configuration <see cref="Constants.STUFF_SCALE"/>.
+/// 
+/// Finaliser removes from SpriteManage so fugeddaboudit
+/// </summary>
 public class StuffBasic
 {
-	private readonly Guid _id = Guid.NewGuid();
 	protected Random _random = new();
 	protected Sprite _sprite;
-	protected Phase _phase;
 
-	public Guid Id => _id;
+	public Guid Id { get; init; } = Guid.NewGuid();
 	public bool MovedThisUpdate { get; set; }
 	public string Name { get; init; }
 	public string Notes { get; init; }
+	public Phase Phase { get; private set; }
 	public int Version { get; init; }
 
 	//protected abstract float _FreezingPoint { get; set; }
@@ -24,7 +29,16 @@ public class StuffBasic
 
 	public StuffBasic(Phase phase)
 	{
-		_phase = phase;
+		Phase = phase;
+	}
+
+	/// <summary>
+	/// Finaliser, ensures garbage collector remove sprite from scene
+	/// </summary>
+	~StuffBasic()
+	{
+		this._sprite.Visible = false;
+		SpriteManager.RemoveSprite(this._sprite);
 	}
 
 	public StuffBasic(StuffDescriptor descriptor)
@@ -39,7 +53,7 @@ public class StuffBasic
 			Logger.Instance.LogWarning($"failed to parse the phase string from material descriptor: descriptor.Phase={descriptor.Phase}");
 			phase = Phase.Solid;
 		}
-		_phase = phase;
+		Phase = phase;
 
 		try
 		{
@@ -55,7 +69,6 @@ public class StuffBasic
 		}
 	}
 
-
 	public StuffBasic SetPosition(int x, int y)
 	{
 		_sprite.X = x * STUFF_SCALE + _sprite.Width / 2;
@@ -63,139 +76,140 @@ public class StuffBasic
 		return this;
 	}
 
-	//TODO actually stuffworld should be passed in here, not the underlying data structure
-	private void ApplyGravityPhaseSolid(StuffBasic[][] world, int xIndex, int yIndex)
-	{
-		//-----------------------------------------------------------------
-		//Check 2 spots below left and right, if all are filled then move on
-		//-----------------------------------------------------------------
 
-		// if bottom row outside array range just continue as this Stuff cant fall anywhere
-		var rowBelowIndex = yIndex - 1;
-		if (rowBelowIndex < 0) return;
+	////TODO actually these methods shoudl all be in world -- NOT "actually stuffworld should be passed in here, not the underlying data structure"
+	//private void ApplyGravityPhaseSolid(StuffBasic[][] world, int xIndex, int yIndex)
+	//{
+	//	//-----------------------------------------------------------------
+	//	//Check 2 spots below left and right, if all are filled then move on
+	//	//-----------------------------------------------------------------
 
-		// check directly below
-		if (world.Move(new (xIndex, yIndex), new (xIndex, rowBelowIndex)))
-		{
-			return;
-		}
+	//	// if bottom row outside array range just continue as this Stuff cant fall anywhere
+	//	var rowBelowIndex = yIndex - 1;
+	//	if (rowBelowIndex < 0) return;
 
-		// check below and left (but alterate sides randomly)
-		bool leftSide = this._random.Next(2) == 1;
-		int colLeftIndex = xIndex - 1;
-		int colRightIndex = xIndex + 1;
+	//	// check directly below
+	//	if (world.MoveSolid(new (xIndex, yIndex), new (xIndex, rowBelowIndex)))
+	//	{
+	//		return;
+	//	}
 
-		for (var lateralGravAttempts = 2; lateralGravAttempts > 0; lateralGravAttempts--)
-		{
-			if (leftSide)
-			{
-				// check below and left
-				if (colLeftIndex >= 0 && world.Move(new (xIndex, yIndex), new (colLeftIndex, rowBelowIndex)))
-				{
-					break;
-				}
-			}
-			else
-			{
-				// check below and right
-				if (colRightIndex < STUFF_WIDTH && world.Move(new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
-				{
-					break;
-				}
-			}
-			leftSide = !leftSide;
-		}
-	}
+	//	// check below and left (but alterate sides randomly)
+	//	bool leftSide = this._random.Next(2) == 1;
+	//	int colLeftIndex = xIndex - 1;
+	//	int colRightIndex = xIndex + 1;
 
-	private void ApplyGravityPhaseLiquid(StuffBasic[][] world, int xIndex, int yIndex)
-	{
-		//-----------------------------------------------------------------
-		//Check 2 spots below left and right
-		//-----------------------------------------------------------------
+	//	for (var lateralGravAttempts = 2; lateralGravAttempts > 0; lateralGravAttempts--)
+	//	{
+	//		if (leftSide)
+	//		{
+	//			// check below and left
+	//			if (colLeftIndex >= 0 && world.MoveSolid(new (xIndex, yIndex), new (colLeftIndex, rowBelowIndex)))
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			// check below and right
+	//			if (colRightIndex < STUFF_WIDTH && world.MoveSolid(new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		leftSide = !leftSide;
+	//	}
+	//}
 
-		// if bottom row outside array range just continue as this Stuff cant fall anywhere
-		var rowBelowIndex = yIndex - 1;
-		if (rowBelowIndex < 0) return;
+	//private void ApplyGravityPhaseLiquid(StuffBasic[][] world, int xIndex, int yIndex)
+	//{
+	//	//-----------------------------------------------------------------
+	//	//Check 2 spots below left and right
+	//	//-----------------------------------------------------------------
 
-		// check directly below
-		if (world.Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex)))
-		{
-			return;
-		}
-		bool leftFirst = this._random.Next(2) == 1;
+	//	// if bottom row outside array range just continue as this Stuff cant fall anywhere
+	//	var rowBelowIndex = yIndex - 1;
+	//	if (rowBelowIndex < 0) return;
 
-		// check below and left (but alterate sides randomly)
-		bool leftSide = leftFirst;
-		int colLeftIndex = xIndex - 1;
-		int colRightIndex = xIndex + 1;
+	//	// check directly below
+	//	if (world.MoveLiquid(new(xIndex, yIndex), new(xIndex, rowBelowIndex)))
+	//	{
+	//		return;
+	//	}
+	//	bool leftFirst = this._random.Next(2) == 1;
 
-		for (var lateralGravAttempts = 2; lateralGravAttempts > 0; lateralGravAttempts--)
-		{
-			if (leftSide)
-			{
-				// check below and left
-				if (colLeftIndex >= 0 && world.Move(new(xIndex, yIndex), new(colLeftIndex, rowBelowIndex)))
-				{
-					break;
-				}
-			}
-			else
-			{
-				// check below and right
-				if (colRightIndex < STUFF_WIDTH && world.Move(new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
-				{
-					break;
-				}
-			}
-			leftSide = !leftSide;
-		}
+	//	// check below and left (but alterate sides randomly)
+	//	bool leftSide = leftFirst;
+	//	int colLeftIndex = xIndex - 1;
+	//	int colRightIndex = xIndex + 1;
 
-		colLeftIndex--;
-		colRightIndex++;
-		leftSide = leftFirst;
+	//	for (var lateralGravAttempts = 2; lateralGravAttempts > 0; lateralGravAttempts--)
+	//	{
+	//		if (leftSide)
+	//		{
+	//			// check below and left
+	//			if (colLeftIndex >= 0 && world.MoveLiquid(new(xIndex, yIndex), new(colLeftIndex, rowBelowIndex)))
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			// check below and right
+	//			if (colRightIndex < STUFF_WIDTH && world.MoveLiquid(new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		leftSide = !leftSide;
+	//	}
 
-		//-----------------------------------------------------------------
-		//Check 2 spots directly left and right - represent fluidic flow
-		//-----------------------------------------------------------------
+	//	colLeftIndex--;
+	//	colRightIndex++;
+	//	leftSide = leftFirst;
 
-		// check direct lateral movements
-		for (var lateralGravAttempts = 2; lateralGravAttempts > 0; lateralGravAttempts--)
-		{
-			if (leftSide)
-			{
-				// check left
-				if (colLeftIndex >= 0 && world.Move(new(xIndex, yIndex), new(colLeftIndex, yIndex)))
-				{
-					break;
-				}
-			}
-			else
-			{
-				// check right
-				if (colRightIndex < STUFF_WIDTH && world.Move(new(xIndex, yIndex), new(colRightIndex, yIndex)))
-				{
-					break;
-				}
-			}
-			leftSide = !leftSide;
-		}
-	}
+	//	//-----------------------------------------------------------------
+	//	//Check 2 spots directly left and right - represent fluidic flow
+	//	//-----------------------------------------------------------------
 
-	public void ApplyGravity(StuffBasic[][] world, int xIndex, int yIndex)
-	{
-		switch (_phase)
-		{
-			case Phase.Solid:
-				ApplyGravityPhaseSolid(world, xIndex, yIndex); 
-				break;
-			case Phase.Liquid:
-				ApplyGravityPhaseLiquid(world, xIndex, yIndex);
-				break;
-			case Phase.Gas: 
-			default:
-				Logger.Instance.LogInfo($"Phase {_phase} not handled");
-				break;
-		}
-	}
+	//	// check direct lateral movements
+	//	for (var lateralFlowAttempts = 2; lateralFlowAttempts > 0; lateralFlowAttempts--)
+	//	{
+	//		if (leftSide)
+	//		{
+	//			// check left
+	//			if (colLeftIndex >= 0 && world.MoveLiquid(new(xIndex, yIndex), new(colLeftIndex, yIndex)))
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		else
+	//		{
+	//			// check right
+	//			if (colRightIndex < STUFF_WIDTH && world.MoveLiquid(new(xIndex, yIndex), new(colRightIndex, yIndex)))
+	//			{
+	//				break;
+	//			}
+	//		}
+	//		leftSide = !leftSide;
+	//	}
+	//}
+
+	//public void ApplyGravity(StuffBasic[][] world, int xIndex, int yIndex)
+	//{
+	//	switch (Phase)
+	//	{
+	//		case Phase.Solid:
+	//			ApplyGravityPhaseSolid(world, xIndex, yIndex); 
+	//			break;
+	//		case Phase.Liquid:
+	//			ApplyGravityPhaseLiquid(world, xIndex, yIndex);
+	//			break;
+	//		case Phase.Gas: 
+	//		default:
+	//			Logger.Instance.LogInfo($"Phase {Phase} not handled");
+	//			break;
+	//	}
+	//}
 
 }

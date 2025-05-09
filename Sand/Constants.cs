@@ -1,12 +1,15 @@
-﻿namespace Sand;
+﻿using Sand.Stuff;
+
+namespace Sand;
 
 public class Constants
 {
 	//---------------------------------------------------
 	//	DIMENSIONS										|
 	//---------------------------------------------------
-	/// <summary>The number of X-axis elements.</summary>
-	public const int STUFF_WIDTH = 40;//51;
+	//TODO SEE BELOW COMMENT
+	/// <summary>The number of X-axis elements.TODO convert width and height to resolution (ie real pixels) and calculate the number of <see cref="Sand.Stuff.StuffBasic"/>'s wide and high</summary>
+	public const int STUFF_WIDTH = 20;//51;
 	/// <summary>The number of Y-axis elements.</summary>
 	public const int STUFF_HEIGHT = 40;//200;
 	/// <summary>A Stuff element is this many pixels per side.</summary>

@@ -9,7 +9,7 @@ using YamlDotNet.Serialization;
 
 namespace Sand.Stuff;
 
-public class StuffFactory
+public partial class StuffFactory
 {
 	#region Singleton
 	private static StuffFactory _instance;
@@ -34,7 +34,7 @@ public class StuffFactory
 			dir = Path.Combine(AppContext.BaseDirectory, "Stuff");
 			var filenames = Directory.EnumerateFiles(dir);
 			var filereadtasks = new List<Task>();
-			foreach (var filename in filenames.Where(f => Regex.IsMatch(Path.GetFileName(f), "^StuffDescriptors.*\\.yaml$")))
+			foreach (var filename in filenames.Where(f => StuffDescriptorFilenames().IsMatch(Path.GetFileName(f))))
 			{
 				filereadtasks.Add(Task.Run(() => LoadDescriptorsFromFile(filename)));
 			}
@@ -69,4 +69,7 @@ public class StuffFactory
 			_stuffDescriptors.AddOrUpdate(descriptor.Name, descriptor, (name, desc) => desc);
 		}
 	}
+
+	[GeneratedRegex("^StuffDescriptors.*\\.yaml$")]
+	private static partial Regex StuffDescriptorFilenames();
 }

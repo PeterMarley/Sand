@@ -1,4 +1,6 @@
 ﻿using Sand.Stuff;
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using static Sand.Constants;
 
@@ -6,35 +8,43 @@ namespace Sand;
 
 public static class ArrayExtensions
 {
-	public static bool Move(this StuffBasic[][] world, Point from, Point to)
+
+
+	public static bool TryGetStuff(this StuffBasic[][] arr2d, int x, int y, [NotNullWhen(true)] out StuffBasic element)
 	{
-		// check for stuff at target
-
-		if (from.X >= 0 && from.X < STUFF_WIDTH
-			&& from.Y >= 0 && from.Y < STUFF_HEIGHT
-			&& to.X >= 0 && to.X < STUFF_WIDTH 
-			&& to.Y >= 0 && to.Y < STUFF_HEIGHT)
+		if (arr2d.IsValidIndex(x, y) && arr2d[x][y] != null)
 		{
-
-			var stuffSource = world[from.X][from.Y];
-			var stuffTarget = world[to.X][to.Y];
-			// if not stuff at target fall to here and finish
-			if (stuffTarget == null)
-			{
-				// update world
-				world[to.X][to.Y] = stuffSource;
-				world[from.X][from.Y] = null;
-
-				if (stuffSource != null)
-				{
-					stuffSource.MovedThisUpdate = true;
-				}
-
-				return true;
-			}
+			element = arr2d[x][y];
+			return true;
 		}
-
-		
-		return false;
+		else
+		{
+			element = null;
+			return false;
+		}
 	}
+
+	private static readonly Func<object[], int, bool> _ARE_THESE_INDICES_ALRIGHT_BAI = (arr, i) => i >= 0 && i < arr.Length;
+
+	public static bool IsValidIndex(this StuffBasic[][] arr2d, int x, int y)
+	{
+		return _ARE_THESE_INDICES_ALRIGHT_BAI(arr2d, x) && _ARE_THESE_INDICES_ALRIGHT_BAI(arr2d[x], y);
+	}
+
+	public static bool IsValidIndex(this StuffBasic[] arr, int i)
+	{
+		return _ARE_THESE_INDICES_ALRIGHT_BAI(arr, i);
+	}
+
+	//public static void PrepareWaterBottom3Y(this StuffBasic[][] arr2d)
+	//{
+	//	for (int x = 0; x < arr2d.Length; x++)
+	//	{
+	//		for (int y = 0; y < 3 && y < arr2d[x].Length; y++)
+	//		{
+	//			arr2d[x][y] = StuffFactory.Instance.Get(Stuffs.BASIC_WATER);
+	//		}
+	//	}
+	//}
+
 }
