@@ -68,12 +68,7 @@ public abstract class AbstractStuff
 		//}
 	}
 
-	public virtual AbstractStuff SetPosition(int x, int y)
-	{
-		//_sprite.X = x * STUFF_SCALE + _sprite.Width / 2;
-		//_sprite.Y = y * STUFF_SCALE + _sprite.Height / 2;
-		return this;
-	}
+	public abstract AbstractStuff SetPosition(int x, int y);
 
 
 	////TODO actually these methods shoudl all be in world -- NOT "actually stuffworld should be passed in here, not the underlying data structure"

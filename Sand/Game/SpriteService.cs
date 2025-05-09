@@ -9,17 +9,7 @@ public class SpriteService
 {
 	#region singleton
 	private static SpriteService _instance;
-	public static SpriteService Instance
-	{
-		get
-		{
-			if (_instance == null)
-			{
-				_instance = new SpriteService();
-			}
-			return _instance;
-		}
-	}
+	public static SpriteService Instance => _instance ??= new();
 	#endregion
 
 	private readonly Texture2D _white = FlatRedBallServices.Load<Texture2D>("Content/TextureImages/WhitePixel.png");

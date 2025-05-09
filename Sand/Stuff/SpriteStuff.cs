@@ -15,7 +15,7 @@ public class SpriteStuff : AbstractStuff
 {
 	protected Sprite _sprite;
 
-	public SpriteStuff(Phase phase) : base(phase) { }
+	//public SpriteStuff(Phase phase) : base(phase) { }
 
 	public SpriteStuff(StuffDescriptor descriptor) : base(descriptor)
 	{

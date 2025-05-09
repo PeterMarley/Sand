@@ -97,19 +97,24 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 			if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)))
 			{
-				_world.AddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
+
+				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 2);
+				//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
+
 			}
 
 			if ((InputManager.Mouse.ButtonPushed(MouseButtons.RightButton) || InputManager.Mouse.ButtonDown(MouseButtons.RightButton)))
 			{
-				_world.AddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
-				_world.AddStuffIfEmpty(Stuffs.BASIC_SAND, x + 1, y + 1);
+				//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
+				//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x + 1, y + 1);
+
+				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 2);
 			}
 
-			if ((InputManager.Mouse.ButtonPushed(MouseButtons.MiddleButton) || InputManager.Mouse.ButtonDown(MouseButtons.MiddleButton)))
-			{
-				_world.AddStuffIfEmpty(Stuffs.FLAT_WATER, x, y);
-			}
+			//if ((InputManager.Mouse.ButtonPushed(MouseButtons.MiddleButton) || InputManager.Mouse.ButtonDown(MouseButtons.MiddleButton)))
+			//{
+			//	_world.AddStuffIfEmpty(Stuffs.FLAT_WATER, x, y);
+			//}
 		}
 
 		if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE_DRAW == 0)

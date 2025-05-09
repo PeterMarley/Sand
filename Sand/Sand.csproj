@@ -34,8 +34,9 @@
   <ItemGroup>
     <Compile Include="Constants.cs" />
     <Compile Include="Extensions\ArrayExtensions.cs" />
+    <Compile Include="Game\PolygonService.cs" />
     <Compile Include="Services\Randoms.cs" />
-    <Compile Include="Stuff\ColorStuff.cs" />
+    <Compile Include="Stuff\PolygonStuff.cs" />
     <Compile Include="Stuff\IStuff.cs" />
     <Compile Include="Game\SpriteService.cs" />
     <Compile Include="GlobalSuppressions.cs" />

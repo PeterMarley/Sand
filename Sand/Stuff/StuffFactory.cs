@@ -60,12 +60,9 @@ public partial class StuffFactory
 			return new SpriteStuff(descriptor);
 		}
 
-		if (!string.IsNullOrEmpty(descriptor.ColorSource))
-		{
-			return new ColorStuff(descriptor);
-		}
-
-		Console.WriteLine("Couldnt Get this Stuff");
+		// this one has descriptor.ColorRgba by default, or should do
+		//return new PolygonStuff(descriptor);
+		throw new InvalidOperationException("Unhandles stuff name dpassed to Get");
 	}
 
 	private void LoadDescriptorsFromFile(string filename)

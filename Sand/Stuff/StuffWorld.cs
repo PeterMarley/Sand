@@ -1,4 +1,5 @@
-﻿using Sand.Services;
+﻿using FlatRedBall;
+using Sand.Services;
 using Sand.Stuff;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using static Sand.Constants;
 
 namespace Sand.Stuff;
@@ -42,15 +44,26 @@ public class StuffWorld
 	{
 		var middle = (STUFF_WIDTH / 2) - 1;
 		var top = STUFF_HEIGHT - 1;
-		AddStuffIfEmpty(stuffType, middle, top);
+		SafeAddStuffIfEmpty(stuffType, middle, top);
 	}
 
-	public void AddStuffIfEmpty(string stuffType, int x, int y)
+	public void SafeAddStuffIfEmpty(string stuffType, int x, int y)
 	{
 		if (_world.IsValidIndex(x,y) && _world[x][y] == null)
 		{
 			var stuff = StuffFactory.Instance.Get(stuffType);
 			_world[x][y] = stuff.SetPosition(x, y);
+		}
+	}
+
+	public void SafeAddStuffIfEmpty_InSquare(string stuffType, int x, int y, int length)
+	{
+		for (int i = x - length; i < x + length; i++)
+		{
+			for (int j = y - length; j < y + length; j++)
+			{
+				SafeAddStuffIfEmpty(stuffType, i, j);
+			}
 		}
 	}
 
@@ -164,34 +177,37 @@ public class StuffWorld
 				leftSide = !leftSide;
 			}
 
-			colLeftIndex--;
-			colRightIndex++;
-			leftSide = leftFirst;
-
-			//-----------------------------------------------------------------
-			//Check 2 spots directly left and right - represent fluidic flow
-			//-----------------------------------------------------------------
-
-			// check direct lateral movements
-			for (var lateralFlowAttempts = 2; lateralFlowAttempts > 0; lateralFlowAttempts--)
+			if (TimeManager.CurrentFrame % 1 == 0)
 			{
-				if (leftSide)
+				colLeftIndex--;
+				colRightIndex++;
+				leftSide = leftFirst;
+
+				//-----------------------------------------------------------------
+				//Check 2 spots directly left and right - represent fluidic flow
+				//-----------------------------------------------------------------
+
+				// check direct lateral movements
+				for (var lateralFlowAttempts = 2; lateralFlowAttempts > 0; lateralFlowAttempts--)
 				{
-					// check left
-					if (colLeftIndex >= 0 && Move(new(xIndex, yIndex), new(colLeftIndex, yIndex)))
+					if (leftSide)
 					{
-						break;
+						// check left
+						if (colLeftIndex >= 0 && Move(new(xIndex, yIndex), new(colLeftIndex, yIndex)))
+						{
+							break;
+						}
 					}
-				}
-				else
-				{
-					// check right
-					if (colRightIndex < STUFF_WIDTH && Move(new(xIndex, yIndex), new(colRightIndex, yIndex)))
+					else
 					{
-						break;
+						// check right
+						if (colRightIndex < STUFF_WIDTH && Move(new(xIndex, yIndex), new(colRightIndex, yIndex)))
+						{
+							break;
+						}
 					}
+					leftSide = !leftSide;
 				}
-				leftSide = !leftSide;
 			}
 		}
 	}
@@ -207,8 +223,15 @@ public class StuffWorld
 
 			switch (stuffAtSource.Phase)
 			{
-				case Phase.Solid:	MoveSolid(from, to);	break;
-				case Phase.Liquid:	MoveLiquid(from, to);	break;
+				case Phase.Solid:
+					MoveSolid(from, to);
+					break;
+				case Phase.Liquid:
+					//if (TimeManager.CurrentFrame % 2 == 0)
+					//{
+						MoveLiquid(from, to);
+					//}
+					break;
 				default: throw new NotImplementedException($"{stuffAtSource.Phase} phase movement not implemented");
 			}
 		}
@@ -411,7 +434,7 @@ public class StuffWorld
 		{
 			for (int y = 0; y < 3 && y < _world[x].Length; y++)
 			{
-				AddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
+				SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
 			}
 		}
 	}
@@ -422,7 +445,7 @@ public class StuffWorld
 		{
 			for (int y = 0; y < _world[x].Length / 2; y++)
 			{
-				AddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
+				SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
 			}
 		}
 	}

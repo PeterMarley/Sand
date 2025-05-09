@@ -1,4 +1,6 @@
-﻿namespace Sand.Stuff;
+﻿using System.Collections.Generic;
+
+namespace Sand.Stuff;
 
 public struct StuffDescriptor
 {
@@ -6,6 +8,6 @@ public struct StuffDescriptor
 	public int Version { get; set; }
 	public string Phase { get; set; }
 	public string SpriteSource { get; set; }
-	public string[] ColorSource { get; set; }
+	public byte[] ColorRgba { get; set; }
 	public string Notes { get; set; }
 }
