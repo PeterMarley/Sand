@@ -20,16 +20,16 @@ public class StuffWorld
 	/// <br/><em>[0, yMax]</em> represents top left.
 	/// <br/><em>[xMax, yMax]</em> represents top right.
 	/// </summary>
-	private StuffBasic[][] _world;
+	private AbstractStuff[][] _world;
 	private StringBuilder _stringBuilder = new();
 	private readonly Random _random = new();
 
 	public StuffWorld()
 	{
-		_world = new StuffBasic[STUFF_WIDTH][];
+		_world = new AbstractStuff[STUFF_WIDTH][];
 		for (int x = 0; x < _world.Length; x++)
 		{
-			_world[x] = new StuffBasic[STUFF_HEIGHT];
+			_world[x] = new AbstractStuff[STUFF_HEIGHT];
 		}
 	}
 	#endregion
@@ -47,7 +47,7 @@ public class StuffWorld
 
 	public void AddStuffIfEmpty(string stuffType, int x, int y)
 	{
-		if (_world[x][y] == null)
+		if (_world.IsValidIndex(x,y) && _world[x][y] == null)
 		{
 			var stuff = StuffFactory.Instance.Get(stuffType);
 			_world[x][y] = stuff.SetPosition(x, y);
@@ -78,7 +78,7 @@ public class StuffWorld
 				break;
 		}
 
-		void ApplyGravityPhaseSolid(StuffBasic[][] world, int xIndex, int yIndex)
+		void ApplyGravityPhaseSolid(AbstractStuff[][] world, int xIndex, int yIndex)
 		{
 			//-----------------------------------------------------------------
 			//Check 2 spots below left and right, if all are filled then move on
@@ -121,7 +121,7 @@ public class StuffWorld
 			}
 		}
 
-		void ApplyGravityPhaseLiquid(StuffBasic[][] world, int xIndex, int yIndex)
+		void ApplyGravityPhaseLiquid(AbstractStuff[][] world, int xIndex, int yIndex)
 		{
 			//-----------------------------------------------------------------
 			//Check 2 spots below left and right
@@ -220,8 +220,8 @@ public class StuffWorld
 			// check for stuff at target
 			var didMove = false;
 
-			var sourceHasStuff = _world.TryGetStuff(from.X, from.Y, out StuffBasic stuffSource);
-			var targetHasStuff = _world.TryGetStuff(to.X, to.Y, out StuffBasic stuffTarget);
+			var sourceHasStuff = _world.TryGetStuff(from.X, from.Y, out AbstractStuff stuffSource);
+			var targetHasStuff = _world.TryGetStuff(to.X, to.Y, out AbstractStuff stuffTarget);
 
 			// if not stuff at target fall to here and finish
 			if ((!targetHasStuff || stuffTarget is not {Phase: Phase.Solid }))

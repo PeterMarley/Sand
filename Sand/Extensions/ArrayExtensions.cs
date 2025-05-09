@@ -10,7 +10,7 @@ public static class ArrayExtensions
 {
 
 
-	public static bool TryGetStuff(this StuffBasic[][] arr2d, int x, int y, [NotNullWhen(true)] out StuffBasic element)
+	public static bool TryGetStuff(this AbstractStuff[][] arr2d, int x, int y, [NotNullWhen(true)] out AbstractStuff element)
 	{
 		if (arr2d.IsValidIndex(x, y) && arr2d[x][y] != null)
 		{
@@ -26,12 +26,12 @@ public static class ArrayExtensions
 
 	private static readonly Func<object[], int, bool> _ARE_THESE_INDICES_ALRIGHT_BAI = (arr, i) => i >= 0 && i < arr.Length;
 
-	public static bool IsValidIndex(this StuffBasic[][] arr2d, int x, int y)
+	public static bool IsValidIndex(this AbstractStuff[][] arr2d, int x, int y)
 	{
 		return _ARE_THESE_INDICES_ALRIGHT_BAI(arr2d, x) && _ARE_THESE_INDICES_ALRIGHT_BAI(arr2d[x], y);
 	}
 
-	public static bool IsValidIndex(this StuffBasic[] arr, int i)
+	public static bool IsValidIndex(this AbstractStuff[] arr, int i)
 	{
 		return _ARE_THESE_INDICES_ALRIGHT_BAI(arr, i);
 	}

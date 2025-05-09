@@ -11,10 +11,10 @@ namespace Sand.Stuff;
 /// 
 /// Finaliser removes from SpriteManage so fugeddaboudit
 /// </summary>
-public class StuffBasic
+public abstract class AbstractStuff
 {
 	protected Random _random = new();
-	protected Sprite _sprite;
+	//protected Sprite _sprite;
 
 	public Guid Id { get; init; } = Guid.NewGuid();
 	public bool MovedThisUpdate { get; set; }
@@ -27,23 +27,22 @@ public class StuffBasic
 	//protected abstract float _BoilingPoint { get; set; }
 	//protected abstract bool _DoesSublimate { get; set; }
 
-	public StuffBasic(Phase phase)
+	public AbstractStuff(Phase phase)
 	{
 		Phase = phase;
 	}
 
-	/// <summary>
-	/// Finaliser, ensures garbage collector remove sprite from scene
-	/// </summary>
-	~StuffBasic()
-	{
-		this._sprite.Visible = false;
-		SpriteManager.RemoveSprite(this._sprite);
-	}
+	///// <summary>
+	///// Finaliser, ensures garbage collector remove sprite from scene
+	///// </summary>
+	//~StuffBasic()
+	//{
+	//	//this._sprite.Visible = false;
+	//	//SpriteManager.RemoveSprite(this._sprite);
+	//}
 
-	public StuffBasic(StuffDescriptor descriptor)
+	public AbstractStuff(StuffDescriptor descriptor)
 	{
-
 		Name = descriptor.Name;
 		Notes = descriptor.Notes;
 		Version = descriptor.Version;
@@ -55,24 +54,24 @@ public class StuffBasic
 		}
 		Phase = phase;
 
-		try
-		{
-			_sprite = (Sprite) (SpriteService.Instance.GetType()
-				.GetMethod(descriptor.SpriteSource)
-				.Invoke(SpriteService.Instance, null));
-		}
-		catch (Exception ex)
-		{
-			Logger.Instance.LogError(ex, "Failed to automatically get sprite using MaterialDescriptor.SpriteSource and reflection. Using random debug sprite.");
-			_sprite = SpriteService.Instance.GetRandomDebugSprite();
-			throw;
-		}
+		//try
+		//{
+		//	_sprite = (Sprite) (SpriteService.Instance.GetType()
+		//		.GetMethod(descriptor.SpriteSource)
+		//		.Invoke(SpriteService.Instance, null));
+		//}
+		//catch (Exception ex)
+		//{
+		//	Logger.Instance.LogError(ex, "Failed to automatically get sprite using MaterialDescriptor.SpriteSource and reflection. Using random debug sprite.");
+		//	_sprite = SpriteService.Instance.GetRandomDebugSprite();
+		//	throw;
+		//}
 	}
 
-	public StuffBasic SetPosition(int x, int y)
+	public virtual AbstractStuff SetPosition(int x, int y)
 	{
-		_sprite.X = x * STUFF_SCALE + _sprite.Width / 2;
-		_sprite.Y = y * STUFF_SCALE + _sprite.Height / 2;
+		//_sprite.X = x * STUFF_SCALE + _sprite.Width / 2;
+		//_sprite.Y = y * STUFF_SCALE + _sprite.Height / 2;
 		return this;
 	}
 

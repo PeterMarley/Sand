@@ -12,3 +12,17 @@
   Phase: Liquid
   SpriteSource: GetWaterStuffSprite
   Notes: Simple falling and flowing water
+
+# Basic Water
+- Name: FlatWater
+  Version: 1
+  Phase: Liquid
+  ColorSource: ["#ffffff","#bbbbbb", "#888888"]
+  Notes: Simple falling and flowing water
+
+# # Basic Magma
+# - Name: BasicMagma
+#   Version: 1
+#   Phase: Liquid
+#   SpriteSource: GetWaterStuffSprite
+#   Notes: Simple falling and flowing rock with a high temperature

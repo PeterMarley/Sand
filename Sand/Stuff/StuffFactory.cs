@@ -48,13 +48,24 @@ public partial class StuffFactory
 		}
 	}
 
-	public StuffBasic Get(string name)
+	public AbstractStuff Get(string name)
 	{
 		if (!_stuffDescriptors.TryGetValue(name, out StuffDescriptor descriptor))
 		{
 			throw new ArgumentException($"Cant create Stuff from name \"{name}\"!");
 		}
-		return new StuffBasic(descriptor);
+
+		if (!string.IsNullOrEmpty(descriptor.SpriteSource))
+		{
+			return new SpriteStuff(descriptor);
+		}
+
+		if (!string.IsNullOrEmpty(descriptor.ColorSource))
+		{
+			return new ColorStuff(descriptor);
+		}
+
+		Console.WriteLine("Couldnt Get this Stuff");
 	}
 
 	private void LoadDescriptorsFromFile(string filename)

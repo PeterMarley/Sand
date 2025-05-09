@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
@@ -35,6 +35,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="Extensions\ArrayExtensions.cs" />
     <Compile Include="Services\Randoms.cs" />
+    <Compile Include="Stuff\ColorStuff.cs" />
     <Compile Include="Stuff\IStuff.cs" />
     <Compile Include="Game\SpriteService.cs" />
     <Compile Include="GlobalSuppressions.cs" />
@@ -42,8 +43,9 @@
     <Compile Include="Game\SandGame.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Stuff\Enums.cs" />
+    <Compile Include="Stuff\SpriteStuff.cs" />
     <Compile Include="Stuff\StuffDescriptor.cs" />
-    <Compile Include="Stuff\StuffBasic.cs" />
+    <Compile Include="Stuff\AbstractStuff.cs" />
     <Compile Include="Stuff\StuffWorld.cs" />
     <Compile Include="Stuff\StuffFactory.cs" />
   </ItemGroup>
