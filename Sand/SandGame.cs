@@ -105,8 +105,10 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		}
 		else if (!didPrep)
 		{
-			_world = StuffWorldFactory.WaterBottom3Y();
+			//_world = StuffWorldFactory.GetDevStuffWorld_000();
+			//_world = StuffWorldFactory.WaterBottom3Y();
 			//_world = StuffWorldFactory.WaterBottomHalf();
+			_world = StuffWorldFactory.SandAlmostEverywhere();
 			didPrep = true;
 		}
 
@@ -122,9 +124,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 			if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)))
 			{
-
 				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 2);
-
 			}
 
 			if ((InputManager.Mouse.ButtonPushed(MouseButtons.RightButton) || InputManager.Mouse.ButtonDown(MouseButtons.RightButton)))
@@ -133,12 +133,13 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 			}
 		}
 
-		//if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE == 0)
+		//if (TimeManager.CurrentFrame % 2 == 0)
 		//{
 		//	_world.Update();
 		//}
 
 		_world.UpdateInSixths();
+
 
 		if (TimeManager.CurrentFrame % (PRINT_STUFF_WORLD_FRAMES * 3) == 0)
 		{

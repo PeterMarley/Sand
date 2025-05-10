@@ -26,7 +26,8 @@ public class StuffWorld
 	/// <br/><em>[xMax, yMax]</em> represents top right.
 	/// </summary>
 	public AbstractStuff[][] World { get; private set; }
-	private readonly List<(Point topLeft, Point bottomRight)> _subGrids = [];
+	//private readonly List<(Point topLeft, Point bottomRight)> _subGrids = [];
+	private List<(Point bottomLeft, Point topRight)> _subGrids = [];
 
 
 	private StringBuilder _stringBuilder = new();
@@ -66,15 +67,31 @@ public class StuffWorld
 		var subWidth = STUFF_WIDTH / gridsAlongX;
 		var subHeight = STUFF_HEIGHT / gridsAlongY;
 
-		for (int row = 0; row < gridsAlongY; row++)
+		////private readonly List<(Point topLeft, Point bottomRight)> _subGrids = [];
+		//for (int xCoord = 0; xCoord < gridsAlongX; xCoord++)
+		//{
+		//	for (int yCoord = 0; yCoord < gridsAlongY; yCoord++)
+		//	{
+		//		var y = (int)(yCoord * subHeight);
+		//		var x = (int)(xCoord * subWidth);
+		//		_subGrids.Add((new(x, y + subHeight), new(x + subWidth, y)));
+		//	}
+		//}
+
+		//private readonly List<(Point bottomLeft, Point topRight)> _subGrids = [];
+		for (int xCoord = 0; xCoord < gridsAlongX; xCoord++)
 		{
-			for (int col = 0; col < gridsAlongX; col++)
+			for (int yCoord = 0; yCoord < gridsAlongY; yCoord++)
 			{
-				var x = (int)(col * subWidth);
-				var y = (int)(row * subHeight);
+				var y = (int)(yCoord * subHeight);
+				var x = (int)(xCoord * subWidth);
 				_subGrids.Add((new(x, y), new(x + subWidth, y + subHeight)));
 			}
 		}
+
+		_subGrids.Sort((a, b) => _random.Next(-1, 2));
+
+		updateCounter = _subGrids.Count - 1;
 	}
 	#endregion
 
@@ -94,7 +111,7 @@ public class StuffWorld
 		if (World.IsValidIndex(x, y) && World[x][y] == null)
 		{
 			var stuff = StuffFactory.Instance.Get(stuffType);
-			World[x][y] = stuff.SetPosition(x, y);
+			World[x][y] = stuff;//.SetPosition(x, y);
 		}
 	}
 
@@ -301,13 +318,12 @@ public class StuffWorld
 			if (!targetHasStuff || stuffTarget is not { Phase: Phase.Solid })
 			{
 
-				World[to.X][to.Y] = stuffSource.SetPosition(to.X, to.Y); // taretSource effectively removed but we have a ref above
+				World[to.X][to.Y] = stuffSource;//.SetPosition(to.X, to.Y); // taretSource effectively removed but we have a ref above
 				World[from.X][from.Y] = null;
 				stuffSource.MovedThisUpdate = true;
 				didMove = true;
 			}
-			//else
-			//{
+
 			//=======================================================================
 			// LIQUID DISPLACEMENT
 			//=======================================================================
@@ -336,7 +352,7 @@ public class StuffWorld
 						if (World.IsValidIndex(adjCursorX, cursorY) && World[adjCursorX][cursorY] == null)
 						{
 							// move this displaced liquid to here
-							World[adjCursorX][cursorY] = stuffTarget.SetPosition(adjCursorX, cursorY); ;
+							World[adjCursorX][cursorY] = stuffTarget;//.SetPosition(adjCursorX, cursorY); ;
 							hasDisplaced = true;// BREAKS both loops
 						}
 					}
@@ -426,48 +442,106 @@ public class StuffWorld
 		}
 	}
 
-	private int updateCounter = 0;
+	private int updateCounter = 5;
 	public void UpdateInSixths()
 	{
 		// get the subrid coords for a 6th of the World
-		updateCounter++;
-		if (updateCounter >= _subGrids.Count)
+		if (updateCounter < _subGrids.Count - 1)
+		{
+			updateCounter++;
+		}
+		else 
 		{
 			updateCounter = 0;
+			
+			_subGrids = _subGrids.OrderBy(((Point bottomLeft, Point topRight) points) => _random.Next(-1, 2)).ToList();
 		}
 		var subgrid = _subGrids[updateCounter];
 
 		var p = new Point();
 		var ltr = true;
 
+		var width = subgrid.topRight.X - subgrid.bottomLeft.X;
+		var height = subgrid.topRight.Y - subgrid.bottomLeft.Y;
+
 		try
 		{
-			for (var yIndex = 0; yIndex < STUFF_HEIGHT; yIndex++)
+			var xIndex = 0;
+			for (var yIndex = subgrid.bottomLeft.Y /*+ updateCounter*/; yIndex < subgrid.topRight.Y; yIndex++/* += (updateCounter + 1)*/)
 			{
-				for (var xIndexSource = 0; xIndexSource < STUFF_WIDTH; xIndexSource++)
+				for (int i = 0; i < width; i++)
 				{
-					//==========================================================||
-					// we adjust the x index depending if we're going
-					//	left to right (ltr) => 0 to last index
-					//	right to left (rtl) => last index to 0
-					//==========================================================||
-
-					int xIndex = ltr ? xIndexSource : STUFF_WIDTH - 1 - xIndexSource;
-
 					p.X = xIndex;
 					p.Y = yIndex;
 
 					// get stuff here
 					var targetStuff = World[xIndex][yIndex];
 					// if nothing here then move on to next Stuff
-					if (targetStuff == null || targetStuff.MovedThisUpdate) continue;
+					if (targetStuff != null && !targetStuff.MovedThisUpdate)
+					{
+						ApplyGravity(xIndex, yIndex);
+					}
 
-					ApplyGravity(xIndex, yIndex);
+					// at end in/decrement
+					xIndex += ltr ? 1 : -1;
 				}
+
+
+				//var j = 0;
+
+				//for (var xIndexSource = subgrid.bottomLeft.X; xIndexSource < subgrid.topRight.X; xIndexSource++)
+				//{
+				//	//==========================================================||
+				//	// we adjust the x index depending if we're going
+				//	//	left to right (ltr) => 0 to last index
+				//	//	right to left (rtl) => last index to 0
+				//	//==========================================================||
+
+				//	int xIndex = ltr ? xIndexSource : xIndexSource + width - j;
+
+				//	p.X = xIndex;
+				//	p.Y = yIndex;
+
+				//	// get stuff here
+				//	var targetStuff = World[xIndex][yIndex];
+				//	// if nothing here then move on to next Stuff
+				//	if (targetStuff == null || targetStuff.MovedThisUpdate) continue;
+
+				//	ApplyGravity(xIndex, yIndex);
+
+				//	j++;
+				//}
 
 				// flip the direction of the next horizontal traversal - for reasons
 				ltr = !ltr;
 			}
+
+			////for (var yIndex = subgrid.bottomLeft.Y; yIndex < subgrid.topRight.Y; yIndex++)
+			////{
+			////	for (var xIndexSource = subgrid.bottomLeft.X; xIndexSource < subgrid.topRight.X; xIndexSource++)
+			////	{
+			////		//==========================================================||
+			////		// we adjust the x index depending if we're going
+			////		//	left to right (ltr) => 0 to last index
+			////		//	right to left (rtl) => last index to 0
+			////		//==========================================================||
+
+			////		int xIndex = ltr ? xIndexSource : STUFF_WIDTH - 1 - xIndexSource;
+
+			////		p.X = xIndex;
+			////		p.Y = yIndex;
+
+			////		// get stuff here
+			////		var targetStuff = World[xIndex][yIndex];
+			////		// if nothing here then move on to next Stuff
+			////		if (targetStuff == null || targetStuff.MovedThisUpdate) continue;
+
+			////		ApplyGravity(xIndex, yIndex);
+			////	}
+
+			////	// flip the direction of the next horizontal traversal - for reasons
+			////	ltr = !ltr;
+			////}
 		}
 		catch (Exception applyGravEx)
 		{
@@ -502,6 +576,7 @@ public class StuffWorld
 
 	public void Draw()
 	{
+		
 		int x = 0;
 		int y = 0;
 		try
