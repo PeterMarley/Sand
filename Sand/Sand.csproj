@@ -47,7 +47,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Models\Stuff\Enums.cs" />
     <Compile Include="Models\Stuff\FileSpriteStuff.cs" />
-    <Compile Include="Models\StuffDescriptors\StuffDescriptor.cs" />
+    <Compile Include="Models\StuffDescriptor.cs" />
     <Compile Include="Models\Stuff\AbstractStuff.cs" />
     <Compile Include="Models\StuffWorld\StuffWorld.cs" />
     <Compile Include="Models\Stuff\StuffFactory.cs" />

@@ -26,11 +26,14 @@ public class StuffWorld
 	/// <br/><em>[xMax, yMax]</em> represents top right.
 	/// </summary>
 	public AbstractStuff[][] World { get; private set; }
+	private readonly List<(Point topLeft, Point bottomRight)> _subGrids = [];
+
 
 	private StringBuilder _stringBuilder = new();
 	private readonly Random _random = new();
 
 	public Vector2 Dimensions { get; private set; }
+
 
 	public StuffWorld()
 	{
@@ -40,6 +43,38 @@ public class StuffWorld
 			World[x] = new AbstractStuff[STUFF_HEIGHT];
 		}
 		Dimensions = new Vector2(World.Length, World[0].Length);
+
+		//===============================================================
+		// Create SUB GRIDS - These are updated one per update, spliting
+		// overall updates across 6 actions
+		//===============================================================
+
+		/*
+			// divisors to describe the number of grids along each axis
+
+			var xDivisor = 4;
+			var yDivisor = 2;
+
+			the above would create a grid like so:
+
+						xxxx
+						xxxx
+		 */
+		var gridsAlongX = 3;
+		var gridsAlongY = 2;
+
+		var subWidth = STUFF_WIDTH / gridsAlongX;
+		var subHeight = STUFF_HEIGHT / gridsAlongY;
+
+		for (int row = 0; row < gridsAlongY; row++)
+		{
+			for (int col = 0; col < gridsAlongX; col++)
+			{
+				var x = (int)(col * subWidth);
+				var y = (int)(row * subHeight);
+				_subGrids.Add((new(x, y), new(x + subWidth, y + subHeight)));
+			}
+		}
 	}
 	#endregion
 
@@ -350,6 +385,7 @@ public class StuffWorld
 
 	#region Game Loop Methods called by SandGame
 
+	[Obsolete("Use a more performant update method like UpdateInSixths()")]
 	public void Update()
 	{
 		var p = new Point();
@@ -389,6 +425,56 @@ public class StuffWorld
 			Logger.Instance.LogError(applyGravEx, $"(x,y)=({p.X},{p.Y}), (maxX, maxY)=({STUFF_WIDTH - 1},{STUFF_HEIGHT - 1})");
 		}
 	}
+
+	private int updateCounter = 0;
+	public void UpdateInSixths()
+	{
+		// get the subrid coords for a 6th of the World
+		updateCounter++;
+		if (updateCounter >= _subGrids.Count)
+		{
+			updateCounter = 0;
+		}
+		var subgrid = _subGrids[updateCounter];
+
+		var p = new Point();
+		var ltr = true;
+
+		try
+		{
+			for (var yIndex = 0; yIndex < STUFF_HEIGHT; yIndex++)
+			{
+				for (var xIndexSource = 0; xIndexSource < STUFF_WIDTH; xIndexSource++)
+				{
+					//==========================================================||
+					// we adjust the x index depending if we're going
+					//	left to right (ltr) => 0 to last index
+					//	right to left (rtl) => last index to 0
+					//==========================================================||
+
+					int xIndex = ltr ? xIndexSource : STUFF_WIDTH - 1 - xIndexSource;
+
+					p.X = xIndex;
+					p.Y = yIndex;
+
+					// get stuff here
+					var targetStuff = World[xIndex][yIndex];
+					// if nothing here then move on to next Stuff
+					if (targetStuff == null || targetStuff.MovedThisUpdate) continue;
+
+					ApplyGravity(xIndex, yIndex);
+				}
+
+				// flip the direction of the next horizontal traversal - for reasons
+				ltr = !ltr;
+			}
+		}
+		catch (Exception applyGravEx)
+		{
+			Logger.Instance.LogError(applyGravEx, $"(x,y)=({p.X},{p.Y}), (maxX, maxY)=({STUFF_WIDTH - 1},{STUFF_HEIGHT - 1})");
+		}
+	}
+
 
 	public void Print()
 	{

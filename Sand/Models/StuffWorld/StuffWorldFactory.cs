@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Sand.Models.StuffWorld;
 
-public class StuffWorldFactory
+public static class StuffWorldFactory
 {
 	/// <summary>
 	/// Basic ass stuffworld
@@ -30,7 +30,7 @@ public class StuffWorldFactory
 		return world;
 	}
 
-	public StuffWorld WaterBottomHalf()
+	public static StuffWorld WaterBottomHalf()
 	{
 		var world = new StuffWorld();
 		for (int x = 0; x < world.World.Length; x++)

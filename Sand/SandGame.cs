@@ -94,7 +94,8 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		base.Initialize();
 	}
 
-	private int FRAME_COUNT_BETWEEN_UPDATE_DRAW = 2;
+	//private int FRAME_COUNT_BETWEEN_UPDATE = 2;
+	private int FRAME_COUNT_BETWEEN_DRAW = 1;
 	private bool didPrep = false;
 	protected override void Update(GameTime gameTime)
 	{
@@ -105,6 +106,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		else if (!didPrep)
 		{
 			_world = StuffWorldFactory.WaterBottom3Y();
+			//_world = StuffWorldFactory.WaterBottomHalf();
 			didPrep = true;
 		}
 
@@ -131,10 +133,12 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 			}
 		}
 
-		if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE_DRAW == 0)
-		{
-			_world.Update();
-		}
+		//if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE == 0)
+		//{
+		//	_world.Update();
+		//}
+
+		_world.UpdateInSixths();
 
 		if (TimeManager.CurrentFrame % (PRINT_STUFF_WORLD_FRAMES * 3) == 0)
 		{
@@ -160,7 +164,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 			return;
 		}
 
-		if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE_DRAW == 0)
+		if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_DRAW == 0)
 		{
 			_world.Draw();
 		}

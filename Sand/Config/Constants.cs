@@ -8,9 +8,9 @@ public class Constants
 	//	DIMENSIONS										|
 	//---------------------------------------------------
 	/// <summary>A Stuff element is this many pixels per side.</summary>
-	public const int STUFF_SCALE = 15;
+	public const int STUFF_SCALE = 5;
 	/// <summary>Window resolution x</summary>
-	public const int RESOLUTION_X = 1000;
+	public const int RESOLUTION_X = 1500;
 	/// <summary>Window resolution y</summary>
 	public const int RESOLUTION_Y = 800;
 	/// <summary>The number of X-axis elements</summary>

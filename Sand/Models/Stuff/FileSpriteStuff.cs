@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Sprite = FlatRedBall.Sprite;
 using static Sand.Config.Constants;
 using Sand.Services;
-using Sand.Stuff.StuffDescriptors;
 
 namespace Sand.Models.Stuff;
 

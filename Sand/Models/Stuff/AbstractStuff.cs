@@ -4,7 +4,6 @@ using static Sand.Config.Constants;
 using FlatRedBall;
 using Sand.Services;
 using Sand.Config;
-using Sand.Stuff.StuffDescriptors;
 
 namespace Sand.Models.Stuff;
 
