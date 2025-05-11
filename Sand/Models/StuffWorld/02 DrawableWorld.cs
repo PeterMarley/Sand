@@ -399,6 +399,7 @@ public class DrawableWorld : IDrawableBatch
 		catch (Exception applyGravEx)
 		{
 			Logger.Instance.LogError(applyGravEx, $"(x,y)=({p.X},{p.Y}), (maxX, maxY)=({STUFF_WIDTH - 1},{STUFF_HEIGHT - 1})");
+			throw;
 		}
 	}
 
@@ -421,18 +422,12 @@ public class DrawableWorld : IDrawableBatch
 
 	public void Draw(Camera camera)
 	{
-		
-		int ls = 0;
-		int ly = 0;
 
 		try
 		{
 			var colorData = new Color[STUFF_HEIGHT * STUFF_WIDTH];
 
 			var cx = 0;
-			//for (var x = 0; x < World.Length; x++)
-			//{
-			//	for (var y = World[x].Length - 1; y >= 0; y--)
 			
 			for (var y = World[0].Length - 1; y >= 0; y--)
 			{
@@ -451,90 +446,36 @@ public class DrawableWorld : IDrawableBatch
 				}
 			}
 
-			//Color[] colorFlattened = new Color[colorData[0].Length * colorData.Length];
-
-			//var c = 0;
-			//for (int x = 0; x < colorData.Length; x++)
-			//{
-			//	for (int y = 0; y < colorData[x].Length; y++, c++)
-			//	{
-			//		colorFlattened[c] = colorData[x][y];
-			//	}
-			//}
-
-			//Color[] cs = [Color.Green, Color.Red, Color.Blue];
-			//var c = 0;
-			//var c2 = 0;
-			//foreach (var i in colorData)
-			//{
-			//	if (c2 > 2)
-			//	{
-			//		c2 = 0;
-			//	}
-			//	foreach (var j in i)
-			//	{
-					
-			//		colorFlattened[c++] = cs[c2];
-			//	}
-			//	c2++;
-			//}
-
-			//List<Color> cd = [];
-
-			//Color[] cs = [Color.Red, Color.Yellow];
-
-			//var c = 0;
-			//var gor = true;
-			//for (int x = 0; x < colorData.Length; x++)
-			//{
-			//	for (int y = colorData[x].Length - 1; y >= 0; y--, c++)
-			//	{
-			//		cd.Add(/*colorData[x][y]*/ /*Color.Gold*/ /*cs[(c + x) % 2]*/ COLOURS[c]);
-			//	}
-			//}
-
-			//Color[] a = new Color[colorData.Length * colorData[0].Length];
-			//Array.Fill(a, Color.Green);
-			//FlatRedBallServices.GraphicsDevice.SamplerStates[0] = SamplerState.PointWrap;  // Point filtering (nearest neighbor)
 			if (WorldSprite == null)
 			{
 
 				FlatRedBallServices.GraphicsOptions.TextureFilter = TextureFilter.Point;
-				//FlatRedBallServices.GraphicsDevice.SamplerStates[0] = SamplerState.PointWrap;
+
 				WorldTexture = new Texture2D(FlatRedBallServices.GraphicsDevice, STUFF_WIDTH, STUFF_HEIGHT);
 				WorldTexture.SetData(colorData);
-				//WorldTexture.Fil
-				// as this sprite is added in auto style, it will update every frame
-				/* create */
-				WorldSprite = SpriteManager.AddManualSprite(WorldTexture);
-				//WorldSprite.TextureFilter = TextureFilter.Point;
 
-				
+				WorldSprite = SpriteManager.AddManualSprite(WorldTexture);
+
 				WorldSprite.Width = RESOLUTION_X * 2;
 				WorldSprite.Height = RESOLUTION_Y * 2;
 				WorldSprite.X += RESOLUTION_X / 2;
 				WorldSprite.Y += RESOLUTION_Y / 2;
 
 				Camera.Main.Orthogonal = true;
-				Camera.Main.OrthogonalWidth = WorldSprite.Width;  // Match this to WorldSprite.Width
-				Camera.Main.OrthogonalHeight = WorldSprite.Height; // And this to WorldSprite.Height
-
-				//WorldSprite.ScaleX = RESOLUTION_X / 2;
-				//WorldSprite.ScaleY = RESOLUTION_Y / 2;
-				//WorldSprite.
-				//WorldTexture.
+				Camera.Main.OrthogonalWidth = WorldSprite.Width;
+				Camera.Main.OrthogonalHeight = WorldSprite.Height;
 			}
 			else
 			{
 				WorldTexture.SetData(colorData);
-				//WorldSprite.Texture = WorldTexture;
 				SpriteManager.ManualUpdate(WorldSprite);
 			}
 
 		}
 		catch (Exception applyGravEx)
 		{
-			Logger.Instance.LogError(applyGravEx, $"(x,y)=({ls},{ly}), (maxX, maxY)=({STUFF_WIDTH - 1},{STUFF_HEIGHT - 1})");
+			Logger.Instance.LogError(applyGravEx, "Draw");
+			throw;
 		}
 	}
 
