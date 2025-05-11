@@ -1,6 +1,4 @@
-﻿using Sand.Models;
-using Sand.Models.Stuff;
-using Sand.Services;
+﻿using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -10,7 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using YamlDotNet.Serialization;
 
-namespace Sand.Stuff;
+namespace Sand;
 
 public partial class StuffFactory
 {
@@ -51,21 +49,13 @@ public partial class StuffFactory
 		}
 	}
 
-	public AbstractStuff Get(string name)
+	public Stuff Get(string name)
 	{
 		if (!_stuffDescriptors.TryGetValue(name, out StuffDescriptor descriptor))
 		{
 			throw new ArgumentException($"Cant create Stuff from name \"{name}\"!");
 		}
-
-		if (!string.IsNullOrEmpty(descriptor.SpriteSource))
-		{
-			return new FileSpriteStuff(descriptor);
-		}
-
-		//// this one has descriptor.ColorRgba by default, or should do
-		//return new PolygonStuff(descriptor);
-		throw new InvalidOperationException("Unhandles stuff name dpassed to Get");
+		return new Stuff(descriptor);
 	}
 
 	private void LoadDescriptorsFromFile(string filename)
@@ -73,12 +63,55 @@ public partial class StuffFactory
 		using var filestream = File.OpenRead(filename);
 		using var streamReader = new StreamReader(filestream);
 
-		var descriptors = _yamlDeserializer.Deserialize<IEnumerable<StuffDescriptor>>(streamReader);
+		var descriptors = _yamlDeserializer.Deserialize<List<StuffDescriptor>>(streamReader);
 
-		foreach (var descriptor in descriptors)
+		for (int i = 0; i < descriptors.Count; i++)
 		{
-			_stuffDescriptors.AddOrUpdate(descriptor.Name, descriptor, (name, desc) => desc);
+			var d = descriptors[i];
+			if (d.ColorsSource != null && d.ColorsSource.Count > 0)
+			{
+				var colors = new Color[d.ColorsSource.Count];
+				for (var j = 0; j < d.ColorsSource.Count; j++)
+				{
+					var rgba = d.ColorsSource[j];
+
+					var c = new Color
+					{
+						R = rgba[0],
+						G = rgba[1],
+						B = rgba[2],
+						A = rgba.Length >= 3 ? rgba[3] : (byte)1
+					};
+
+					colors[j] = c;
+				}
+				d.Colors = colors;
+			}
+			_stuffDescriptors.AddOrUpdate(d.Name, d, (name, desc) => desc);
 		}
+		//foreach (var d in descriptors)
+		//{
+		//	if (d.ColorsSource != null && d.ColorsSource.Count > 0)
+		//	{
+		//		var colors = new Color[d.ColorsSource.Count];
+		//		for (var i = 0; i < d.ColorsSource.Count; i++)
+		//		{
+		//			var rgba = d.ColorsSource[i];
+
+		//			var c = new Color
+		//			{
+		//				R = rgba[0],
+		//				G = rgba[1],
+		//				B = rgba[2],
+		//				A = rgba.Length >= 3 ? rgba[3] : (byte)1
+		//			};
+
+		//			colors[i] = c;
+		//		}
+		//		d.Colors = colors;
+		//	}
+		//	_stuffDescriptors.AddOrUpdate(descriptor.Name, descriptor, (name, desc) => desc);
+		//}
 	}
 
 	[GeneratedRegex("^StuffDescriptors.*\\.yaml$")]

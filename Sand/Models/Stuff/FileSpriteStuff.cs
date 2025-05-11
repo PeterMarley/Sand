@@ -1,14 +1,9 @@
 ﻿using FlatRedBall;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Sprite = FlatRedBall.Sprite;
-using static Sand.Config.Constants;
-using Sand.Services;
+using static Sand.Constants;
 
-namespace Sand.Models.Stuff;
+namespace Sand;
 
 public class FileSpriteStuff : AbstractStuff
 {

@@ -32,16 +32,15 @@
 	  <None Remove="**\*.gluj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Config\Constants.cs" />
+    <Compile Include="Data\Constants.cs" />
     <Compile Include="Extensions\ArrayExtensions.cs" />
-    <Compile Include="Models\StuffWorld\StuffWorldFactory.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Models\StuffWorld\02 DrawableWorld.cs" />
+    <Compile Include="Models\StuffWorld\WorldFactory.cs" />
+    <Compile Include="Models\Stuff\Stuff.cs" />
     <Compile Include="Services\ConfigService.cs" />
-    <Compile Include="Services\PolygonService.cs" />
     <Compile Include="Services\Randoms.cs" />
-    <Compile Include="Models\Stuff\PolygonStuff.cs" />
-    <Compile Include="Models\Stuff\IStuff.cs" />
     <Compile Include="Services\SpriteService.cs" />
-    <Compile Include="Config\GlobalSuppressions.cs" />
     <Compile Include="Services\Logger.cs" />
     <Compile Include="SandGame.cs" />
     <Compile Include="Program.cs" />
@@ -49,7 +48,7 @@
     <Compile Include="Models\Stuff\FileSpriteStuff.cs" />
     <Compile Include="Models\StuffDescriptor.cs" />
     <Compile Include="Models\Stuff\AbstractStuff.cs" />
-    <Compile Include="Models\StuffWorld\StuffWorld.cs" />
+    <Compile Include="Models\StuffWorld\01 StuffWorldOriginal.cs" />
     <Compile Include="Models\Stuff\StuffFactory.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -133,6 +132,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Config\" />
     <Folder Include="Levels\" />
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">

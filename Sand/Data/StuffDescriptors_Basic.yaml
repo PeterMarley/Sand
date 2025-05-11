@@ -5,6 +5,14 @@
   Phase: Solid
   SpriteSource: GetRandomSandStuffSprite
   Notes: Simple falling sand
+  ColorsSource:
+  - [127, 114, 54, 255]   # 7f7236
+  - [145, 130, 62, 255]   # 91823e
+  - [166, 151, 75, 255]   # a6974b
+  - [191, 174, 95, 255]   # bfae5f
+  - [200, 185, 105, 255]  # c8b969
+  - [218, 202, 123, 255]  # daca7b
+  - [227, 210, 146, 255]  # e3d292
 
 # Basic Water
 - Name: BasicWater
@@ -12,17 +20,5 @@
   Phase: Liquid
   SpriteSource: GetWaterStuffSprite
   Notes: Simple falling and flowing water
-
-# Basic Water
-- Name: FlatWater
-  Version: 1
-  Phase: Liquid
-  ColorRgba: [255,0,0,255]
-  Notes: Simple falling and flowing water
-
-# # Basic Magma
-# - Name: BasicMagma
-#   Version: 1
-#   Phase: Liquid
-#   SpriteSource: GetWaterStuffSprite
-#   Notes: Simple falling and flowing rock with a high temperature
+  ColorsSource:
+  - [44, 72, 71, 255]   # 2c4847

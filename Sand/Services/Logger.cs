@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using static Sand.Config.Constants;
+using static Sand.Constants;
 
-namespace Sand.Services;
+namespace Sand;
 
 public class Logger : IDisposable
 {

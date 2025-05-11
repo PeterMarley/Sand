@@ -1,6 +1,6 @@
 ﻿using System;
 using static Sand.Constants;
-using System.Drawing;
+using Microsoft.Xna.Framework;
 
 namespace Sand;
 
@@ -9,29 +9,36 @@ namespace Sand;
 /// 
 /// Finaliser removes from SpriteManage so fugeddaboudit
 /// </summary>
-public abstract class AbstractStuff
+public class Stuff
 {
-	public Guid Id { get; init; } = Guid.NewGuid();
-	public bool MovedThisUpdate { get; set; }
+	public static Random _random = new();
+
+	public bool Dormant { get; set; } = false;
 	public string Name { get; init; }
 	public string Notes { get; init; }
 	public Phase Phase { get; private set; }
 	public int Version { get; init; }
-	private Point WorldCoordinate { get; init; } = new Point(-1, -1);
+	public Color Color { get; private set; }
+	public bool MovedThisUpdate { get; set; }
 
-	public AbstractStuff(Phase phase)
+	//public int X;
+	//public int Y;
+	private StuffDescriptor descriptor;
+
+	public Stuff(Phase phase)
 	{
 		Phase = phase;
 	}
 
-
-	public abstract AbstractStuff SetPosition(int x, int y);
-
-	public AbstractStuff(StuffDescriptor descriptor)
+	public Stuff(StuffDescriptor descriptor)
 	{
+		this.descriptor = descriptor;
+
 		Name = descriptor.Name;
 		Notes = descriptor.Notes;
 		Version = descriptor.Version;
+
+		Color = descriptor.Colors[_random.Next(descriptor.Colors.Length)];
 
 		if (!Enum.TryParse(descriptor.Phase, true, out Phase phase))
 		{
@@ -40,5 +47,5 @@ public abstract class AbstractStuff
 		}
 		Phase = phase;
 	}
-
+	
 }

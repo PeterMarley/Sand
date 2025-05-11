@@ -3,14 +3,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using FlatRedBall.Input;
 using static FlatRedBall.Input.Mouse;
-using static Sand.Config.Constants;
-using Sand.Stuff;
 using System.Threading.Tasks;
-using System;
-using Sand.Services;
-using Sand.Config;
-using FlatRedBall.Screens;
-using Sand.Models.StuffWorld;
+using static Sand.Constants;
 
 namespace Sand;
 
@@ -18,7 +12,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 {
 	GraphicsDeviceManager graphics;
 
-	private StuffWorld _world;
+	private DrawableWorld _world;
 	private Task _tLoadMaterials;
 	public SandGame() : base()
 	{
@@ -108,14 +102,16 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 			//_world = StuffWorldFactory.GetDevStuffWorld_000();
 			//_world = StuffWorldFactory.WaterBottom3Y();
 			//_world = StuffWorldFactory.WaterBottomHalf();
-			_world = StuffWorldFactory.SandAlmostEverywhere();
+			//_world = WorldFactory.SandAlmostEverywhere();
+			_world = WorldFactory.GetDevStuffWorld_002();
+
+			SpriteManager.AddDrawableBatch(_world);
 			didPrep = true;
 		}
 
 		FlatRedBallServices.Update(gameTime);
 
 		Randoms.Instance.Refresh();
-
 
 		if (InputManager.Mouse.IsInGameWindow())
 		{
@@ -124,26 +120,16 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 			if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)))
 			{
-				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 2);
+				//_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 2);
+				_world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
+
 			}
 
 			if ((InputManager.Mouse.ButtonPushed(MouseButtons.RightButton) || InputManager.Mouse.ButtonDown(MouseButtons.RightButton)))
 			{
-				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 2);
+				//_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 2);
+				_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
 			}
-		}
-
-		//if (TimeManager.CurrentFrame % 2 == 0)
-		//{
-		//	_world.Update();
-		//}
-
-		_world.UpdateInSixths();
-
-
-		if (TimeManager.CurrentFrame % (PRINT_STUFF_WORLD_FRAMES * 3) == 0)
-		{
-			_world.Print();
 		}
 
 		if (InputManager.Keyboard.KeyReleased(Keys.Escape))
@@ -152,6 +138,8 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 			this.Exit();
 			return;
 		}
+
+		_world.Update();
 
 		base.Update(gameTime);
 	}
@@ -167,7 +155,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 		if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_DRAW == 0)
 		{
-			_world.Draw();
+			_world.Draw(Camera.Main);
 		}
 
 		base.Draw(gameTime);

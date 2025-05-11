@@ -1,9 +1,8 @@
 ﻿using FlatRedBall;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using static Sand.Config.Constants;
 
-namespace Sand.Services;
+namespace Sand;
 
 public class SpriteService
 {
@@ -61,7 +60,7 @@ public class SpriteService
 	{
 		var t = _textureArray[_NextColourIndex()];
 		var sprite = SpriteManager.AddSprite(t);
-		sprite.TextureScale = STUFF_SCALE;
+		sprite.TextureScale = Constants.STUFF_SCALE;
 		return sprite;
 	}
 
@@ -69,14 +68,14 @@ public class SpriteService
 	{
 		//var sprite = SpriteManager.AddSprite(RandomTextureFrom(_sandTextures));
 		var sprite = SpriteManager.AddManualSprite(RandomTextureFrom(_sandTextures)); //TODO should this really be getting done here rather than constructor?
-		sprite.TextureScale = STUFF_SCALE;
+		sprite.TextureScale = Constants.STUFF_SCALE;
 		return sprite;
 	}
 
 	public Sprite GetWaterStuffSprite()
 	{
 		var sprite = SpriteManager.AddSprite(_water);
-		sprite.TextureScale = STUFF_SCALE;
+		sprite.TextureScale = Constants.STUFF_SCALE;
 		return sprite;
 	}
 
