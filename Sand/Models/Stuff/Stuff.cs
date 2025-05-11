@@ -19,10 +19,10 @@ public class Stuff
 	public Phase Phase { get; private set; }
 	public int Version { get; init; }
 	public Color Color { get; private set; }
-	public bool MovedThisUpdate { get; set; }
 
-	//public int X;
-	//public int Y;
+	/// <summary>This many updates have occured since this Stuff Moved</summary>
+	public int NotMovedCount { get; set; }
+
 	private StuffDescriptor descriptor;
 
 	public Stuff(Phase phase)

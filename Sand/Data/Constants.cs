@@ -6,11 +6,11 @@ public class Constants
 	//	DIMENSIONS										|
 	//---------------------------------------------------
 	/// <summary>A Stuff element is this many pixels per side.</summary>
-	public const int STUFF_SCALE = 5;//5;
+	public const int STUFF_SCALE = 6;//5;
 	/// <summary>Window resolution x</summary>
-	public const int RESOLUTION_X = 500;//1500;
+	public const int RESOLUTION_X = 2000;//1500;
 	/// <summary>Window resolution y</summary>
-	public const int RESOLUTION_Y = 500;//800;
+	public const int RESOLUTION_Y = 1000;//800;
 	/// <summary>The number of X-axis elements</summary>
 	public const int STUFF_WIDTH = RESOLUTION_X / STUFF_SCALE;
 	/// <summary>The number of Y-axis elements</summary>

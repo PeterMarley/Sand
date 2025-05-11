@@ -71,7 +71,6 @@ public class DrawableWorld : IDrawableBatch
 	public void ApplyGravity(int xIndex, int yIndex)
 	{
 		var stuff = World[xIndex][yIndex];
-		if (stuff == null) return;
 		switch (stuff.Phase)
 		{
 			case Phase.Solid:
@@ -97,7 +96,7 @@ public class DrawableWorld : IDrawableBatch
 			if (rowBelowIndex < 0) return;
 
 			// check directly below
-			if (Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 2)) || Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)))
+			if ((rowBelowIndex - 2 >= 0 && Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 2)) || (rowBelowIndex - 1 >= 0 && Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)))))
 			{
 				return;
 			}
@@ -135,6 +134,7 @@ public class DrawableWorld : IDrawableBatch
 			{
 				return;
 			}
+
 		}
 
 		void ApplyGravityPhaseLiquid(int xIndex, int yIndex)
@@ -148,7 +148,7 @@ public class DrawableWorld : IDrawableBatch
 			if (rowBelowIndex < 0) return;
 
 			// check directly below
-			if (rowBelowIndex - 1 >= 0 && (Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)) || Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1))))
+			if ((rowBelowIndex - 2 >= 0 && Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 2)) || (rowBelowIndex - 1 >= 0 && Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)))))
 			{
 				return;
 			}
@@ -215,27 +215,68 @@ public class DrawableWorld : IDrawableBatch
 		}
 	}
 
+	private const int NOT_MOVED_THRESHOLD = 3;
 	public bool Move(Point from, Point to)
-	{	
+	{
+		var stuffAtSource = World[from.X][from.Y];
+		var stuffAtTarget = World[to.X][to.Y];
 
-			var stuffAtSource = World[from.X][from.Y];
+		if (stuffAtSource == null) return true;
 
-			if (stuffAtSource == null) return true;
+		bool didMove;
 
-			switch (stuffAtSource.Phase)
+		switch (stuffAtSource.Phase)
+		{
+			case Phase.Solid:
+				didMove = MoveSolid(from, to);
+				break;
+			case Phase.Liquid:
+				didMove = MoveLiquid(from, to);
+				break;
+			default: 
+				throw new NotImplementedException($"{stuffAtSource.Phase} phase movement not implemented");
+		}
+
+		if (!didMove)
+		{
+			stuffAtSource.NotMovedCount++;
+
+			if (stuffAtSource.NotMovedCount >= NOT_MOVED_THRESHOLD)
 			{
-				case Phase.Solid:
-					MoveSolid(from, to);
-					break;
-				case Phase.Liquid:
-					//if (TimeManager.CurrentFrame % 2 == 0)
-					//{
-					MoveLiquid(from, to);
-					//}
-					break;
-				default: throw new NotImplementedException($"{stuffAtSource.Phase} phase movement not implemented");
+				stuffAtSource.Dormant = true;
+				stuffAtSource.NotMovedCount = 0;
 			}
-		
+
+			if (stuffAtTarget != null && stuffAtTarget.NotMovedCount >= NOT_MOVED_THRESHOLD)
+			{
+				stuffAtTarget.Dormant = true;
+				stuffAtTarget.NotMovedCount = 0;
+			}
+			
+
+			// get an update now and again to normalise wierd behaviour
+			if (stuffAtSource.NotMovedCount > (NOT_MOVED_THRESHOLD * 2))
+			{
+				stuffAtSource.Dormant = false;
+				stuffAtSource.NotMovedCount = 0;
+			}
+
+			if (stuffAtTarget != null && stuffAtTarget.NotMovedCount > (NOT_MOVED_THRESHOLD * 2))
+			{
+				stuffAtTarget.Dormant = false;
+				stuffAtTarget.NotMovedCount = 0;
+			}
+		}
+		else 
+		{
+			stuffAtSource.Dormant = false;
+			stuffAtSource.NotMovedCount = 0;
+			if (stuffAtTarget != null)
+			{
+				stuffAtTarget.Dormant = false;
+				stuffAtTarget.NotMovedCount = 0;
+			}
+		}
 
 		return false;
 
@@ -244,67 +285,70 @@ public class DrawableWorld : IDrawableBatch
 			// check for stuff at target
 			var didMove = false;
 
-			Stuff stuffSource = World.Get(from);
 			Stuff stuffTarget = World.Get(to);
-			var sourceHasStuff = stuffSource != null;
+			var sourceHasStuff = stuffAtSource != null;
 			var targetHasStuff = stuffTarget != null;
 
 			// if not stuff at target fall to here and finish
-			if (!targetHasStuff || stuffTarget is not { Phase: Phase.Solid })
+			if (stuffTarget == null // nothing at target
+			|| stuffTarget is not { Phase: Phase.Solid }) // or thing at target is not a solid
 			{
-
-				World[to.X][to.Y] = stuffSource;//.SetPosition(to.X, to.Y); // taretSource effectively removed but we have a ref above
+				World[to.X][to.Y] = stuffAtSource;
 				World[from.X][from.Y] = null;
-				stuffSource.MovedThisUpdate = true;
 				didMove = true;
 			}
 
-			//=======================================================================
-			// LIQUID DISPLACEMENT
-			//=======================================================================
+			var hasDisplacedLiquid = LiquidDisplacement();
+	
+			return didMove || hasDisplacedLiquid;
 
-			// if stuff at the target, but target NOT solid (we know that source IS solid), then
-			// fall here - liquid, gas displacement means the thing pushed out of the way has
-			// to go up
-			if (targetHasStuff && stuffTarget is not { Phase: Phase.Solid })
+			bool LiquidDisplacement() 
 			{
-				// up upwards in Y-axis (checkling one left and right also) from displaced liqud
-				// until empty stuff found - staying within the water column.
-				// Once we fall out of bounds of array just stop looping as the target is already
-				// garbage awaiting collection.
+				//=======================================================================
+				// LIQUID DISPLACEMENT
+				//=======================================================================
 				var hasDisplaced = false;
-				var waterColumnX = to.X;
-				for (int cursorY = to.Y; !hasDisplaced && cursorY < World[0].Length; cursorY++)
-				{
 
-					///////////////////////////////////////////////////////
-					// lets try randomly going left, on or right of yCoord in water column droping
-					// there if empty, so 1/3 itll land left, on or right of cursorY
-					///////////////////////////////////////////////////////
-					for (var i = 0; !hasDisplaced && i < Randoms.Instance.Ind_leftRightMid.Length; i++)
+				// if stuff at the target, but target NOT solid (we know that source IS solid), then
+				// fall here - liquid, gas displacement means the thing pushed out of the way has
+				// to go up
+				if (targetHasStuff && stuffTarget is not { Phase: Phase.Solid })
+				{
+					// up upwards in Y-axis (checkling one left and right also) from displaced liqud
+					// until empty stuff found - staying within the water column.
+					// Once we fall out of bounds of array just stop looping as the target is already
+					// garbage awaiting collection.
+					var waterColumnX = to.X;
+					for (int cursorY = to.Y; !hasDisplaced && cursorY < World[0].Length; cursorY++)
 					{
-						var adjCursorX = waterColumnX + Randoms.Instance.Ind_leftRightMid[i];
-						if (adjCursorX >= 0 && adjCursorX < World.Length && World[adjCursorX][cursorY] == null)
+
+						///////////////////////////////////////////////////////
+						// lets try randomly going left, on or right of yCoord in water column droping
+						// there if empty, so 1/3 itll land left, on or right of cursorY
+						///////////////////////////////////////////////////////
+						for (var i = 0; !hasDisplaced && i < Randoms.Instance.Ind_leftRightMid.Length; i++)
 						{
-							// move this displaced liquid to here
-							World[adjCursorX][cursorY] = stuffTarget;//.SetPosition(adjCursorX, cursorY); ;
-							hasDisplaced = true;// BREAKS both loops
+							var adjCursorX = waterColumnX + Randoms.Instance.Ind_leftRightMid[i];
+							if (adjCursorX >= 0 && adjCursorX < World.Length && World[adjCursorX][cursorY] == null)
+							{
+								// move this displaced liquid to here
+								World[adjCursorX][cursorY] = stuffTarget;//.SetPosition(adjCursorX, cursorY); ;
+								hasDisplaced = true;// BREAKS both loops
+							}
 						}
 					}
+
+					// no empty spot found so "destroy" the displayers stuff (for now)
+					// TODO this will need updated when screen can move
 				}
+				//}
 
-				// no empty spot found so "destroy" the displayers stuff (for now)
-				// TODO this will need updated when screen can move
+				return hasDisplaced;
 			}
-			//}
-
-			return didMove;
 		}
 
 		bool MoveLiquid(Point from, Point to)
 		{
-			
-
 			var stuffSource = World[from.X][from.Y];
 			var stuffTarget = World[to.X][to.Y];
 			// if not stuff at target fall to here and finish
@@ -313,12 +357,6 @@ public class DrawableWorld : IDrawableBatch
 				// update world
 				World[to.X][to.Y] = stuffSource;
 				World[from.X][from.Y] = null;
-
-				if (stuffSource != null)
-				{
-					stuffSource.MovedThisUpdate = true;
-				}
-
 				return true;
 			}
 
@@ -353,9 +391,9 @@ public class DrawableWorld : IDrawableBatch
 					p.Y = yIndex;
 
 					// get stuff here
-					var targetStuff = World[xIndex][yIndex];
+					var stuff = World[xIndex][yIndex];
 					// if nothing here then move on to next Stuff
-					if (targetStuff == null/* || targetStuff.MovedThisUpdate*/) continue;
+					if (stuff == null || (stuff.Dormant && stuff.NotMovedCount <= (NOT_MOVED_THRESHOLD * 5))) continue;
 
 					ApplyGravity(xIndex, yIndex);
 				}

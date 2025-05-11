@@ -88,11 +88,18 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		base.Initialize();
 	}
 
-	//private int FRAME_COUNT_BETWEEN_UPDATE = 2;
-	private int FRAME_COUNT_BETWEEN_DRAW = 1;
+	private int FRAME_COUNT_BETWEEN_UPDATE = 20;
+	private int FRAME_COUNT_BETWEEN_DRAW = 3;
 	private bool didPrep = false;
 	protected override void Update(GameTime gameTime)
 	{
+		if (InputManager.Keyboard.KeyReleased(Keys.Escape))
+		{
+			Logger.Instance.Dispose();
+			this.Exit();
+			return;
+		}
+
 		if (!_tLoadMaterials.IsCompleted)
 		{
 			return;
@@ -120,26 +127,24 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 			if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)))
 			{
-				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 2);
+				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 5);
 				//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
 
 			}
 
 			if ((InputManager.Mouse.ButtonPushed(MouseButtons.RightButton) || InputManager.Mouse.ButtonDown(MouseButtons.RightButton)))
 			{
-				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 2);
+				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 5);
 				//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
 			}
 		}
 
-		if (InputManager.Keyboard.KeyReleased(Keys.Escape))
-		{
-			Logger.Instance.Dispose();
-			this.Exit();
-			return;
-		}
 
-		_world.Update();
+
+		if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE == 0)
+		{
+			_world.Update();
+		}
 
 		base.Update(gameTime);
 	}
