@@ -120,15 +120,15 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 			if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)))
 			{
-				//_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 2);
-				_world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
+				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 2);
+				//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
 
 			}
 
 			if ((InputManager.Mouse.ButtonPushed(MouseButtons.RightButton) || InputManager.Mouse.ButtonDown(MouseButtons.RightButton)))
 			{
-				//_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 2);
-				_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
+				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 2);
+				//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
 			}
 		}
 

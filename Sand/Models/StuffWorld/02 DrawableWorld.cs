@@ -148,7 +148,7 @@ public class DrawableWorld : IDrawableBatch
 			if (rowBelowIndex < 0) return;
 
 			// check directly below
-			if (Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 2)) || Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)))
+			if (rowBelowIndex - 1 >= 0 && (Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)) || Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1))))
 			{
 				return;
 			}
@@ -355,7 +355,7 @@ public class DrawableWorld : IDrawableBatch
 					// get stuff here
 					var targetStuff = World[xIndex][yIndex];
 					// if nothing here then move on to next Stuff
-					if (targetStuff == null || targetStuff.MovedThisUpdate) continue;
+					if (targetStuff == null/* || targetStuff.MovedThisUpdate*/) continue;
 
 					ApplyGravity(xIndex, yIndex);
 				}
@@ -395,27 +395,31 @@ public class DrawableWorld : IDrawableBatch
 
 		try
 		{
-			var colorData = new Color[World.Length][];
+			var colorData = new Color[STUFF_HEIGHT * STUFF_WIDTH];
 
-			for (var x = 0; x < World.Length; x++)
+			var cx = 0;
+			//for (var x = 0; x < World.Length; x++)
+			//{
+			//	for (var y = World[x].Length - 1; y >= 0; y--)
+			
+			for (var y = World[0].Length - 1; y >= 0; y--)
 			{
-				colorData[x] = new Color[World[x].Length];
-				for (var y = World[x].Length - 1; y >= 0; y--)
+				for (var x = 0; x < World.Length; x++)
 				{
 					// if nothing here then color this pixel black
 					if (World[x][y] == null)
 					{
-						colorData[x][y] = Color.Green;
+						colorData[cx++] = Color.Black;
 					}
 					// otherwise colour by the stuff there
 					else
 					{
-						colorData[x][y] = World[x][y].Color;
+						colorData[cx++] = World[x][y].Color;
 					}
 				}
 			}
 
-			Color[] colorFlattened = new Color[colorData[0].Length * colorData.Length];
+			//Color[] colorFlattened = new Color[colorData[0].Length * colorData.Length];
 
 			//var c = 0;
 			//for (int x = 0; x < colorData.Length; x++)
@@ -443,19 +447,19 @@ public class DrawableWorld : IDrawableBatch
 			//	c2++;
 			//}
 
-			List<Color> cd = [];
+			//List<Color> cd = [];
 
-			Color[] cs = [Color.Red, Color.Yellow];
+			//Color[] cs = [Color.Red, Color.Yellow];
 
-			var c = 0;
-			var gor = true;
-			for (int x = 0; x < colorData.Length; x++)
-			{
-				for (int y = colorData[x].Length - 1; y >= 0; y--, c++)
-				{
-					cd.Add(/*colorData[x][y]*/ /*Color.Gold*/ /*cs[(c + x) % 2]*/ COLOURS[c]);
-				}
-			}
+			//var c = 0;
+			//var gor = true;
+			//for (int x = 0; x < colorData.Length; x++)
+			//{
+			//	for (int y = colorData[x].Length - 1; y >= 0; y--, c++)
+			//	{
+			//		cd.Add(/*colorData[x][y]*/ /*Color.Gold*/ /*cs[(c + x) % 2]*/ COLOURS[c]);
+			//	}
+			//}
 
 			//Color[] a = new Color[colorData.Length * colorData[0].Length];
 			//Array.Fill(a, Color.Green);
@@ -465,8 +469,8 @@ public class DrawableWorld : IDrawableBatch
 
 				FlatRedBallServices.GraphicsOptions.TextureFilter = TextureFilter.Point;
 				//FlatRedBallServices.GraphicsDevice.SamplerStates[0] = SamplerState.PointWrap;
-				WorldTexture = new Texture2D(FlatRedBallServices.GraphicsDevice, colorData.Length, colorData[0].Length);
-				WorldTexture.SetData(cd.ToArray());
+				WorldTexture = new Texture2D(FlatRedBallServices.GraphicsDevice, STUFF_WIDTH, STUFF_HEIGHT);
+				WorldTexture.SetData(colorData);
 				//WorldTexture.Fil
 				// as this sprite is added in auto style, it will update every frame
 				/* create */
@@ -490,7 +494,7 @@ public class DrawableWorld : IDrawableBatch
 			}
 			else
 			{
-				WorldTexture.SetData(cd.ToArray());
+				WorldTexture.SetData(colorData);
 				//WorldSprite.Texture = WorldTexture;
 				SpriteManager.ManualUpdate(WorldSprite);
 			}
