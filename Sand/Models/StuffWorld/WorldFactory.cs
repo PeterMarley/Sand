@@ -65,5 +65,18 @@ public static class WorldFactory
 
 	public static DrawableWorld GetDevStuffWorld_002() => new();
 
+	public static DrawableWorld WaterBottomHalf()
+	{
+		var world = new DrawableWorld();
+		for (int x = 0; x < world.World.Length; x++)
+		{
+			for (int y = 0; y < world.World[x].Length / 2; y++)
+			{
+				world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
+			}
+		}
+		return world;
+	}
+
 	//#endregion
 }

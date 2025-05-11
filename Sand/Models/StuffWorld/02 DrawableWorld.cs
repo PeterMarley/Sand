@@ -102,7 +102,7 @@ public class DrawableWorld : IDrawableBatch
 			}
 
 			// check below and left (but alterate sides randomly)
-			bool leftSide = _random.Next(2) == 1;
+			//bool leftSide = _random.Next(2) == 1;
 			int colLeftIndex = xIndex - 1;
 			int colRightIndex = xIndex + 1;
 
@@ -152,10 +152,9 @@ public class DrawableWorld : IDrawableBatch
 			{
 				return;
 			}
-			bool leftFirst = _random.Next(2) == 1;
+			bool leftFirst = this.leftSide;
 
 			// check below and left (but alterate sides randomly)
-			bool leftSide = leftFirst;
 			int colLeftIndex = xIndex - 1;
 			int colRightIndex = xIndex + 1;
 
@@ -215,7 +214,7 @@ public class DrawableWorld : IDrawableBatch
 		}
 	}
 
-	private const int NOT_MOVED_THRESHOLD = 3;
+	private const int NOT_MOVED_DORMANT_TRIGGER = 2;
 	public bool Move(Point from, Point to)
 	{
 		var stuffAtSource = World[from.X][from.Y];
@@ -239,32 +238,19 @@ public class DrawableWorld : IDrawableBatch
 
 		if (!didMove)
 		{
-			stuffAtSource.NotMovedCount++;
-
-			if (stuffAtSource.NotMovedCount >= NOT_MOVED_THRESHOLD)
+			if (stuffAtSource.NotMovedCount > NOT_MOVED_DORMANT_TRIGGER)
 			{
 				stuffAtSource.Dormant = true;
-				stuffAtSource.NotMovedCount = 0;
-			}
-
-			if (stuffAtTarget != null && stuffAtTarget.NotMovedCount >= NOT_MOVED_THRESHOLD)
-			{
-				stuffAtTarget.Dormant = true;
-				stuffAtTarget.NotMovedCount = 0;
+				stuffAtSource.NotMovedCount++;
 			}
 			
-
-			// get an update now and again to normalise wierd behaviour
-			if (stuffAtSource.NotMovedCount > (NOT_MOVED_THRESHOLD * 2))
+			if (stuffAtTarget != null)
 			{
-				stuffAtSource.Dormant = false;
-				stuffAtSource.NotMovedCount = 0;
-			}
-
-			if (stuffAtTarget != null && stuffAtTarget.NotMovedCount > (NOT_MOVED_THRESHOLD * 2))
-			{
-				stuffAtTarget.Dormant = false;
-				stuffAtTarget.NotMovedCount = 0;
+				if (stuffAtTarget.NotMovedCount > NOT_MOVED_DORMANT_TRIGGER)
+				{
+					stuffAtTarget.Dormant = true;
+					stuffAtTarget.NotMovedCount++;
+				}
 			}
 		}
 		else 
@@ -368,17 +354,20 @@ public class DrawableWorld : IDrawableBatch
 
 	#region Game Loop Methods called by SandGame
 
+	private bool leftSide = true;
 	public void Update()
 	{
 		var p = new Point();
 		var ltr = true;
-
+		leftSide = _random.Next(2) == 0;
 		try
 		{
+			var i = 0;
 			for (var yIndex = 0; yIndex < STUFF_HEIGHT; yIndex++)
 			{
-				for (var xIndexSource = 0; xIndexSource < STUFF_WIDTH; xIndexSource++)
+				for (var xIndexSource = 0; xIndexSource < STUFF_WIDTH; xIndexSource++, i++)
 				{
+
 					//==========================================================||
 					// we adjust the x index depending if we're going
 					//	left to right (ltr) => 0 to last index
@@ -393,9 +382,14 @@ public class DrawableWorld : IDrawableBatch
 					// get stuff here
 					var stuff = World[xIndex][yIndex];
 					// if nothing here then move on to next Stuff
-					if (stuff == null || (stuff.Dormant && stuff.NotMovedCount <= (NOT_MOVED_THRESHOLD * 5))) continue;
+					if (stuff == null || stuff.Dormant) continue;
 
 					ApplyGravity(xIndex, yIndex);
+
+					if (i % 100 == 0)
+					{
+						leftSide = _random.Next(2) == 0;
+					}
 				}
 
 				// flip the direction of the next horizontal traversal - for reasons

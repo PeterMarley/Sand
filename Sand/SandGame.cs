@@ -89,7 +89,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 	}
 
 	private int FRAME_COUNT_BETWEEN_UPDATE = 20;
-	private int FRAME_COUNT_BETWEEN_DRAW = 3;
+	private int FRAME_COUNT_BETWEEN_DRAW = 20;
 	private bool didPrep = false;
 	protected override void Update(GameTime gameTime)
 	{
@@ -110,7 +110,8 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 			//_world = StuffWorldFactory.WaterBottom3Y();
 			//_world = StuffWorldFactory.WaterBottomHalf();
 			//_world = WorldFactory.SandAlmostEverywhere();
-			_world = WorldFactory.GetDevStuffWorld_002();
+			//_world = WorldFactory.GetDevStuffWorld_002();
+			_world = WorldFactory.WaterBottomHalf();
 
 			SpriteManager.AddDrawableBatch(_world);
 			didPrep = true;
@@ -127,19 +128,17 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 			if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)))
 			{
-				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 5);
+				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 10);
 				//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
 
 			}
 
 			if ((InputManager.Mouse.ButtonPushed(MouseButtons.RightButton) || InputManager.Mouse.ButtonDown(MouseButtons.RightButton)))
 			{
-				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 5);
+				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 10);
 				//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
 			}
 		}
-
-
 
 		if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE == 0)
 		{

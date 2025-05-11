@@ -13,7 +13,19 @@ public class Stuff
 {
 	public static Random _random = new();
 
-	public bool Dormant { get; set; } = false;
+	private bool _dormant = false;
+	public bool Dormant; 
+	//{ 
+	//	get => _dormant; 
+	//	set 
+	//	{
+	//		_dormant = value;
+	//		if (!_dormant)
+	//		{
+	//			NotMovedCount = 0;
+	//		}
+	//	}
+	//}
 	public string Name { get; init; }
 	public string Notes { get; init; }
 	public Phase Phase { get; private set; }
