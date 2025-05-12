@@ -3,7 +3,6 @@
 - Name: BasicSand
   Version: 1
   Phase: Powder
-  SpriteSource: GetRandomSandStuffSprite
   Notes: Simple falling sand
   ColorsSource:
   - [127, 114, 54, 255]   # 7f7236
@@ -18,7 +17,8 @@
 - Name: BasicWater
   Version: 1
   Phase: Liquid
-  SpriteSource: GetWaterStuffSprite
   Notes: Simple falling and flowing water
   ColorsSource:
   - [44, 72, 71, 255]   # 2c4847
+
+ 

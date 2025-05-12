@@ -1,6 +1,7 @@
 ﻿using System;
 using static Sand.Constants;
 using Microsoft.Xna.Framework;
+using Sand.Models.Stuff;
 
 namespace Sand;
 
@@ -11,20 +12,28 @@ namespace Sand;
 /// </summary>
 public class Stuff
 {
-	public static Random _random = new();
-
 	public int DormantChecks { get; private set; }
+
+	public bool CheckDormancy() 
+	{
+		DormantChecks++;
+		return _dormant;
+	}
+
 	private bool _dormant = false;
 	public bool Dormant //{ get; set; }
 	{ 
 		get 
 		{
-			DormantChecks++;
+			//DormantChecks++;
 			return _dormant;
 		}
 		set 
 		{
-			DormantChecks = 0;
+			if (value != _dormant)
+			{
+				DormantChecks = 0;
+			}
 			_dormant = value;
 		}
 	}
@@ -33,10 +42,30 @@ public class Stuff
 	public Phase Phase { get; private set; }
 	public int Version { get; init; }
 
+	private Color DormancyColor
+	{
+		get
+		{
+			switch (Phase)
+			{
+				case Phase.Solid: 
+				case Phase.Powder:
+					return Color.Yellow;
+				case Phase.Liquid:
+					return Color.Magenta;
+				case Phase.Gas:
+					return Color.Cyan;
+				default:
+					return Color.White;				
+
+			}
+		}
+	}
+
 	private Color _color;
 	public Color Color 
 	{
-		get => Dormant ? (Phase == Phase.Liquid ? Color.Magenta : Color.Gold) : _color;
+		get => Dormant && SHOW_STUFF_DORMANCY_COLORS ? DormancyColor : _color;
 		private set => _color = value;
 	}
 
@@ -55,7 +84,7 @@ public class Stuff
 		Notes = descriptor.Notes;
 		Version = descriptor.Version;
 
-		Color = descriptor.Colors[_random.Next(descriptor.Colors.Length)];
+		Color = descriptor.Colors[Randoms.Random.Next(descriptor.Colors.Length)];
 
 		if (!Enum.TryParse(descriptor.Phase, true, out Phase phase))
 		{

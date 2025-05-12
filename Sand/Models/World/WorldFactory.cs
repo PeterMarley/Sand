@@ -4,6 +4,8 @@ namespace Sand;
 
 public static class WorldFactory
 {
+
+	#region old ass worlds
 	/// <summary>
 	/// Basic ass stuffworld
 	/// </summary>
@@ -62,6 +64,7 @@ public static class WorldFactory
 	//	}
 	//	return world;
 	//}
+	#endregion
 
 	public static DrawableWorld GetDevStuffWorld_002() => new();
 
@@ -78,5 +81,4 @@ public static class WorldFactory
 		return world;
 	}
 
-	//#endregion
 }

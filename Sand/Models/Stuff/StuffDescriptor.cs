@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace Sand;
+namespace Sand.Models.Stuff;
 public struct StuffDescriptor
 {
 	public StuffDescriptor() 

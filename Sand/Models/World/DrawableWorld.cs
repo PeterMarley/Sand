@@ -13,10 +13,6 @@ namespace Sand;
 
 public class DrawableWorld : IDrawableBatch
 {
-	private StringBuilder _stringBuilder = new();
-	//private readonly Random _random = new();
-
-
 	/// <summary>
 	/// Outer array is X, inner array is Y.
 	/// <br/><em>[0, 0]</em> represents bottom left of viewport.
@@ -71,6 +67,28 @@ public class DrawableWorld : IDrawableBatch
 	public void ApplyGravity(int xIndex, int yIndex)
 	{
 		var stuff = World[xIndex][yIndex];
+
+		//if (stuff == null)
+		//{
+		//	continue;
+		//}
+		//else if (stuff.Dormant)
+		//{
+		//	if (stuff.DormantChecks > 20)
+		//	{
+		//		stuff.Dormant = false;
+		//	}
+		//	else
+		//	{
+		//		continue;
+		//	}
+		//}
+
+		//if (stuff == null || stuff.Dormant)
+		//{
+		//	return;
+		//}
+
 		switch (stuff.Phase)
 		{
 			case Phase.Powder:
@@ -87,6 +105,11 @@ public class DrawableWorld : IDrawableBatch
 
 		void ApplyGravityPhasePowder(int xIndex, int yIndex)
 		{
+			if (stuff.CheckDormancy())
+			{
+				return;
+			}
+
 			//-----------------------------------------------------------------
 			//Check 2 spots below left and right, if all are filled then move on
 			//-----------------------------------------------------------------
@@ -139,6 +162,8 @@ public class DrawableWorld : IDrawableBatch
 
 		void ApplyGravityPhaseLiquid(int xIndex, int yIndex)
 		{
+
+
 			//-----------------------------------------------------------------
 			//Check 2 spots below left and right
 			//-----------------------------------------------------------------
@@ -146,6 +171,12 @@ public class DrawableWorld : IDrawableBatch
 			// if bottom row outside array range just continue as this Stuff cant fall anywhere
 			var rowBelowIndex = yIndex - 1;
 			if (rowBelowIndex < 0) return;
+
+			// if dormant, and theres nothing below, finish
+			if (stuff.CheckDormancy() && World[xIndex][rowBelowIndex] != null)
+			{
+				return;
+			}
 
 			// check directly below
 			if ((rowBelowIndex - 2 >= 0 && Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 2)) || (rowBelowIndex - 1 >= 0 && Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)))))
@@ -320,6 +351,7 @@ public class DrawableWorld : IDrawableBatch
 								// move this displaced liquid to here
 								World[adjCursorX][cursorY] = stuffTarget;//.SetPosition(adjCursorX, cursorY); ;
 								hasDisplaced = true;// BREAKS both loops
+								stuffAtTarget.Dormant = false;
 							}
 						}
 					}
@@ -382,8 +414,11 @@ public class DrawableWorld : IDrawableBatch
 					// get stuff here
 					var stuff = World[xIndex][yIndex];
 
-					// if nothing here then move on to next Stuff
-					if (stuff == null || stuff.Dormant) continue;
+					// if nothing here then move on to next Stuff **NOTE** dormancy is checked in apply gravity
+					if (stuff == null)
+					{
+						continue;
+					}
 
 					ApplyGravity(xIndex, yIndex);
 				}

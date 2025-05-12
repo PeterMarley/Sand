@@ -6,7 +6,7 @@ public class Constants
 	//	DIMENSIONS										|
 	//---------------------------------------------------
 	/// <summary>A Stuff element is this many pixels per side.</summary>
-	public const int STUFF_SCALE = 6;//5;
+	public const int STUFF_SCALE = 4;//5;
 	/// <summary>Window resolution x</summary>
 	public const int RESOLUTION_X = 2000;//1500;
 	/// <summary>Window resolution y</summary>
@@ -31,6 +31,13 @@ public class Constants
 	public const bool LOG_TO_FILE = true;
 	/// <summary>Controls whether logging goes to console window (still goes to visual studio output)</summary>]
 	public const bool LOG_TO_CONSOLE = false;
+
+	//---------------------------------------------------
+	//	DEBUG											|
+	//---------------------------------------------------
+	/// <summary>Controls whether dormant colours are shown in CMYK</summary>]
+	public const bool SHOW_STUFF_DORMANCY_COLORS = true;
+
 }
 
 public class Stuffs
