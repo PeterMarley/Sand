@@ -38,6 +38,7 @@
     <Compile Include="Models\StuffWorld\02 DrawableWorld.cs" />
     <Compile Include="Models\StuffWorld\WorldFactory.cs" />
     <Compile Include="Models\Stuff\Stuff.cs" />
+    <Compile Include="Services\FastRandomBoolGenerator.cs" />
     <Compile Include="Services\ConfigService.cs" />
     <Compile Include="Services\Randoms.cs" />
     <Compile Include="Services\SpriteService.cs" />

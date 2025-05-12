@@ -13,27 +13,32 @@ public class Stuff
 {
 	public static Random _random = new();
 
+	public int DormantChecks { get; private set; }
 	private bool _dormant = false;
-	public bool Dormant; 
-	//{ 
-	//	get => _dormant; 
-	//	set 
-	//	{
-	//		_dormant = value;
-	//		if (!_dormant)
-	//		{
-	//			NotMovedCount = 0;
-	//		}
-	//	}
-	//}
+	public bool Dormant //{ get; set; }
+	{ 
+		get 
+		{
+			DormantChecks++;
+			return _dormant;
+		}
+		set 
+		{
+			DormantChecks = 0;
+			_dormant = value;
+		}
+	}
 	public string Name { get; init; }
 	public string Notes { get; init; }
 	public Phase Phase { get; private set; }
 	public int Version { get; init; }
-	public Color Color { get; private set; }
 
-	/// <summary>This many updates have occured since this Stuff Moved</summary>
-	public int NotMovedCount { get; set; }
+	private Color _color;
+	public Color Color 
+	{
+		get => Dormant ? (Phase == Phase.Liquid ? Color.Magenta : Color.Gold) : _color;
+		private set => _color = value;
+	}
 
 	private StuffDescriptor descriptor;
 

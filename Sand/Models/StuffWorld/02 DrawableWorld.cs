@@ -14,7 +14,7 @@ namespace Sand;
 public class DrawableWorld : IDrawableBatch
 {
 	private StringBuilder _stringBuilder = new();
-	private readonly Random _random = new();
+	//private readonly Random _random = new();
 
 
 	/// <summary>
@@ -73,8 +73,8 @@ public class DrawableWorld : IDrawableBatch
 		var stuff = World[xIndex][yIndex];
 		switch (stuff.Phase)
 		{
-			case Phase.Solid:
-				ApplyGravityPhaseSolid(xIndex, yIndex);
+			case Phase.Powder:
+				ApplyGravityPhasePowder(xIndex, yIndex);
 				break;
 			case Phase.Liquid:
 				ApplyGravityPhaseLiquid(xIndex, yIndex);
@@ -85,7 +85,7 @@ public class DrawableWorld : IDrawableBatch
 				break;
 		}
 
-		void ApplyGravityPhaseSolid(int xIndex, int yIndex)
+		void ApplyGravityPhasePowder(int xIndex, int yIndex)
 		{
 			//-----------------------------------------------------------------
 			//Check 2 spots below left and right, if all are filled then move on
@@ -102,7 +102,7 @@ public class DrawableWorld : IDrawableBatch
 			}
 
 			// check below and left (but alterate sides randomly)
-			//bool leftSide = _random.Next(2) == 1;
+			bool leftSide = FastRandomBoolGenerator.Instance.Next();
 			int colLeftIndex = xIndex - 1;
 			int colRightIndex = xIndex + 1;
 
@@ -152,8 +152,8 @@ public class DrawableWorld : IDrawableBatch
 			{
 				return;
 			}
-			bool leftFirst = this.leftSide;
-
+			bool leftFirst = FastRandomBoolGenerator.Instance.Next();
+			bool leftSide = leftFirst;
 			// check below and left (but alterate sides randomly)
 			int colLeftIndex = xIndex - 1;
 			int colRightIndex = xIndex + 1;
@@ -214,7 +214,7 @@ public class DrawableWorld : IDrawableBatch
 		}
 	}
 
-	private const int NOT_MOVED_DORMANT_TRIGGER = 2;
+	private const int NOT_MOVED_DORMANT_TRIGGER = 10;
 	public bool Move(Point from, Point to)
 	{
 		var stuffAtSource = World[from.X][from.Y];
@@ -226,8 +226,8 @@ public class DrawableWorld : IDrawableBatch
 
 		switch (stuffAtSource.Phase)
 		{
-			case Phase.Solid:
-				didMove = MoveSolid(from, to);
+			case Phase.Powder:
+				didMove = MovePowder(from, to);
 				break;
 			case Phase.Liquid:
 				didMove = MoveLiquid(from, to);
@@ -238,35 +238,31 @@ public class DrawableWorld : IDrawableBatch
 
 		if (!didMove)
 		{
-			if (stuffAtSource.NotMovedCount > NOT_MOVED_DORMANT_TRIGGER)
+			if (stuffAtSource.DormantChecks > NOT_MOVED_DORMANT_TRIGGER)
 			{
 				stuffAtSource.Dormant = true;
-				stuffAtSource.NotMovedCount++;
 			}
 			
-			if (stuffAtTarget != null)
-			{
-				if (stuffAtTarget.NotMovedCount > NOT_MOVED_DORMANT_TRIGGER)
-				{
-					stuffAtTarget.Dormant = true;
-					stuffAtTarget.NotMovedCount++;
-				}
-			}
+			//if (stuffAtTarget != null)
+			//{
+			//	if (stuffAtTarget.NotMovedCount > NOT_MOVED_DORMANT_TRIGGER)
+			//	{
+			//		stuffAtTarget.Dormant = true;
+			//	}
+			//}
 		}
 		else 
 		{
 			stuffAtSource.Dormant = false;
-			stuffAtSource.NotMovedCount = 0;
 			if (stuffAtTarget != null)
 			{
 				stuffAtTarget.Dormant = false;
-				stuffAtTarget.NotMovedCount = 0;
 			}
 		}
 
 		return false;
 
-		bool MoveSolid(Point from, Point to)
+		bool MovePowder(Point from, Point to)
 		{
 			// check for stuff at target
 			var didMove = false;
@@ -277,15 +273,19 @@ public class DrawableWorld : IDrawableBatch
 
 			// if not stuff at target fall to here and finish
 			if (stuffTarget == null // nothing at target
-			|| stuffTarget is not { Phase: Phase.Solid }) // or thing at target is not a solid
+			|| stuffTarget is not { Phase: Phase.Solid or Phase.Powder }) // or thing at target is not a solid
 			{
 				World[to.X][to.Y] = stuffAtSource;
 				World[from.X][from.Y] = null;
 				didMove = true;
 			}
 
-			var hasDisplacedLiquid = LiquidDisplacement();
-	
+			var hasDisplacedLiquid = false;
+			if (stuffTarget != null && stuffTarget is { Phase: Phase.Liquid})
+			{
+				hasDisplacedLiquid = LiquidDisplacement();
+			}
+
 			return didMove || hasDisplacedLiquid;
 
 			bool LiquidDisplacement() 
@@ -298,7 +298,7 @@ public class DrawableWorld : IDrawableBatch
 				// if stuff at the target, but target NOT solid (we know that source IS solid), then
 				// fall here - liquid, gas displacement means the thing pushed out of the way has
 				// to go up
-				if (targetHasStuff && stuffTarget is not { Phase: Phase.Solid })
+				if (targetHasStuff && stuffTarget is not { Phase: Phase.Solid or Phase.Powder })
 				{
 					// up upwards in Y-axis (checkling one left and right also) from displaced liqud
 					// until empty stuff found - staying within the water column.
@@ -354,12 +354,12 @@ public class DrawableWorld : IDrawableBatch
 
 	#region Game Loop Methods called by SandGame
 
-	private bool leftSide = true;
+	//private bool leftSide = true;
 	public void Update()
 	{
 		var p = new Point();
 		var ltr = true;
-		leftSide = _random.Next(2) == 0;
+
 		try
 		{
 			var i = 0;
@@ -381,15 +381,11 @@ public class DrawableWorld : IDrawableBatch
 
 					// get stuff here
 					var stuff = World[xIndex][yIndex];
+
 					// if nothing here then move on to next Stuff
 					if (stuff == null || stuff.Dormant) continue;
 
 					ApplyGravity(xIndex, yIndex);
-
-					if (i % 100 == 0)
-					{
-						leftSide = _random.Next(2) == 0;
-					}
 				}
 
 				// flip the direction of the next horizontal traversal - for reasons

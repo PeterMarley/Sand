@@ -2,7 +2,7 @@
 # Basic Sand
 - Name: BasicSand
   Version: 1
-  Phase: Solid
+  Phase: Powder
   SpriteSource: GetRandomSandStuffSprite
   Notes: Simple falling sand
   ColorsSource:

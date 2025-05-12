@@ -64,7 +64,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		// SETs to comfy dev left screen
 		//============================================================================
 		var pos = Window.Position;
-		pos.X -= 2500;
+		//pos.X -= 2500;
 		//pos.Y -= 250;
 		Window.Position = pos;
 		//============================================================================
@@ -88,8 +88,8 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		base.Initialize();
 	}
 
-	private int FRAME_COUNT_BETWEEN_UPDATE = 20;
-	private int FRAME_COUNT_BETWEEN_DRAW = 20;
+	private int FRAME_COUNT_BETWEEN_UPDATE = 60;
+	private int FRAME_COUNT_BETWEEN_DRAW = 120;
 	private bool didPrep = false;
 	protected override void Update(GameTime gameTime)
 	{
@@ -110,8 +110,8 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 			//_world = StuffWorldFactory.WaterBottom3Y();
 			//_world = StuffWorldFactory.WaterBottomHalf();
 			//_world = WorldFactory.SandAlmostEverywhere();
-			//_world = WorldFactory.GetDevStuffWorld_002();
-			_world = WorldFactory.WaterBottomHalf();
+			_world = WorldFactory.GetDevStuffWorld_002();
+			//_world = WorldFactory.WaterBottomHalf();
 
 			SpriteManager.AddDrawableBatch(_world);
 			didPrep = true;

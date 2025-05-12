@@ -11,7 +11,7 @@ public class Randoms
 	private Randoms() { Refresh(); }
 	#endregion
 
-	private Random _random = new ();
+	private Random _random = new();
 	/// <summary>
 	/// This array can be used to get a random order of -1, 0 and 1 
 	/// for chosing random left or right directions
@@ -21,7 +21,7 @@ public class Randoms
 	/// <summary>
 	/// Regenerate all random sequences for this Update run through
 	/// </summary>
-	public void Refresh() 
+	public void Refresh()
 	{
 		Ind_leftRightMid = Ind_leftRightMid.OrderBy(x => _random.Next(2)).ToArray();
 	}
