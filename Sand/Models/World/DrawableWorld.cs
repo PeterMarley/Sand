@@ -173,7 +173,7 @@ public class DrawableWorld : IDrawableBatch
 			if (rowBelowIndex < 0) return;
 
 			// if dormant, and theres nothing below, finish
-			if (stuff.CheckDormancy() && World[xIndex][rowBelowIndex] != null)
+			if (stuff.CheckDormancy() && World[xIndex][rowBelowIndex] != null) // this is not null check basically enables erroneously dormant stuff to right itself
 			{
 				return;
 			}
@@ -242,6 +242,52 @@ public class DrawableWorld : IDrawableBatch
 					leftSide = !leftSide;
 				}
 			}
+
+			////====================================================================
+			//// check left below and right, if all same phase then set as dormant
+			////====================================================================
+
+			//// the col left right and row below indices all checked to be valid at this point
+
+			//bool leftDormancyCondition = false;
+			//bool rightDormancyCondition = colRightIndex < STUFF_WIDTH;
+			//bool belowleftDormancyCondition = rowBelowIndex >= 0;
+			
+			//var a = World[xIndex];
+			//var b = World[xIndex][yIndex];
+			//var c = World[xIndex][yIndex];
+
+			//try
+			//{
+			//	if (World[colLeftIndex][yIndex] != null && World[colLeftIndex][yIndex].Name == stuff.Name)
+			//	{
+			//		leftDormancyCondition = true;
+			//	}
+
+			//	// if directly right is not empty and is same phase then set dormancy check
+			//	if (World[colRightIndex][yIndex] != null && World[colRightIndex][yIndex].Name == stuff.Name)
+			//	{
+			//		rightDormancyCondition = true;
+			//	}
+
+			//	// if directly left is not empty and is same phase then set dormancy check
+			//	if (World[xIndex][rowBelowIndex] != null && World[xIndex][rowBelowIndex].Name == stuff.Name)
+			//	{
+			//		belowleftDormancyCondition = true;
+			//	}
+
+			//	// if directly below is not empty and is same phase then set dormancy check
+			//	if (leftDormancyCondition && rightDormancyCondition && belowleftDormancyCondition)
+			//	{
+			//		stuff.Dormant = true;
+			//	}
+			//}
+			//catch (Exception checkingAdjacentEx)
+			//{
+			//	throw;
+			//}
+
+			
 		}
 	}
 
@@ -415,7 +461,7 @@ public class DrawableWorld : IDrawableBatch
 					var stuff = World[xIndex][yIndex];
 
 					// if nothing here then move on to next Stuff **NOTE** dormancy is checked in apply gravity
-					if (stuff == null)
+					if (stuff == null/* || stuff.CheckDormancy()*/)
 					{
 						continue;
 					}

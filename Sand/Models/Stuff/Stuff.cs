@@ -17,6 +17,10 @@ public class Stuff
 	public bool CheckDormancy() 
 	{
 		DormantChecks++;
+		//if (DormantChecks > 5)
+		//{
+		//	_dormant = false;
+		//}
 		return _dormant;
 	}
 

@@ -36,7 +36,7 @@ public class Constants
 	//	DEBUG											|
 	//---------------------------------------------------
 	/// <summary>Controls whether dormant colours are shown in CMYK</summary>]
-	public const bool SHOW_STUFF_DORMANCY_COLORS = true;
+	public const bool SHOW_STUFF_DORMANCY_COLORS = false;
 
 }
 
