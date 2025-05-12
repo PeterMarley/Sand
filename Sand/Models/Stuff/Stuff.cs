@@ -52,7 +52,8 @@ public class Stuff
 		{
 			switch (Phase)
 			{
-				case Phase.Solid: 
+				case Phase.Solid:
+					return Color.Green;
 				case Phase.Powder:
 					return Color.Yellow;
 				case Phase.Liquid:

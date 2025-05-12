@@ -21,4 +21,15 @@
   ColorsSource:
   - [44, 72, 71, 255]   # 2c4847
 
+# Basic Stone
+- Name: BasicStone
+  Version: 1
+  Phase: Solid
+  Notes: Hard and unyielding. The world moves around stone.
+  ColorsSource:
+  - [75, 75, 75, 255] # c0c0c0
+  - [34, 34 ,34 ,255] # 575757
+  - [44, 44, 44,255] # 727272
+  - [38, 38, 38,255] # 636363
+
  

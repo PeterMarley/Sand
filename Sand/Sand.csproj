@@ -37,6 +37,7 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Models\World\DrawableWorld.cs" />
     <Compile Include="Models\World\WorldFactory.cs" />
+    <Compile Include="Models\Player\Player.cs" />
     <Compile Include="Models\Stuff\Stuff.cs" />
     <Compile Include="Services\FastRandomBoolGenerator.cs" />
     <Compile Include="Services\ConfigService.cs" />

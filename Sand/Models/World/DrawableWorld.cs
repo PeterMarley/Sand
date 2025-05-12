@@ -97,10 +97,6 @@ public class DrawableWorld : IDrawableBatch
 			case Phase.Liquid:
 				ApplyGravityPhaseLiquid(xIndex, yIndex);
 				break;
-			case Phase.Gas:
-			default:
-				Logger.Instance.LogInfo($"Phase {stuff.Phase} not handled");
-				break;
 		}
 
 		void ApplyGravityPhasePowder(int xIndex, int yIndex)
@@ -299,19 +295,12 @@ public class DrawableWorld : IDrawableBatch
 
 		if (stuffAtSource == null) return true;
 
-		bool didMove;
-
-		switch (stuffAtSource.Phase)
+		var didMove = stuffAtSource.Phase switch
 		{
-			case Phase.Powder:
-				didMove = MovePowder(from, to);
-				break;
-			case Phase.Liquid:
-				didMove = MoveLiquid(from, to);
-				break;
-			default: 
-				throw new NotImplementedException($"{stuffAtSource.Phase} phase movement not implemented");
-		}
+			Phase.Powder => MovePowder(from, to),
+			Phase.Liquid => MoveLiquid(from, to),
+			_ => false,
+		};
 
 		if (!didMove)
 		{
