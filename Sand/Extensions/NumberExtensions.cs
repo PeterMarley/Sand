@@ -10,46 +10,34 @@ namespace Sand.Extensions;
 
 public static class NumberExtensions
 {
+	private const int HALF_RESOLUTION_X = RESOLUTION_X / 2;
+	private const int HALF_RESOLUTION_Y = RESOLUTION_Y / 2;
+	private const int STUFF_DIVISOR = STUFF_SCALE * 2;
 	public static (int top, int right, int bottom, int left) ToStuffCoord(Sprite sprite)
 	{
-		int spriteGridLeft;// = (int)((Player.Sprite.Left + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-		int spriteGridRight;// = (int)((Player.Sprite.Right + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-		int spriteGridTop;// = (int)((Player.Sprite.Top + 1000) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-		int spriteGridBottom;// = (int)((Player.Sprite.Bottom + 1000) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
 		var offsetX = sprite.Width / 2;
 		var offsetY = sprite.Height / 2;
-		//var spriteX = (int)((sprite.X + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-		//var spriteY = (int)((sprite.Y + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-		var x = sprite.X;
-		var y = sprite.Y;
-		spriteGridLeft = (int)((x - offsetX + (RESOLUTION_X / 2)) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-		spriteGridRight = (int)((x + offsetX + (RESOLUTION_X / 2)) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-		spriteGridTop = (int)((y + offsetY + (RESOLUTION_Y / 2)) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-		spriteGridBottom = (int)((y - offsetY + (RESOLUTION_Y / 2)) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
 
+		/*		EG, GETTING TOP:
+		 *
+		 * (int)(
+		 *		(sprite.Y				// centre of sprite (in world coords)
+		 *		+ offsetY				// move to top of sprint
+		 *		+ HALF_RESOLUTION_Y		// adjust coordinate origin (center origin sprite VS bottom left origin drawableworld)
+		 *		) 
+		 * / STUFF_SCALE),				// adjust to stuff units
+		 */
 
-		return (spriteGridTop, spriteGridRight, spriteGridBottom, spriteGridLeft);
+		return (
+			/*top*/        (int)((sprite.Y + offsetY + HALF_RESOLUTION_Y) / STUFF_DIVISOR),
+			/*right*/    (int)((sprite.X + offsetX + HALF_RESOLUTION_X) / STUFF_DIVISOR),
+			/*bottom*/    (int)((sprite.Y - offsetY + HALF_RESOLUTION_Y) / STUFF_DIVISOR),
+			/*left*/    (int)((sprite.X - offsetX + HALF_RESOLUTION_X) / STUFF_DIVISOR)
+		);
 	}
 
-	// ie get the x and y of a stuff, and get its sprite coord
-	//public static (float top, float right, float bottom, float left) ToWorldCoords(int xStuff, int yStuff)
-	//{
-	//	int spriteGridLeft;// = (int)((Player.Sprite.Left + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-	//	int spriteGridRight;// = (int)((Player.Sprite.Right + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-	//	int spriteGridTop;// = (int)((Player.Sprite.Top + 1000) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-	//	int spriteGridBottom;// = (int)((Player.Sprite.Bottom + 1000) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-	//	var offsetX = sprite.Width / 2;
-	//	var offsetY = sprite.Height / 2;
-	//	//var spriteX = (int)((sprite.X + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-	//	//var spriteY = (int)((sprite.Y + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-	//	var x = sprite.X;
-	//	var y = sprite.Y;
-	//	spriteGridLeft = (int)((x - offsetX + (RESOLUTION_X / 2)) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-	//	spriteGridRight = (int)((x + offsetX + (RESOLUTION_X / 2)) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-	//	spriteGridTop = (int)((y + offsetY + (RESOLUTION_Y / 2)) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-	//	spriteGridBottom = (int)((y - offsetY + (RESOLUTION_Y / 2)) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-
-
-	//	return (spriteGridTop, spriteGridRight, spriteGridBottom, spriteGridLeft);
-	//}
+	//// ie get the x and y of a stuff, and get its sprite coord
+	public static (float xWorld, float yWorld) ToWorldCoords(int xStuff, int yStuff)=> (ToWorldCoordsX(xStuff),ToWorldCoordsY(yStuff));
+	public static float ToWorldCoordsX(int xStuff) => xStuff * STUFF_DIVISOR - HALF_RESOLUTION_X;
+	public static float ToWorldCoordsY(int yStuff) => yStuff * STUFF_DIVISOR - HALF_RESOLUTION_Y;
 }

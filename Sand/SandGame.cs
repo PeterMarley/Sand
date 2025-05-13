@@ -5,6 +5,7 @@ using FlatRedBall.Input;
 using static FlatRedBall.Input.Mouse;
 using System.Threading.Tasks;
 using static Sand.Constants;
+using System.Diagnostics;
 
 namespace Sand;
 
@@ -112,7 +113,6 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 	{
 		if (InputManager.Keyboard.KeyReleased(Keys.Escape))
 		{
-			Logger.Instance.Dispose();
 			this.Exit();
 			return;
 		}
@@ -139,6 +139,10 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 		Randoms.Instance.Refresh();
 
+		if (InputManager.Keyboard.KeyPushed(Keys.Enter))
+		{
+			Debugger.Break();
+		}
 
 		if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE == 0)
 		{

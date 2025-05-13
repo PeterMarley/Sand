@@ -97,8 +97,8 @@ public class DrawableWorld : IDrawableBatch
 		{
 			var stuff = StuffFactory.Instance.Get(stuffType);
 			World[x][y] = stuff;//.SetPosition(x, y);
-			//stuff.X = x;
-			//stuff.Y = y;
+								//stuff.X = x;
+								//stuff.Y = y;
 		}
 	}
 
@@ -290,7 +290,7 @@ public class DrawableWorld : IDrawableBatch
 			//bool leftDormancyCondition = false;
 			//bool rightDormancyCondition = colRightIndex < STUFF_WIDTH;
 			//bool belowleftDormancyCondition = rowBelowIndex >= 0;
-			
+
 			//var a = World[xIndex];
 			//var b = World[xIndex][yIndex];
 			//var c = World[xIndex][yIndex];
@@ -325,7 +325,7 @@ public class DrawableWorld : IDrawableBatch
 			//	throw;
 			//}
 
-			
+
 		}
 	}
 
@@ -350,7 +350,7 @@ public class DrawableWorld : IDrawableBatch
 			{
 				stuffAtSource.Dormant = true;
 			}
-			
+
 			//if (stuffAtTarget != null)
 			//{
 			//	if (stuffAtTarget.NotMovedCount > NOT_MOVED_DORMANT_TRIGGER)
@@ -359,7 +359,7 @@ public class DrawableWorld : IDrawableBatch
 			//	}
 			//}
 		}
-		else 
+		else
 		{
 			stuffAtSource.Dormant = false;
 			if (stuffAtTarget != null)
@@ -389,14 +389,14 @@ public class DrawableWorld : IDrawableBatch
 			}
 
 			var hasDisplacedLiquid = false;
-			if (stuffTarget != null && stuffTarget is { Phase: Phase.Liquid})
+			if (stuffTarget != null && stuffTarget is { Phase: Phase.Liquid })
 			{
 				hasDisplacedLiquid = LiquidDisplacement();
 			}
 
 			return didMove || hasDisplacedLiquid;
 
-			bool LiquidDisplacement() 
+			bool LiquidDisplacement()
 			{
 				//=======================================================================
 				// LIQUID DISPLACEMENT
@@ -536,7 +536,7 @@ public class DrawableWorld : IDrawableBatch
 			var colorData = new Color[STUFF_HEIGHT * STUFF_WIDTH];
 
 			var cx = 0;
-			
+
 			for (var y = World[0].Length - 1; y >= 0; y--)
 			{
 				for (var x = 0; x < World.Length; x++)
@@ -626,137 +626,187 @@ public class DrawableWorld : IDrawableBatch
 					ForceAddStuff_InSquare(Stuffs.BASIC_STONE, x, y, 10);
 					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
 				}
+
+				// place stuff at bottom left of player
+				if (InputManager.Keyboard.KeyDown(Keys.E))
+				{
+					var (top, right, bottom, left) = NumberExtensions.ToStuffCoord(Player.Sprite);
+					ForceAddStuff_InSquare(Stuffs.BASIC_STONE, left, bottom, 2);
+				}
 			}
 		}
 
 		void AffectPlayer()
 		{
 
-			////Gravity;
-			//Player.Sprite.Acceleration.Y -= /*-*/10;
-			////Wind Resistance
-			//if (Player.Sprite.Acceleration.Y < 0)
-			//{
-			//	Player.Sprite.Acceleration.Y += 3;
-			//}
-			
+			//Gravity;
+			//Player.Sprite.Velocity.Y -= /*-*/1;
+			Player.Sprite.Y -= /*-*/PLAYER_MOVE_FACTOR / 2;
 
-			if (InputManager.Keyboard.KeyDown(Keys.W))
+			//Wind Resistance
+			//if (Player.Sprite.Velocity.Y < 0)
+			//{
+			//	Player.Sprite.Velocity.Y += 3;
+			//}
+
+			var (top, right, bottom, left) = NumberExtensions.ToStuffCoord(Player.Sprite);
+
+			bool allowUp = true;
+			bool allowRight = true;
+			bool allowDown = true;
+			bool allowLeft = true;
+
+			Collision();
+
+			void Collision() 
+			{
+				//================================================
+				// bottom collision
+				//================================================
+
+				// get the row directly below the sprite
+				bottom--;
+				// if bottom coord index safe
+				if (bottom >= 0 && bottom < STUFF_HEIGHT)
+				{
+					// iterate across that row within the sprites x coords and check if downward movement should be arrested
+					for (var x = left; x < right; x++)
+					{
+						// if outside the world bound just continue to next in row
+						if (x < 0 || x >= STUFF_WIDTH)
+						{
+							continue;
+						}
+
+						// if there is something here then stop
+						if (World[x][bottom] != null)
+						{
+							allowDown = false;
+							break;
+						}
+					}
+				}
+				// if bottom coord index is not safe
+				else if (bottom < 0)
+				{
+					allowDown = false;
+				}
+
+				//================================================
+				// TOP collision
+				//================================================ww
+
+				// get the row directly below the sprite
+				top++;
+				// if bottom coord index safe
+				if (top >= 0 && top < STUFF_HEIGHT)
+				{
+					// iterate across that row within the sprites x coords and check if downward movement should be arrested
+					for (var x = left; x < right; x++)
+					{
+						// if outside the world bound just continue to next in row
+						if (x < 0 || x >= STUFF_WIDTH)
+						{
+							continue;
+						}
+
+						// if there is something here then stop
+						if (World[x][top] != null)
+						{
+							allowUp = false;
+							break;
+						}
+					}
+				}
+				// if bottom coord index is not safe
+				else if (top >= STUFF_HEIGHT)
+				{
+					allowUp = false;
+				}
+
+			}
+
+			//move upwards
+			if (allowUp && InputManager.Keyboard.KeyDown(Keys.W))
 			{
 				Player.Sprite.Y += PLAYER_MOVE_FACTOR;
 
 				//Player.Sprite.Acceleration.Y += PLAYER_MOVE_FACTOR;
 				//Player.Sprite.Position.Y += 10;
-
-				//if (Player.Sprite.Velocity.Y < 0)
-				//{
-				//	Player.Sprite.Velocity.Y = 0;
-				//}
-				
 			}
 
-			//Player.Sprite.Acceleration.Y -= PLAYER_MOVE_FACTOR / 4;//gravity;
-
-			if (InputManager.Keyboard.KeyDown(Keys.A))
+			// move left
+			if (allowLeft && InputManager.Keyboard.KeyDown(Keys.A))
 			{
 				Player.Sprite.X -= PLAYER_MOVE_FACTOR;
 			}
-
-			if (InputManager.Keyboard.KeyDown(Keys.S))
+			// move down
+			if (allowDown && InputManager.Keyboard.KeyDown(Keys.S))
 			{
 				Player.Sprite.Y -= PLAYER_MOVE_FACTOR;
 			}
-
-			if (InputManager.Keyboard.KeyDown(Keys.D))
+			// move right
+			if (allowRight && InputManager.Keyboard.KeyDown(Keys.D))
 			{
 				Player.Sprite.X += PLAYER_MOVE_FACTOR;
 			}
-
-			// stuff at bottom left of player
-			if (InputManager.Keyboard.KeyDown(Keys.E))
-			{
-				
-			}
-
+			// move to top left
 			if (InputManager.Keyboard.KeyDown(Keys.Insert))
 			{
 				Player.Sprite.Top = RESOLUTION_Y;
 				Player.Sprite.Left = 0;
 			}
-
+			// move to top right
 			if (InputManager.Keyboard.KeyDown(Keys.Home))
 			{
 				Player.Sprite.Top = RESOLUTION_Y;
 				Player.Sprite.Right = RESOLUTION_X;
 			}
-
+			// move to bottom right
 			if (InputManager.Keyboard.KeyDown(Keys.End))
 			{
 				Player.Sprite.Bottom = 0;
 				Player.Sprite.Right = RESOLUTION_X;
 			}
-
+			// move to bottom left
 			if (InputManager.Keyboard.KeyDown(Keys.Delete))
 			{
 				Player.Sprite.Left = 0;
 				Player.Sprite.Bottom = 0;
 			}
-
-			int i = 0;
-			int y1 = 0;
-
 			//int spriteX;// = (int)((Player.Sprite.Left + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
 			//int spriteY;// = (int)((Player.Sprite.Right + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-			int spriteGridLeft;// = (int)((Player.Sprite.Left + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-			int spriteGridRight;// = (int)((Player.Sprite.Right + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-			int spriteGridTop;// = (int)((Player.Sprite.Top + 1000) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-			int spriteGridBottom;// = (int)((Player.Sprite.Bottom + 1000) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
+			//int left;// = (int)((Player.Sprite.Left + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
+			//int right;// = (int)((Player.Sprite.Right + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
+			//int top;// = (int)((Player.Sprite.Top + 1000) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
+			//int bottom;// = (int)((Player.Sprite.Bottom + 1000) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
 			try
 			{
+				//========================================================
+				// build up a collection of points surrounding the sprite
+				//========================================================
 
+
+				//** left and rights => for every y between bottom and top, take the left most and right most x
+
+				// LEFT TODO
+				// RIGHT TODO
+
+				//** top and bottoms => for every x between left and right, take the top and bottom most y
+
+				// TOP TODO
+				// BOTTOM
 				if (InputManager.Keyboard.KeyPushed(Keys.Q))
 				{
-					Logger.Instance.LogInfo($"NORMAL X={((int)Player.Sprite.X):D4} Y={((int)Player.Sprite.Y):D4} L={((int)Player.Sprite.Left):D4} R={((int)Player.Sprite.Right):D4} T={((int)Player.Sprite.Top):D4} B={((int)Player.Sprite.Bottom):D4}");
-					//var spriteGridLeft = (int)((Player.Sprite.X / STUFF_SCALE));// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-					//var spriteGridRight = (int)((Player.Sprite.X / STUFF_SCALE));// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-					//var spriteGridTop = (int)((Player.Sprite.Y / STUFF_SCALE));// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-					//var spriteGridBottom = (int)((Player.Sprite.Y / STUFF_SCALE));// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-					//var offsetX = Player.Sprite.Width / 2;
-					//var offsetY = Player.Sprite.Height / 2;
-					//var spriteX = (int)((Player.Sprite.X + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-					//var spriteY = (int)((Player.Sprite.Y + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
 
-					////spriteGridLeft = (int)((Player.Sprite.Left + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-					////spriteGridRight = (int)((Player.Sprite.Right + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-					////spriteGridTop = (int)((Player.Sprite.Top + 1000) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-					////spriteGridBottom = (int)((Player.Sprite.Bottom + 1000) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-					////Logger.Instance.LogInfo($"CALCD 1 X={spriteX:D4} Y={spriteY:D4}  L={spriteGridLeft:D4} R={spriteGridRight:D4} T={spriteGridTop:D4} B={spriteGridBottom:D4}");
-
-					//var x = Player.Sprite.X;
-					//var y = Player.Sprite.Y;
-
-					//spriteGridLeft = (int)((x - offsetX + (RESOLUTION_X / 2)) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-					//spriteGridRight = (int)((x + offsetX + (RESOLUTION_X / 2)) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-					//spriteGridTop = (int)((y + offsetY + (RESOLUTION_Y / 2)) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-					//spriteGridBottom = (int)((y - offsetY + (RESOLUTION_Y / 2)) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-
-					var (top, right, bottom, left) = NumberExtensions.ToStuffCoord(Player.Sprite);
+					//spriteGridLeft = left;
+					//spriteGridRight = right;
+					//spriteGridTop = top;
+					//spriteGridBottom = bottom;
 
 
-					spriteGridLeft = left;
-					spriteGridRight = right;
-					spriteGridTop = top;
-					spriteGridBottom = bottom;
-
-					//Logger.Instance.LogInfo($"CALCD 2 X={spriteX:D4} Y={spriteY:D4}  L={spriteGridLeft:D4} R={spriteGridRight:D4} T={spriteGridTop:D4} B={spriteGridBottom:D4}\n");
-
-					var abs = Math.Abs(spriteGridLeft);
-
-
-					var adj = (abs <= 10 ? "   " : (abs <= 100 ? "  " : (abs <= 1000 ? " " : "")));
-
-
-
+					var abs = Math.Abs(left);
+					var adj = (abs < 10 ? "  " : (abs < 100 ? " " : (abs < 1000 ? "" : "")));
 					//var xyz =
 					//   $"\n ----{spriteGridTop}---- \n" +
 					//	"|            |\n" +
@@ -767,132 +817,27 @@ public class DrawableWorld : IDrawableBatch
 					//	"|            |\n" +
 					//   $" ----{spriteGridBottom}----\n\n " +
 					//   $"WIDTH=[{Player.Sprite.Width}]";
-
 					var xyz =
-					   $"\n ----{spriteGridTop / STUFF_SCALE}---- \n" +
+					   $"\n --- [{top}] --- \n" +
 						"|            |\n" +
 						"|            |\n" +
-					   $"{spriteGridLeft / STUFF_SCALE}         {adj}|     HEIGHT=[{Player.Sprite.Height}]\n" +
-					   $"|            {spriteGridRight / STUFF_SCALE}\n" +
+					   $"[{left}]\n" +
+					   $"|           [{right}]\n" +
 						"|            |\n" +
 						"|            |\n" +
-					   $" ----{spriteGridBottom / STUFF_SCALE}----\n\n " +
+					   $" --- [{bottom}] ---\n\n " +
 					   $"WIDTH=[{Player.Sprite.Width}]";
-
 					Logger.Instance.LogInfo(xyz);
 
-					//var c = 0;
-					//for (i = spriteGridLeft; i <= spriteGridRight; i++, c++)
-					//{
-					//	if (i < 0 || i >= World.Length)
-					//	{
-					//		continue;
-					//	}
 
-					//	//sideBuffer[i] = new(x, spriteGridTop);
-					//	Point p /*sideBuffer[i]*/ = new(i, spriteGridBottom);
-					//	var stuff = World.Get(p);
-					//	if (stuff == null)
-					//	{
-					//		// if empty, fugheddaboudit
-					//		continue;
-					//	}
-					//	else
-					//	{
-					//		if (stuff is { Phase: Phase.Solid })
-					//		{
-					//			Player.Sprite.Velocity.Y = 0;
-					//			break;
-					//		}
-					//	}
-
-					//}
 				}
-				//	//========================================================
-				//	// build up a collection of points surrounding the sprite
-				//	//========================================================
-
-				//	//** left and rights => for every y between bottom and top, take the left most and right most x
-
-				//	// TODO
-
-				//	//** top and bottoms => for every x between left and right, take the top and bottom most y
-
-				//	//var spriteGridLeft = (int)(Player.Sprite.Left / STUFF_SCALE);// + (RESOLUTION_X / 2);
-				//	//var spriteGridRight = (int)(Player.Sprite.Right / STUFF_SCALE);// + (RESOLUTION_X / 2);
-				//	//var spriteGridTop = (int)(Player.Sprite.Top / STUFF_SCALE);// + (RESOLUTION_Y / 2);
-				//	//var spriteGridBottom = (int)(Player.Sprite.Bottom / STUFF_SCALE);// + (RESOLUTION_Y / 2);
-
-				//	var spriteGridLeft = (int)((Player.Sprite.X / STUFF_SCALE));// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-				//	var spriteGridRight = (int)((Player.Sprite.X / STUFF_SCALE));// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-				//	var spriteGridTop = (int)((Player.Sprite.Y / STUFF_SCALE));// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-				//	var spriteGridBottom = (int)((Player.Sprite.Y / STUFF_SCALE));// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-
-				//	y1 = spriteGridBottom;
-				//	// hold a collection of points representing the points at which the sprite is overlaying the DrawableWorld
-				//	//Point[] sideBuffer = new Point[spriteGridRight - spriteGridLeft];
-
-
-
-
-				//	//if (Player.Sprite.Velocity.Y < 0)
-				//	//{
-				
-
-				//		//foreach (var bottomPoint in sideBuffer)
-				//		//{
-				//		//	var stuff = World.Get(bottomPoint);
-				//		//	if (stuff == null)
-				//		//	{
-				//		//		// if empty, fugheddaboudit
-				//		//		continue;
-				//		//	}
-				//		//	else
-				//		//	{
-				//		//		if (stuff is { Phase: Phase.Solid })
-				//		//		{
-				//		//			Player.Sprite.Velocity.Y = 0;
-				//		//		}
-				//		//	}
-				//		//}
-				//	//}
-
 			}
 			catch (Exception ex)
 			{
+				Logger.Instance.LogError(ex, "Checking collisions ex");
 				throw;
 			}
-
-		//for (var x = 0; x < World.Length; x++)
-		//{
-		//	for (var y = 0; y < World[x].Length; y++)
-		//	{
-
-		//		if (Player.Sprite.Velocity.Y < 0)
-		//		{
-		//			if (Player.Sprite.Bottom)
-		//		}
-
-		//		//if (Player.Sprite.Velocity.Y < 0)
-		//		//{
-		//		//	// goin down
-		//		//}
-		//		//else
-		//		//{
-		//		//	// going up
-		//		//}
-
-		//		//if (Player.Sprite.Velocity.X < 0)
-		//		//{
-		//		//	// goin left
-		//		//}
-		//		//else
-		//		//{
-		//		//	// going right
-		//		//}
-		//	}
-		//}
-	}
+		}
 	}
 
 	#endregion
@@ -925,16 +870,16 @@ public class DrawableWorld : IDrawableBatch
 
 	public static readonly Color[] COLOURS = new Color[1024]
 	{
-		Color.DarkOliveGreen, Color.Bisque, Color.LightSalmon, Color.LemonChiffon, Color.Ivory, 
-		Color.DarkSlateGray, Color.DarkKhaki, Color.YellowGreen, Color.DarkCyan, Color.Peru, 
-		Color.BlanchedAlmond, Color.Black, Color.DarkGoldenrod, Color.IndianRed, Color.Lavender, 
+		Color.DarkOliveGreen, Color.Bisque, Color.LightSalmon, Color.LemonChiffon, Color.Ivory,
+		Color.DarkSlateGray, Color.DarkKhaki, Color.YellowGreen, Color.DarkCyan, Color.Peru,
+		Color.BlanchedAlmond, Color.Black, Color.DarkGoldenrod, Color.IndianRed, Color.Lavender,
 		Color.Tan, Color.Bisque, Color.Gray, Color.YellowGreen, Color.PeachPuff, Color.Indigo,
 		Color.RosyBrown, Color.LightSeaGreen, Color.AntiqueWhite, Color.DimGray, Color.Peru,
 		Color.MediumSpringGreen, Color.LightSeaGreen, Color.DeepSkyBlue, Color.IndianRed, Color.MediumSlateBlue,
 		Color.DarkKhaki, Color.DarkGoldenrod, Color.Olive, Color.DarkGray, Color.MintCream,
-		Color.MediumTurquoise, Color.LightGray, Color.Brown, Color.Salmon,Color.WhiteSmoke, 
-		
-		
+		Color.MediumTurquoise, Color.LightGray, Color.Brown, Color.Salmon,Color.WhiteSmoke,
+
+
 		Color.DarkRed, Color.OldLace, Color.Cyan, Color.LightYellow, Color.MistyRose, Color.Goldenrod, Color.CornflowerBlue,
 		Color.Brown, Color.Khaki, Color.LightSteelBlue, Color.Cyan, Color.Lavender, Color.DarkGreen, Color.Olive, Color.LightSeaGreen,
 		Color.SaddleBrown, Color.Moccasin, Color.DodgerBlue, Color.NavajoWhite, Color.MidnightBlue, Color.Honeydew, Color.LightGreen, Color.Cornsilk,
