@@ -641,7 +641,6 @@ public class DrawableWorld : IDrawableBatch
 
 			//Gravity;
 			//Player.Sprite.Velocity.Y -= /*-*/1;
-			Player.Sprite.Y -= /*-*/PLAYER_MOVE_FACTOR / 2;
 
 			//Wind Resistance
 			//if (Player.Sprite.Velocity.Y < 0)
@@ -656,7 +655,14 @@ public class DrawableWorld : IDrawableBatch
 			bool allowDown = true;
 			bool allowLeft = true;
 
-			Collision();
+			try
+			{
+				Collision();
+			}
+			catch (Exception ex)
+			{
+				throw;
+			}
 
 			void Collision() 
 			{
@@ -724,6 +730,69 @@ public class DrawableWorld : IDrawableBatch
 					allowUp = false;
 				}
 
+				//================================================
+				// LEFT collision
+				//================================================ww
+
+				// get the row directly below the sprite
+				left--;
+				// if bottom coord index safe
+				if (left >= 0 && left < STUFF_WIDTH)
+				{
+					// iterate across that row within the sprites x coords and check if downward movement should be arrested
+					for (var y = top; y > bottom; y--)
+					{
+						// if outside the world bound just continue to next in row
+						if (y < 0 || y >= STUFF_HEIGHT)
+						{
+							continue;
+						}
+
+						// if there is something here then stop
+						if (World[left][y] != null)
+						{
+							allowLeft = false;
+							break;
+						}
+					}
+				}
+				// if bottom coord index is not safe
+				else if (left < 0)
+				{
+					allowLeft = false;
+				}
+
+				//================================================
+				// LEFT collision
+				//================================================ww
+
+				// get the row directly below the sprite
+				right++;
+				// if bottom coord index safe
+				if (right >= 0 && right < STUFF_WIDTH)
+				{
+					// iterate across that row within the sprites x coords and check if downward movement should be arrested
+					for (var y = top; y > bottom; y--)
+					{
+						// if outside the world bound just continue to next in row
+						if (y < 0 || y >= STUFF_HEIGHT)
+						{
+							continue;
+						}
+
+						// if there is something here then stop
+						if (World[right][y] != null)
+						{
+							allowRight = false;
+							break;
+						}
+					}
+				}
+				// if bottom coord index is not safe
+				else if (right >= STUFF_WIDTH)
+				{
+					allowRight = false;
+				}
 			}
 
 			//move upwards
@@ -741,9 +810,17 @@ public class DrawableWorld : IDrawableBatch
 				Player.Sprite.X -= PLAYER_MOVE_FACTOR;
 			}
 			// move down
-			if (allowDown && InputManager.Keyboard.KeyDown(Keys.S))
+			if (allowDown)
 			{
-				Player.Sprite.Y -= PLAYER_MOVE_FACTOR;
+
+				//gravity
+				Player.Sprite.Y -= /*-*/PLAYER_MOVE_FACTOR / 2;
+				if (InputManager.Keyboard.KeyDown(Keys.S))
+				{
+					Player.Sprite.Y -= PLAYER_MOVE_FACTOR;
+				}
+
+				
 			}
 			// move right
 			if (allowRight && InputManager.Keyboard.KeyDown(Keys.D))
