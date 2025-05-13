@@ -8,9 +8,9 @@ public class Constants
 	/// <summary>A Stuff element is this many pixels per side.</summary>
 	public const int STUFF_SCALE = 4;//5;
 	/// <summary>Window resolution x</summary>
-	public const int RESOLUTION_X = 2000;//1500;
+	public const int RESOLUTION_X = 500;//1500;
 	/// <summary>Window resolution y</summary>
-	public const int RESOLUTION_Y = 1000;//800;
+	public const int RESOLUTION_Y = 500;//800;
 	/// <summary>The number of X-axis elements</summary>
 	public const int STUFF_WIDTH = RESOLUTION_X / STUFF_SCALE;
 	/// <summary>The number of Y-axis elements</summary>
@@ -30,7 +30,7 @@ public class Constants
 	/// <summary>Controls whether logging goes to file</summary>]
 	public const bool LOG_TO_FILE = true;
 	/// <summary>Controls whether logging goes to console window (still goes to visual studio output)</summary>]
-	public const bool LOG_TO_CONSOLE = false;
+	public const bool LOG_TO_CONSOLE = true;
 
 	//---------------------------------------------------
 	//	DEBUG											|

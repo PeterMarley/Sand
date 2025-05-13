@@ -34,6 +34,7 @@
   <ItemGroup>
     <Compile Include="Data\Constants.cs" />
     <Compile Include="Extensions\ArrayExtensions.cs" />
+    <Compile Include="Extensions\NumberExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Models\World\DrawableWorld.cs" />
     <Compile Include="Models\World\WorldFactory.cs" />

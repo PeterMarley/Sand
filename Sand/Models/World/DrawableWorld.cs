@@ -1,10 +1,16 @@
 ﻿using FlatRedBall;
+using FlatRedBall.Content.Math.Splines;
 using FlatRedBall.Graphics;
+using FlatRedBall.Input;
+using FlatRedBall.Math.Geometry;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Sand.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using static FlatRedBall.Input.Mouse;
 using static Sand.Constants;
 using Point = System.Drawing.Point;
 
@@ -19,7 +25,11 @@ public class DrawableWorld : IDrawableBatch
 	/// <br/><em>[0, yMax]</em> represents top left.
 	/// <br/><em>[xMax, yMax]</em> represents top right.
 	/// </summary>
+	public Player Player { get; private set; }
+	//public Layer LayerPlayer { get; init; }
 	public Stuff[][] World { get; private set; }
+	//public Layer LayerWorld { get; init; }
+
 	public float X { get; set; }
 	public float Y { get; set; }
 	public float Z { get; init; } = 0;
@@ -31,7 +41,17 @@ public class DrawableWorld : IDrawableBatch
 		for (int x = 0; x < World.Length; x++)
 		{
 			World[x] = new Stuff[STUFF_HEIGHT];
-		};
+			//for (int y = 0; y < World[x].Length; y++)
+			//{
+			//	if (x == 0 || x == World.Length // if at far left or right
+			//	|| y == 0 || y == World[x].Length) // if at far top or bottom
+			//	{
+			//		World[x][y] = StuffFactory.Instance.Get(Stuffs.BASIC_STONE);
+			//	}
+			//}
+		}
+
+		Player = new Player();
 	}
 
 
@@ -46,6 +66,28 @@ public class DrawableWorld : IDrawableBatch
 			{
 				SafeAddStuffIfEmpty(stuffType, i, j);
 			}
+		}
+	}
+
+	public void ForceAddStuff_InSquare(string stuffType, int x, int y, int length)
+	{
+		for (int i = x - length; i < x + length; i++)
+		{
+			for (int j = y - length; j < y + length; j++)
+			{
+				ForceAddStuff(stuffType, i, j);
+			}
+		}
+	}
+
+	public void ForceAddStuff(string stuffType, int x, int y)
+	{
+		if (x >= 0 && x < World.Length && y >= 0 && y < World[0].Length)
+		{
+			var stuff = StuffFactory.Instance.Get(stuffType);
+			World[x][y] = stuff;//.SetPosition(x, y);
+								//stuff.X = x;
+								//stuff.Y = y;
 		}
 	}
 
@@ -526,6 +568,7 @@ public class DrawableWorld : IDrawableBatch
 				WorldSprite.Height = RESOLUTION_Y * 2;
 				WorldSprite.X += RESOLUTION_X / 2;
 				WorldSprite.Y += RESOLUTION_Y / 2;
+				WorldSprite.Z = 0;
 
 				Camera.Main.Orthogonal = true;
 				Camera.Main.OrthogonalWidth = WorldSprite.Width;
@@ -549,6 +592,307 @@ public class DrawableWorld : IDrawableBatch
 	public void Destroy()
 	{
 		throw new NotImplementedException();
+	}
+
+
+	private const int PLAYER_MOVE_FACTOR = 10;
+	public void ProcessControlsInput()
+	{
+		AffectWorld();
+		AffectPlayer();
+
+		void AffectWorld()
+		{
+			if (InputManager.Mouse.IsInGameWindow())
+			{
+				var x = InputManager.Mouse.X / STUFF_SCALE;
+				var y = (FlatRedBallServices.GraphicsDevice.Viewport.Height - InputManager.Mouse.Y) / STUFF_SCALE;
+
+				if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)))
+				{
+					SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 10);
+					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
+
+				}
+
+				if ((InputManager.Mouse.ButtonPushed(MouseButtons.RightButton) || InputManager.Mouse.ButtonDown(MouseButtons.RightButton)))
+				{
+					SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 10);
+					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
+				}
+
+				if ((InputManager.Mouse.ButtonPushed(MouseButtons.MiddleButton) || InputManager.Mouse.ButtonDown(MouseButtons.MiddleButton)))
+				{
+					ForceAddStuff_InSquare(Stuffs.BASIC_STONE, x, y, 10);
+					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
+				}
+			}
+		}
+
+		void AffectPlayer()
+		{
+
+			////Gravity;
+			//Player.Sprite.Acceleration.Y -= /*-*/10;
+			////Wind Resistance
+			//if (Player.Sprite.Acceleration.Y < 0)
+			//{
+			//	Player.Sprite.Acceleration.Y += 3;
+			//}
+			
+
+			if (InputManager.Keyboard.KeyDown(Keys.W))
+			{
+				Player.Sprite.Y += PLAYER_MOVE_FACTOR;
+
+				//Player.Sprite.Acceleration.Y += PLAYER_MOVE_FACTOR;
+				//Player.Sprite.Position.Y += 10;
+
+				//if (Player.Sprite.Velocity.Y < 0)
+				//{
+				//	Player.Sprite.Velocity.Y = 0;
+				//}
+				
+			}
+
+			//Player.Sprite.Acceleration.Y -= PLAYER_MOVE_FACTOR / 4;//gravity;
+
+			if (InputManager.Keyboard.KeyDown(Keys.A))
+			{
+				Player.Sprite.X -= PLAYER_MOVE_FACTOR;
+			}
+
+			if (InputManager.Keyboard.KeyDown(Keys.S))
+			{
+				Player.Sprite.Y -= PLAYER_MOVE_FACTOR;
+			}
+
+			if (InputManager.Keyboard.KeyDown(Keys.D))
+			{
+				Player.Sprite.X += PLAYER_MOVE_FACTOR;
+			}
+
+			// stuff at bottom left of player
+			if (InputManager.Keyboard.KeyDown(Keys.E))
+			{
+				
+			}
+
+			if (InputManager.Keyboard.KeyDown(Keys.Insert))
+			{
+				Player.Sprite.Top = RESOLUTION_Y;
+				Player.Sprite.Left = 0;
+			}
+
+			if (InputManager.Keyboard.KeyDown(Keys.Home))
+			{
+				Player.Sprite.Top = RESOLUTION_Y;
+				Player.Sprite.Right = RESOLUTION_X;
+			}
+
+			if (InputManager.Keyboard.KeyDown(Keys.End))
+			{
+				Player.Sprite.Bottom = 0;
+				Player.Sprite.Right = RESOLUTION_X;
+			}
+
+			if (InputManager.Keyboard.KeyDown(Keys.Delete))
+			{
+				Player.Sprite.Left = 0;
+				Player.Sprite.Bottom = 0;
+			}
+
+			int i = 0;
+			int y1 = 0;
+
+			//int spriteX;// = (int)((Player.Sprite.Left + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
+			//int spriteY;// = (int)((Player.Sprite.Right + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
+			int spriteGridLeft;// = (int)((Player.Sprite.Left + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
+			int spriteGridRight;// = (int)((Player.Sprite.Right + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
+			int spriteGridTop;// = (int)((Player.Sprite.Top + 1000) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
+			int spriteGridBottom;// = (int)((Player.Sprite.Bottom + 1000) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
+			try
+			{
+
+				if (InputManager.Keyboard.KeyPushed(Keys.Q))
+				{
+					Logger.Instance.LogInfo($"NORMAL X={((int)Player.Sprite.X):D4} Y={((int)Player.Sprite.Y):D4} L={((int)Player.Sprite.Left):D4} R={((int)Player.Sprite.Right):D4} T={((int)Player.Sprite.Top):D4} B={((int)Player.Sprite.Bottom):D4}");
+					//var spriteGridLeft = (int)((Player.Sprite.X / STUFF_SCALE));// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
+					//var spriteGridRight = (int)((Player.Sprite.X / STUFF_SCALE));// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
+					//var spriteGridTop = (int)((Player.Sprite.Y / STUFF_SCALE));// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
+					//var spriteGridBottom = (int)((Player.Sprite.Y / STUFF_SCALE));// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
+					//var offsetX = Player.Sprite.Width / 2;
+					//var offsetY = Player.Sprite.Height / 2;
+					//var spriteX = (int)((Player.Sprite.X + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
+					//var spriteY = (int)((Player.Sprite.Y + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
+
+					////spriteGridLeft = (int)((Player.Sprite.Left + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
+					////spriteGridRight = (int)((Player.Sprite.Right + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
+					////spriteGridTop = (int)((Player.Sprite.Top + 1000) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
+					////spriteGridBottom = (int)((Player.Sprite.Bottom + 1000) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
+					////Logger.Instance.LogInfo($"CALCD 1 X={spriteX:D4} Y={spriteY:D4}  L={spriteGridLeft:D4} R={spriteGridRight:D4} T={spriteGridTop:D4} B={spriteGridBottom:D4}");
+
+					//var x = Player.Sprite.X;
+					//var y = Player.Sprite.Y;
+
+					//spriteGridLeft = (int)((x - offsetX + (RESOLUTION_X / 2)) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
+					//spriteGridRight = (int)((x + offsetX + (RESOLUTION_X / 2)) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
+					//spriteGridTop = (int)((y + offsetY + (RESOLUTION_Y / 2)) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
+					//spriteGridBottom = (int)((y - offsetY + (RESOLUTION_Y / 2)) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
+
+					var (top, right, bottom, left) = NumberExtensions.ToStuffCoord(Player.Sprite);
+
+
+					spriteGridLeft = left;
+					spriteGridRight = right;
+					spriteGridTop = top;
+					spriteGridBottom = bottom;
+
+					//Logger.Instance.LogInfo($"CALCD 2 X={spriteX:D4} Y={spriteY:D4}  L={spriteGridLeft:D4} R={spriteGridRight:D4} T={spriteGridTop:D4} B={spriteGridBottom:D4}\n");
+
+					var abs = Math.Abs(spriteGridLeft);
+
+
+					var adj = (abs <= 10 ? "   " : (abs <= 100 ? "  " : (abs <= 1000 ? " " : "")));
+
+
+
+					//var xyz =
+					//   $"\n ----{spriteGridTop}---- \n" +
+					//	"|            |\n" +
+					//	"|            |\n" +
+					//   $"{spriteGridLeft}         {adj}|     HEIGHT=[{Player.Sprite.Height}]\n" +
+					//   $"|            {spriteGridRight}\n" +
+					//	"|            |\n" +
+					//	"|            |\n" +
+					//   $" ----{spriteGridBottom}----\n\n " +
+					//   $"WIDTH=[{Player.Sprite.Width}]";
+
+					var xyz =
+					   $"\n ----{spriteGridTop / STUFF_SCALE}---- \n" +
+						"|            |\n" +
+						"|            |\n" +
+					   $"{spriteGridLeft / STUFF_SCALE}         {adj}|     HEIGHT=[{Player.Sprite.Height}]\n" +
+					   $"|            {spriteGridRight / STUFF_SCALE}\n" +
+						"|            |\n" +
+						"|            |\n" +
+					   $" ----{spriteGridBottom / STUFF_SCALE}----\n\n " +
+					   $"WIDTH=[{Player.Sprite.Width}]";
+
+					Logger.Instance.LogInfo(xyz);
+
+					//var c = 0;
+					//for (i = spriteGridLeft; i <= spriteGridRight; i++, c++)
+					//{
+					//	if (i < 0 || i >= World.Length)
+					//	{
+					//		continue;
+					//	}
+
+					//	//sideBuffer[i] = new(x, spriteGridTop);
+					//	Point p /*sideBuffer[i]*/ = new(i, spriteGridBottom);
+					//	var stuff = World.Get(p);
+					//	if (stuff == null)
+					//	{
+					//		// if empty, fugheddaboudit
+					//		continue;
+					//	}
+					//	else
+					//	{
+					//		if (stuff is { Phase: Phase.Solid })
+					//		{
+					//			Player.Sprite.Velocity.Y = 0;
+					//			break;
+					//		}
+					//	}
+
+					//}
+				}
+				//	//========================================================
+				//	// build up a collection of points surrounding the sprite
+				//	//========================================================
+
+				//	//** left and rights => for every y between bottom and top, take the left most and right most x
+
+				//	// TODO
+
+				//	//** top and bottoms => for every x between left and right, take the top and bottom most y
+
+				//	//var spriteGridLeft = (int)(Player.Sprite.Left / STUFF_SCALE);// + (RESOLUTION_X / 2);
+				//	//var spriteGridRight = (int)(Player.Sprite.Right / STUFF_SCALE);// + (RESOLUTION_X / 2);
+				//	//var spriteGridTop = (int)(Player.Sprite.Top / STUFF_SCALE);// + (RESOLUTION_Y / 2);
+				//	//var spriteGridBottom = (int)(Player.Sprite.Bottom / STUFF_SCALE);// + (RESOLUTION_Y / 2);
+
+				//	var spriteGridLeft = (int)((Player.Sprite.X / STUFF_SCALE));// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
+				//	var spriteGridRight = (int)((Player.Sprite.X / STUFF_SCALE));// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
+				//	var spriteGridTop = (int)((Player.Sprite.Y / STUFF_SCALE));// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
+				//	var spriteGridBottom = (int)((Player.Sprite.Y / STUFF_SCALE));// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
+
+				//	y1 = spriteGridBottom;
+				//	// hold a collection of points representing the points at which the sprite is overlaying the DrawableWorld
+				//	//Point[] sideBuffer = new Point[spriteGridRight - spriteGridLeft];
+
+
+
+
+				//	//if (Player.Sprite.Velocity.Y < 0)
+				//	//{
+				
+
+				//		//foreach (var bottomPoint in sideBuffer)
+				//		//{
+				//		//	var stuff = World.Get(bottomPoint);
+				//		//	if (stuff == null)
+				//		//	{
+				//		//		// if empty, fugheddaboudit
+				//		//		continue;
+				//		//	}
+				//		//	else
+				//		//	{
+				//		//		if (stuff is { Phase: Phase.Solid })
+				//		//		{
+				//		//			Player.Sprite.Velocity.Y = 0;
+				//		//		}
+				//		//	}
+				//		//}
+				//	//}
+
+			}
+			catch (Exception ex)
+			{
+				throw;
+			}
+
+		//for (var x = 0; x < World.Length; x++)
+		//{
+		//	for (var y = 0; y < World[x].Length; y++)
+		//	{
+
+		//		if (Player.Sprite.Velocity.Y < 0)
+		//		{
+		//			if (Player.Sprite.Bottom)
+		//		}
+
+		//		//if (Player.Sprite.Velocity.Y < 0)
+		//		//{
+		//		//	// goin down
+		//		//}
+		//		//else
+		//		//{
+		//		//	// going up
+		//		//}
+
+		//		//if (Player.Sprite.Velocity.X < 0)
+		//		//{
+		//		//	// goin left
+		//		//}
+		//		//else
+		//		//{
+		//		//	// going right
+		//		//}
+		//	}
+		//}
+	}
 	}
 
 	#endregion

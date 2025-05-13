@@ -60,11 +60,28 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 #if DEBUG
 
+		var configPrintStr =
+			$"\n=============================================================\n" +
+			$"\tCONFIG VALUES\n" +
+			$"===============================================================\n" +
+			$"\tSTUFF_SCALE={STUFF_SCALE}\n" +
+			$"\tRESOLUTION_X={RESOLUTION_X}\n" +
+			$"\tRESOLUTION_Y={RESOLUTION_Y}\n" +
+			$"\tSTUFF_WIDTH={STUFF_WIDTH}\n" +
+			$"\tSTUFF_HEIGHT={STUFF_HEIGHT}\n\n" +
+			$"\tPRINT_STUFF_WORLD={PRINT_STUFF_WORLD}\n" +
+			$"\tPRINT_STUFF_WORLD_FRAMES={PRINT_STUFF_WORLD_FRAMES}\n\n" +
+			$"\tLOG_TO_CONSOLE={LOG_TO_CONSOLE}\n" +
+			$"\tLOG_TO_FILE={LOG_TO_FILE}\n\n" +
+			$"\tSHOW_STUFF_DORMANCY_COLORS=={SHOW_STUFF_DORMANCY_COLORS}\n" +
+			$"===============================================================\n";
+		Logger.Instance.LogInfo(configPrintStr);
+
 		//============================================================================
 		// SETs to comfy dev left screen
 		//============================================================================
 		var pos = Window.Position;
-		//pos.X -= 2500;
+		pos.X -= 2500;
 		//pos.Y -= 250;
 		Window.Position = pos;
 		//============================================================================
@@ -84,7 +101,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 
 		_tLoadMaterials = Task.Run(StuffFactory.Instance.LoadMaterialsAsync);
-		
+
 		base.Initialize();
 	}
 
@@ -110,8 +127,9 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 			//_world = StuffWorldFactory.WaterBottom3Y();
 			//_world = StuffWorldFactory.WaterBottomHalf();
 			//_world = WorldFactory.SandAlmostEverywhere();
-			_world = WorldFactory.GetDevStuffWorld_002();
+			//_world = WorldFactory.GetDevStuffWorld_002();
 			//_world = WorldFactory.WaterBottomHalf();
+			_world = WorldFactory.StoneAroundEdges();
 
 			SpriteManager.AddDrawableBatch(_world);
 			didPrep = true;
@@ -121,35 +139,14 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 		Randoms.Instance.Refresh();
 
-		if (InputManager.Mouse.IsInGameWindow())
-		{
-			var x = InputManager.Mouse.X / STUFF_SCALE;
-			var y = (FlatRedBallServices.GraphicsDevice.Viewport.Height - InputManager.Mouse.Y) / STUFF_SCALE;
-
-			if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)))
-			{
-				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 10);
-				//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
-
-			}
-
-			if ((InputManager.Mouse.ButtonPushed(MouseButtons.RightButton) || InputManager.Mouse.ButtonDown(MouseButtons.RightButton)))
-			{
-				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 10);
-				//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
-			}
-
-			if ((InputManager.Mouse.ButtonPushed(MouseButtons.MiddleButton) || InputManager.Mouse.ButtonDown(MouseButtons.MiddleButton)))
-			{
-				_world.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_STONE, x, y, 10);
-				//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
-			}
-		}
 
 		if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE == 0)
 		{
 			_world.Update();
 		}
+
+		_world.ProcessControlsInput();
+
 
 		base.Update(gameTime);
 	}
@@ -170,4 +167,6 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 		base.Draw(gameTime);
 	}
+
+
 }

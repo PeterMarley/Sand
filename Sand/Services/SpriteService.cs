@@ -49,35 +49,34 @@ public class SpriteService
 		_sandTextures = [_sand01, _sand02, _sand03, _sand04, _sand05, _sand06, _sand07];
 	}
 
-	#region Sprite Gets
+	//#region Sprite Gets
 
-	//======================================================================
-	// Do not rename these are they are referred to by the Material YAMLs
-	// and invoked by reflection targeting the method names
-	//======================================================================
+	////======================================================================
+	//// Do not rename these are they are referred to by the Material YAMLs
+	//// and invoked by reflection targeting the method names
+	////======================================================================
 
-	public Sprite GetRandomDebugSprite()
-	{
-		var t = _textureArray[_NextColourIndex()];
-		var sprite = SpriteManager.AddSprite(t);
-		sprite.TextureScale = Constants.STUFF_SCALE;
-		return sprite;
-	}
+	//public Sprite GetRandomDebugSprite()
+	//{
+	//	var t = _textureArray[_NextColourIndex()];
+	//	var sprite = SpriteManager.AddSprite(t);
+	//	sprite.TextureScale = Constants.STUFF_SCALE;
+	//	return sprite;
+	//}
 
-	public Sprite GetRandomSandStuffSprite()
-	{
-		//var sprite = SpriteManager.AddSprite(RandomTextureFrom(_sandTextures));
-		var sprite = SpriteManager.AddManualSprite(RandomTextureFrom(_sandTextures)); //TODO should this really be getting done here rather than constructor?
-		sprite.TextureScale = Constants.STUFF_SCALE;
-		return sprite;
-	}
+	//public Sprite GetRandomSandStuffSprite()
+	//{
+	//	var sprite = SpriteManager.AddManualSprite(RandomTextureFrom(_sandTextures));
+	//	sprite.TextureScale = Constants.STUFF_SCALE;
+	//	return sprite;
+	//}
 
-	public Sprite GetWaterStuffSprite()
-	{
-		var sprite = SpriteManager.AddSprite(_water);
-		sprite.TextureScale = Constants.STUFF_SCALE;
-		return sprite;
-	}
+	//public Sprite GetWaterStuffSprite()
+	//{
+	//	var sprite = SpriteManager.AddSprite(_water);
+	//	sprite.TextureScale = Constants.STUFF_SCALE;
+	//	return sprite;
+	//}
 
-	#endregion
+	//#endregion
 }
