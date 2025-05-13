@@ -1,6 +1,7 @@
 ﻿using FlatRedBall;
 using FlatRedBall.Content.Math.Splines;
 using FlatRedBall.Graphics;
+using FlatRedBall.Graphics.Animation;
 using FlatRedBall.Input;
 using FlatRedBall.Math.Geometry;
 using Microsoft.Xna.Framework;
@@ -596,10 +597,12 @@ public class DrawableWorld : IDrawableBatch
 
 
 	private const int PLAYER_MOVE_FACTOR = 10;
+	private const int GRAV_MAGNITUDE = 1;
 	public void ProcessControlsInput()
 	{
 		AffectWorld();
 		AffectPlayer();
+		Player.Turn();
 
 		void AffectWorld()
 		{
@@ -649,12 +652,13 @@ public class DrawableWorld : IDrawableBatch
 			//}
 
 			var (top, right, bottom, left) = NumberExtensions.ToStuffCoord(Player.Sprite);
-
+			var gravMagnitude = GRAV_MAGNITUDE;
+			var moveFactor = PLAYER_MOVE_FACTOR;
 			bool allowUp = true;
 			bool allowRight = true;
 			bool allowDown = true;
 			bool allowLeft = true;
-
+			bool inLiquid = false;
 			try
 			{
 				Collision();
@@ -669,7 +673,7 @@ public class DrawableWorld : IDrawableBatch
 				//================================================
 				// bottom collision
 				//================================================
-
+				#region
 				// get the row directly below the sprite
 				bottom--;
 				// if bottom coord index safe
@@ -687,8 +691,16 @@ public class DrawableWorld : IDrawableBatch
 						// if there is something here then stop
 						if (World[x][bottom] != null)
 						{
-							allowDown = false;
-							break;
+							if (World[x][bottom].Phase == Phase.Liquid)
+							{
+								inLiquid = true;
+								moveFactor = PLAYER_MOVE_FACTOR / 2;
+							}
+							else
+							{ 
+								allowDown = false;
+								break;
+							}
 						}
 					}
 				}
@@ -697,11 +709,11 @@ public class DrawableWorld : IDrawableBatch
 				{
 					allowDown = false;
 				}
-
+				#endregion
 				//================================================
 				// TOP collision
 				//================================================ww
-
+				#region
 				// get the row directly below the sprite
 				top++;
 				// if bottom coord index safe
@@ -719,8 +731,17 @@ public class DrawableWorld : IDrawableBatch
 						// if there is something here then stop
 						if (World[x][top] != null)
 						{
-							allowUp = false;
-							break;
+							if (World[x][top].Phase == Phase.Liquid)
+							{
+								inLiquid = true;
+								moveFactor = PLAYER_MOVE_FACTOR / 2;
+							}
+							else
+							{
+								allowUp = false;
+								break;
+							}
+							
 						}
 					}
 				}
@@ -729,11 +750,11 @@ public class DrawableWorld : IDrawableBatch
 				{
 					allowUp = false;
 				}
-
+				#endregion
 				//================================================
 				// LEFT collision
 				//================================================ww
-
+				#region
 				// get the row directly below the sprite
 				left--;
 				// if bottom coord index safe
@@ -751,8 +772,16 @@ public class DrawableWorld : IDrawableBatch
 						// if there is something here then stop
 						if (World[left][y] != null)
 						{
-							allowLeft = false;
-							break;
+							if (World[left][y].Phase == Phase.Liquid)
+							{
+								inLiquid = true;
+								moveFactor = PLAYER_MOVE_FACTOR / 2;
+							}
+							else
+							{
+								allowLeft = false;
+								break;
+							}
 						}
 					}
 				}
@@ -761,11 +790,11 @@ public class DrawableWorld : IDrawableBatch
 				{
 					allowLeft = false;
 				}
-
+				#endregion
 				//================================================
 				// LEFT collision
 				//================================================ww
-
+				#region
 				// get the row directly below the sprite
 				right++;
 				// if bottom coord index safe
@@ -783,8 +812,16 @@ public class DrawableWorld : IDrawableBatch
 						// if there is something here then stop
 						if (World[right][y] != null)
 						{
-							allowRight = false;
-							break;
+							if (World[right][y].Phase == Phase.Liquid)
+							{
+								inLiquid = true;
+								moveFactor = PLAYER_MOVE_FACTOR / 2;
+							}
+							else
+							{
+								allowRight = false;
+								break;
+							}
 						}
 					}
 				}
@@ -793,12 +830,13 @@ public class DrawableWorld : IDrawableBatch
 				{
 					allowRight = false;
 				}
+				#endregion
 			}
 
 			//move upwards
 			if (allowUp && InputManager.Keyboard.KeyDown(Keys.W))
 			{
-				Player.Sprite.Y += PLAYER_MOVE_FACTOR;
+				Player.Sprite.Y += moveFactor;
 
 				//Player.Sprite.Acceleration.Y += PLAYER_MOVE_FACTOR;
 				//Player.Sprite.Position.Y += 10;
@@ -807,17 +845,17 @@ public class DrawableWorld : IDrawableBatch
 			// move left
 			if (allowLeft && InputManager.Keyboard.KeyDown(Keys.A))
 			{
-				Player.Sprite.X -= PLAYER_MOVE_FACTOR;
+				Player.Sprite.X -= moveFactor;
 			}
 			// move down
 			if (allowDown)
 			{
 
 				//gravity
-				Player.Sprite.Y -= /*-*/PLAYER_MOVE_FACTOR / 2;
+				Player.Sprite.Y -= /*-*/moveFactor / 2;
 				if (InputManager.Keyboard.KeyDown(Keys.S))
 				{
-					Player.Sprite.Y -= PLAYER_MOVE_FACTOR;
+					Player.Sprite.Y -= moveFactor;
 				}
 
 				
@@ -825,7 +863,7 @@ public class DrawableWorld : IDrawableBatch
 			// move right
 			if (allowRight && InputManager.Keyboard.KeyDown(Keys.D))
 			{
-				Player.Sprite.X += PLAYER_MOVE_FACTOR;
+				Player.Sprite.X += moveFactor;
 			}
 			// move to top left
 			if (InputManager.Keyboard.KeyDown(Keys.Insert))

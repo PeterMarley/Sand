@@ -23,6 +23,7 @@
     <None Remove="Content\TextureImages\SandPixel_05_a6974b.png" />
     <None Remove="Content\TextureImages\SandPixel_06_91823e.png" />
     <None Remove="Content\TextureImages\SandPixel_07_7f7236.png" />
+    <None Remove="Content\TextureImages\satiro-Sheet v1.1.png" />
     <None Remove="Content\TextureImages\WaterPixel_01_2c4847.png" />
     <None Remove="Content\TextureImages\WhitePixel.png" />
     <None Remove="Icon.ico" />
@@ -77,6 +78,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\TextureImages\SandPixel_07_7f7236.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\TextureImages\satiro-Sheet v1.1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\TextureImages\WaterPixel_01_2c4847.png">
