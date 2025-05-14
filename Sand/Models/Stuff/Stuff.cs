@@ -2,6 +2,7 @@
 using static Sand.Constants;
 using Microsoft.Xna.Framework;
 using Sand.Models.Stuff;
+using FlatRedBall;
 
 namespace Sand;
 
@@ -67,10 +68,31 @@ public class Stuff
 		}
 	}
 
+	private int ColorIndex = 0;
 	private Color _color;
 	public Color Color 
 	{
-		get => Dormant && SHOW_STUFF_DORMANCY_COLORS ? DormancyColor : _color;
+		get
+		{
+			switch (this.descriptor.ColorRotation)
+			{
+				case "OnCreate":
+				default:
+					return Dormant && SHOW_STUFF_DORMANCY_COLORS ? DormancyColor : _color;
+				case "OnDraw":
+					if (Dormant && SHOW_STUFF_DORMANCY_COLORS)
+					{
+						return DormancyColor;
+					}
+					ColorIndex++;
+					if (ColorIndex >= this.descriptor.Colors.Length)
+					{
+						ColorIndex = 0;
+					}
+					
+					return this.descriptor.Colors[ColorIndex];
+			}
+		}
 		private set => _color = value;
 	}
 

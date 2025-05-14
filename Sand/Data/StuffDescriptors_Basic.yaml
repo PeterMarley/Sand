@@ -36,9 +36,17 @@
 - Name: BasicLava
   Version: 1
   Phase: Liquid
-  Notes: Burning, Acrid, consuming. Destruction and creation.
+  Notes: Burning, Acrid, consuming. Destruction and creation.  Varying colors.
   ColorsSource:
   - [255, 109, 0, 255]     # Bright molten orange
   - [216, 67, 21, 255]     # Deep lava red-orange
   - [255, 171, 64, 255]    # Glowing amber
   - [255, 193, 7, 255]     # Bright lava yellow
+  ColorRotation: "OnDraw"
+
+- Name: BasicLava2
+  Version: 2
+  Phase: Liquid
+  Notes: Burning, Acrid, consuming. Destruction and creation. Single color.
+  ColorsSource:
+  - [255, 109, 0, 255]     # Bright molten orange

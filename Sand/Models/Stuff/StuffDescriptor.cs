@@ -25,6 +25,13 @@ public struct StuffDescriptor
 		//		Colors[i] = c;
 		//	}
 		//}
+
+		//for (int i = 0; i < ColorsSource.Count; i++)
+		//{	
+		//	var csRaw = ColorsSource[i];
+		//	ColorsSourceParsed = new Color(csRaw[0], csRaw[1], csRaw[2], csRaw[3]);
+		//}
+
 	}
 	public string Name { get; set; }
 	public int Version { get; set; }
@@ -32,5 +39,7 @@ public struct StuffDescriptor
 	public string SpriteSource { get; set; }
 	public Color[] Colors { get; set; } = [Color.Magenta];
 	public List<byte[]> ColorsSource = [];
+	//public List<byte[]> ColorsSourceParsed = [];
+	public string ColorRotation { get; set; } = "OnCreate";
 	public string Notes { get; set; }
 }

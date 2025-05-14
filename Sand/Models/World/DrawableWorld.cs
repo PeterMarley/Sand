@@ -630,6 +630,12 @@ public class DrawableWorld : IDrawableBatch
 					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
 				}
 
+				if ((InputManager.Mouse.ButtonPushed(MouseButtons.XButton1) || InputManager.Mouse.ButtonDown(MouseButtons.XButton1)))
+				{
+					ForceAddStuff_InSquare(Stuffs.BASIC_LAVA2, x, y, 2);
+					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
+				}
+
 				// place stuff at bottom left of player
 				if (InputManager.Keyboard.KeyDown(Keys.E))
 				{
