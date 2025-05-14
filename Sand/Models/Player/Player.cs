@@ -26,6 +26,7 @@ public class Player
 
 	private const int width = 100;
 	private const int height = 100;
+	private bool lookingRight = true;
 
 	public Player()
 	{
@@ -159,7 +160,7 @@ public class Player
 
 	public void Turn() 
 	{
-		if (InputManager.Keyboard.KeyDown(Microsoft.Xna.Framework.Input.Keys.A))
+		if (!lookingRight || InputManager.Keyboard.KeyDown(Microsoft.Xna.Framework.Input.Keys.A))
 		{
 			//Sprite.SetAnimationChain(_acIdleLeft01);
 
@@ -169,13 +170,14 @@ public class Player
 			}
 
 			Sprite.ScaleX = -Math.Abs(Sprite.ScaleX);
-			return;
+			lookingRight = false;
 		}
-		else if (InputManager.Keyboard.KeyDown(Microsoft.Xna.Framework.Input.Keys.D))
+		
+		if (lookingRight || InputManager.Keyboard.KeyDown(Microsoft.Xna.Framework.Input.Keys.D))
 		{
 			//Sprite.SetAnimationChain(_acIdleRight01);
 			Sprite.ScaleX = Math.Abs(Sprite.ScaleX);
-			return;
+			lookingRight = true;
 		}
 	}
 }

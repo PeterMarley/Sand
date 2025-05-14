@@ -596,7 +596,7 @@ public class DrawableWorld : IDrawableBatch
 	}
 
 
-	private const int PLAYER_MOVE_FACTOR = 10;
+	private const int PLAYER_MOVE_FACTOR = 15;
 	private const int GRAV_MAGNITUDE = 1;
 	public void ProcessControlsInput()
 	{
@@ -836,7 +836,7 @@ public class DrawableWorld : IDrawableBatch
 			//move upwards
 			if (allowUp && InputManager.Keyboard.KeyDown(Keys.W))
 			{
-				Player.Sprite.Y += moveFactor;
+				Player.Sprite.Y += (moveFactor * 2);
 
 				//Player.Sprite.Acceleration.Y += PLAYER_MOVE_FACTOR;
 				//Player.Sprite.Position.Y += 10;
@@ -852,7 +852,7 @@ public class DrawableWorld : IDrawableBatch
 			{
 
 				//gravity
-				Player.Sprite.Y -= /*-*/moveFactor / 2;
+				Player.Sprite.Y -= /*-*/moveFactor * .7f;
 				if (InputManager.Keyboard.KeyDown(Keys.S))
 				{
 					Player.Sprite.Y -= moveFactor;

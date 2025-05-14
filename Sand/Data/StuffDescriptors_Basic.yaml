@@ -32,4 +32,13 @@
   - [44, 44, 44,255] # 727272
   - [38, 38, 38,255] # 636363
 
- 
+ # Basic Stone
+- Name: BasicLava
+  Version: 1
+  Phase: Liquid
+  Notes: Burning, Acrid, consuming. Destruction and creation.
+  ColorsSource:
+  - [255, 109, 0, 255]     # Bright molten orange
+  - [216, 67, 21, 255]     # Deep lava red-orange
+  - [255, 171, 64, 255]    # Glowing amber
+  - [255, 193, 7, 255]     # Bright lava yellow
