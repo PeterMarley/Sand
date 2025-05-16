@@ -20,16 +20,14 @@ namespace Sand;
 
 public class DrawableWorld : IDrawableBatch
 {
-	/// <summary>
-	/// Outer array is X, inner array is Y.
-	/// <br/><em>[0, 0]</em> represents bottom left of viewport.
-	/// <br/><em>[0, yMax]</em> represents top left.
-	/// <br/><em>[xMax, yMax]</em> represents top right.
-	/// </summary>
-	public Player Player { get; private set; }
-	//public Layer LayerPlayer { get; init; }
+	
+	/// <summary>Outer array is X, inner array is Y.</summary>
 	public Stuff[][] World { get; private set; }
-	//public Layer LayerWorld { get; init; }
+	public List<List<Point>> WorldChunks { get; set; }
+	private Texture2D WorldTexture;
+	private Sprite WorldSprite;
+
+	public Player Player { get; private set; }
 
 	public float X { get; set; }
 	public float Y { get; set; }
@@ -38,27 +36,76 @@ public class DrawableWorld : IDrawableBatch
 
 	public DrawableWorld()
 	{
-		World = new Stuff[STUFF_WIDTH][];
-		for (int x = 0; x < World.Length; x++)
-		{
-			World[x] = new Stuff[STUFF_HEIGHT];
-			//for (int y = 0; y < World[x].Length; y++)
-			//{
-			//	if (x == 0 || x == World.Length // if at far left or right
-			//	|| y == 0 || y == World[x].Length) // if at far top or bottom
-			//	{
-			//		World[x][y] = StuffFactory.Instance.Get(Stuffs.BASIC_STONE);
-			//	}
-			//}
-		}
+		PrepareWorld();
+		PreparePlayer();
 
-		Player = new Player();
+
+		void PrepareWorld() 
+		{
+			//========================================
+			// PREPARE THE WORLD DATA STRUCTURE
+			//========================================
+
+			World = new Stuff[STUFF_WIDTH][];
+			for (int x = 0; x < World.Length; x++)
+			{
+				World[x] = new Stuff[STUFF_HEIGHT];
+			}
+
+			//========================================
+			// PREPARE THE SUBGRIDS FOR MULTITHREADING!
+			//				(OLDE GODS WONT YE SAVE US)
+			//========================================
+
+			WorldChunks = [];
+
+			const int chunkRows = 2;
+			const int chunkCols = 2;
+
+			int chunkWidth = STUFF_WIDTH / chunkRows;
+			int chunkHeight = STUFF_HEIGHT / chunkCols;
+
+			var cursor = new Point(0, 0);
+
+			// these outer two loops are the row and cols of chunks
+			for (int chunkRow = 0; chunkRow < chunkCols; chunkRow++)
+			{
+				for (int chunkCol = 0; chunkCol < chunkRows; chunkCol++)
+				{
+
+					// container for all points in a chunk
+					var chunkPoints = new List<Point>(chunkWidth * chunkHeight);
+
+					// inner loops are for the pixels in each chunk
+					for (int y = cursor.Y; y < cursor.Y + chunkHeight; y++)
+					{
+						for (int x = cursor.X; x < cursor.X + chunkWidth; x++)
+						{
+							chunkPoints.Add(new Point(x, y));
+						}
+					}
+					WorldChunks.Add(chunkPoints);
+
+					// move the cursor over one column to new chunk
+					cursor = new Point(cursor.X + chunkWidth, cursor.Y);
+				}
+
+				// move the cursor up one row to new chunk
+				cursor = new Point(cursor.X, cursor.Y + chunkHeight);
+			}
+		}
+		void PreparePlayer() 
+		{
+			Player = new Player();
+
+		}
 	}
 
 
 	#region Public API
 
 	#region Adding Stuff
+
 	public void SafeAddStuffIfEmpty_InSquare(string stuffType, int x, int y, int length)
 	{
 		for (int i = x - length; i < x + length; i++)
@@ -464,7 +511,6 @@ public class DrawableWorld : IDrawableBatch
 
 	#region Game Loop Methods called by SandGame
 
-	//private bool leftSide = true;
 	public void Update()
 	{
 		var p = new Point();
@@ -512,46 +558,20 @@ public class DrawableWorld : IDrawableBatch
 		}
 	}
 
-	public void Print()
-	{
-
-
-		//foreach (var i in World)
-		//{
-		//	foreach (var j in i)
-		//	{
-		//		_stringBuilder.Append($" {(j == null ? "--" : j.Id.ToString()[..2])} ");
-		//	}
-		//	_stringBuilder.AppendLine();
-		//}
-	}
-
-	private Texture2D WorldTexture;
-	private Sprite WorldSprite;
-
 	public void Draw(Camera camera)
 	{
 
 		try
 		{
+			// interate through the World and get the color data of all Stuffs there
 			var colorData = new Color[STUFF_HEIGHT * STUFF_WIDTH];
-
-			var cx = 0;
+			var colorIndex = 0;
 
 			for (var y = World[0].Length - 1; y >= 0; y--)
 			{
 				for (var x = 0; x < World.Length; x++)
 				{
-					// if nothing here then color this pixel black
-					if (World[x][y] == null)
-					{
-						colorData[cx++] = Color.Black;
-					}
-					// otherwise colour by the stuff there
-					else
-					{
-						colorData[cx++] = World[x][y].Color;
-					}
+					colorData[colorIndex++] = World[x][y] == null ? Color.Black : World[x][y].Color;
 				}
 			}
 
@@ -582,9 +602,9 @@ public class DrawableWorld : IDrawableBatch
 			}
 
 		}
-		catch (Exception applyGravEx)
+		catch (Exception drawWorldEx)
 		{
-			Logger.Instance.LogError(applyGravEx, "Draw");
+			Logger.Instance.LogError(drawWorldEx, $"Failed to process and apply the colour of each {nameof(Stuff)} to the {nameof(WorldTexture)}");
 			throw;
 		}
 	}
@@ -674,7 +694,7 @@ public class DrawableWorld : IDrawableBatch
 				throw;
 			}
 
-			void Collision() 
+			void Collision()
 			{
 				//================================================
 				// bottom collision
@@ -703,7 +723,7 @@ public class DrawableWorld : IDrawableBatch
 								moveFactor = PLAYER_MOVE_FACTOR / 2;
 							}
 							else
-							{ 
+							{
 								allowDown = false;
 								break;
 							}
@@ -747,7 +767,7 @@ public class DrawableWorld : IDrawableBatch
 								allowUp = false;
 								break;
 							}
-							
+
 						}
 					}
 				}
@@ -859,13 +879,19 @@ public class DrawableWorld : IDrawableBatch
 
 				//gravity
 				Player.Sprite.Y -= /*-*/moveFactor * .7f;
+				Player.Falling = true;
 				if (InputManager.Keyboard.KeyDown(Keys.S))
 				{
 					Player.Sprite.Y -= moveFactor;
 				}
 
-				
+
 			}
+			else 
+			{
+				Player.Falling = false;
+			}
+
 			// move right
 			if (allowRight && InputManager.Keyboard.KeyDown(Keys.D))
 			{
@@ -962,30 +988,6 @@ public class DrawableWorld : IDrawableBatch
 	}
 
 	#endregion
-
-	//#region StuffWorld preconfigured setups for dev testing
-	//public void PrepareWaterBottom3Y()
-	//{
-	//	for (int x = 0; x < _world.Length; x++)
-	//	{
-	//		for (int y = 0; y < 3 && y < _world[x].Length; y++)
-	//		{
-	//			SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
-	//		}
-	//	}
-	//}
-
-	//public void PrepareWaterBottomHalf()
-	//{
-	//	for (int x = 0; x < _world.Length; x++)
-	//	{
-	//		for (int y = 0; y < _world[x].Length / 2; y++)
-	//		{
-	//			SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
-	//		}
-	//	}
-	//}
-	//#endregion
 
 	#endregion
 

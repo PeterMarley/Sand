@@ -12,6 +12,8 @@ using static Sand.Constants;
 using FlatRedBall.Graphics.Animation;
 using AnimationFrame = FlatRedBall.Graphics.Animation.AnimationFrame;
 using FlatRedBall.Input;
+using System.Globalization;
+using FlatRedBall.Math.Geometry;
 
 namespace Sand;
 
@@ -27,15 +29,72 @@ public class Player
 	private const int width = 100;
 	private const int height = 100;
 	private bool lookingRight = true;
+	public bool Falling { get; set; }
+
+	private string AnimChainName_Walk = "Walk";
+	private string AnimChainName_Run = "Run";
+	private string AnimChainName_Stop = "Stop";
+	private string AnimChainName_Idle = "Idle";
+	private string AnimChainName_Fall = "Fall";
+	private string AnimChainName_Die = "Die";
+	private string AnimChainName_Damage = "Damage";
+	private string AnimChainName_Dash = "Dash";
 
 	public Player()
 	{
 	
-		//CreatePlayerTexture001_WeeSquareBoyo();
-		CreatePlayerTexture002_SpriteyMcSpriteSprite();
+		CreatePlayerTexture001_WeeSquareBoyo();
+		//CreatePlayerTexture002_SpriteyMcSpriteSprite();
+		CreatePlayerTexture003_SpritesLikeANormalPerson();
 
+		/// source: https://lucky-loops.itch.io/character-satyr
+		void CreatePlayerTexture003_SpritesLikeANormalPerson()
+		{
 
+			var tSpriteSheet = FlatRedBallServices.Load<Texture2D>("C:\\Dev\\FlatRedBall\\Sand\\Sand\\Content\\TextureImages\\satiro-Sheet v1.1.png");
+			var timeIdleDefault = 0.2f;
 
+			Sprite = SpriteManager.AddSprite(new AnimationChainList()
+			{
+				GetChain(0, 6, AnimChainName_Walk),
+				GetChain(1, 8, AnimChainName_Run),
+				GetChain(2, 4, AnimChainName_Stop),
+				GetChain(3, 6, AnimChainName_Idle),
+				GetChain(4, 6, AnimChainName_Fall),
+				GetChain(5, 10, AnimChainName_Die),
+				GetChain(6, 4, AnimChainName_Damage),
+				GetChain(7, 6, AnimChainName_Dash),
+			});
+			Sprite.X = RESOLUTION_X / 2;
+			Sprite.Y = RESOLUTION_Y / 2;
+			Sprite.Z = 1;
+			Sprite.TextureScale = 10;
+			Sprite.CurrentChainName = "Idle";
+
+			var circle = new Circle();
+			circle.Position = Sprite.Position;
+
+			
+			AnimationChain GetChain(int row, int count, string name)
+			{
+
+				var chain = new AnimationChain();
+				for (var i = 0; i < count; i++)
+				{
+					const int wide = 32;
+					const int high = 32;
+					var frameDataRight = new Color[wide * high];
+					tSpriteSheet.GetData<Color>(0, new Rectangle(wide * i, row * high, wide, high), frameDataRight, 0, wide * high);
+					var tRight = new Texture2D(FlatRedBallServices.GraphicsDevice, wide, high);
+					tRight.SetData(frameDataRight);
+					var textureRight = tRight;
+					var frameDataLeft = new Color[frameDataRight.Length];
+					chain.Add(new AnimationFrame(textureRight, timeIdleDefault));
+				}
+				chain.Name = name;
+				return chain;
+			}
+		}
 		/// source: https://lucky-loops.itch.io/character-satyr
 		void CreatePlayerTexture002_SpriteyMcSpriteSprite() 
 		{
@@ -160,24 +219,53 @@ public class Player
 
 	public void Turn() 
 	{
-		if (!lookingRight || InputManager.Keyboard.KeyDown(Microsoft.Xna.Framework.Input.Keys.A))
-		{
-			//Sprite.SetAnimationChain(_acIdleLeft01);
 
-			if (Sprite.ScaleX > 0)
-			{ 
-			
+		try
+		{
+			var pressingA = InputManager.Keyboard.KeyDown(Microsoft.Xna.Framework.Input.Keys.A);
+			var pressingD = InputManager.Keyboard.KeyDown(Microsoft.Xna.Framework.Input.Keys.D);
+
+			if (pressingA)
+			{
+				lookingRight = false;
+				Sprite.CurrentChainName = AnimChainName_Walk;
 			}
 
-			Sprite.ScaleX = -Math.Abs(Sprite.ScaleX);
-			lookingRight = false;
+			if (pressingD)
+			{
+				lookingRight = true;
+				Sprite.CurrentChainName = AnimChainName_Walk;
+			}
+
+			if (!pressingA && !pressingD)
+			{
+				if (Falling)
+				{
+					Sprite.CurrentChainName = AnimChainName_Fall;
+				}
+				else
+				{
+					Sprite.CurrentChainName = AnimChainName_Idle;
+				}
+			}
+
+
+			if (lookingRight)
+			{
+				Sprite.ScaleX = Math.Abs(Sprite.ScaleX);
+				lookingRight = true;
+			}
+			else
+			{
+				Sprite.ScaleX = -Math.Abs(Sprite.ScaleX);
+				lookingRight = false;
+			}
 		}
-		
-		if (lookingRight || InputManager.Keyboard.KeyDown(Microsoft.Xna.Framework.Input.Keys.D))
+		catch (Exception ex)
 		{
-			//Sprite.SetAnimationChain(_acIdleRight01);
-			Sprite.ScaleX = Math.Abs(Sprite.ScaleX);
-			lookingRight = true;
+
+			throw;
 		}
+
 	}
 }

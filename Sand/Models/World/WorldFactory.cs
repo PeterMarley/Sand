@@ -106,5 +106,22 @@ public static class WorldFactory
 
 		return world;
 	}
+	public static DrawableWorld WaterSloshingInAllAbout()
+	{
+		var world = new DrawableWorld();
 
+		var i = 0;
+		for (int x = 0; x < world.World.Length; x++)
+		{
+			for (int y = 0; y < world.World[x].Length; y++)
+			{
+				if (y > 4)
+				{
+					world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
+				}
+				i++;
+			}
+		}
+		return world;
+	}
 }
