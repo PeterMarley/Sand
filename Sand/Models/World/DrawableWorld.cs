@@ -73,18 +73,19 @@ public class DrawableWorld : IDrawableBatch
 
 			WorldChunks = [];
 
-			const int chunkRows = 2;
-			const int chunkCols = 2;
+			const int chunksLong = 10;
+			/*const int chunkRows = 10;
+			const int chunkCols = 10;*/
 
-			int chunkWidth = STUFF_WIDTH / chunkRows;
-			int chunkHeight = STUFF_HEIGHT / chunkCols;
+			int chunkWidth = STUFF_WIDTH / chunksLong/*chunkRows*/;
+			int chunkHeight = STUFF_HEIGHT / chunksLong/*chunkCols*/;
 
 			var cursor = new Point(0, 0);
 
 			// these outer two loops are the row and cols of chunks
-			for (int chunkRow = 0; chunkRow < chunkRows; chunkRow++)
+			for (int chunkRow = 0; chunkRow < chunksLong/*chunkCols*/; chunkRow++)
 			{
-				for (int chunkCol = 0; chunkCol < chunkCols; chunkCol++)
+				for (int chunkCol = 0; chunkCol < chunksLong/*chunkRows*/; chunkCol++)
 				{
 
 					// container for all points in a chunk
@@ -124,7 +125,7 @@ public class DrawableWorld : IDrawableBatch
 
 					// IF NOT LAST column in row of chunks - move the cursor over one column to new chunk
 					// OTHERWISE set the col back to first for new row
-					cursor = new Point(chunkCol != chunkCols - 1 ? cursor.X + chunkWidth : 0, cursor.Y);
+					cursor = new Point(chunkCol != chunksLong/*chunkCols*/ - 1 ? cursor.X + chunkWidth : 0, cursor.Y);
 				}
 
 				// move the cursor up one row to new chunk - doesn't matter if new cursor falls off the
@@ -751,7 +752,7 @@ public class DrawableWorld : IDrawableBatch
 
 				if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)))
 				{
-					SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 70);
+					SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 15);
 					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
 
 				}
@@ -777,7 +778,7 @@ public class DrawableWorld : IDrawableBatch
 				// place stuff at bottom left of player
 				if (InputManager.Keyboard.KeyDown(Keys.E))
 				{
-					var (top, right, bottom, left) = NumberExtensions.ToStuffCoord(Player.Sprite);
+					var (top, right, bottom, left) = Player.GetPositionStuff(); /*NumberExtensions.ToStuffCoord(Player.Sprite);*/
 					ForceAddStuff_InSquare(Stuffs.BASIC_STONE, left, bottom, 2);
 				}
 			}
@@ -795,7 +796,7 @@ public class DrawableWorld : IDrawableBatch
 			//	Player.Sprite.Velocity.Y += 3;
 			//}
 
-			var (top, right, bottom, left) = NumberExtensions.ToStuffCoord(Player.Sprite);
+			var (top, right, bottom, left) = Player.GetPositionStuff();/* NumberExtensions.ToStuffCoord(Player.Sprite);*/
 			var gravMagnitude = GRAV_MAGNITUDE;
 			var moveFactor = PLAYER_MOVE_FACTOR;
 			bool allowUp = true;
@@ -803,6 +804,7 @@ public class DrawableWorld : IDrawableBatch
 			bool allowDown = true;
 			bool allowLeft = true;
 			bool inLiquid = false;
+
 			try
 			{
 				Collision();
@@ -845,6 +847,7 @@ public class DrawableWorld : IDrawableBatch
 								allowDown = false;
 								break;
 							}
+							Logger.Instance.LogInfo($"Encountering {World[x][bottom].Phase} at bottom - move factor is {moveFactor}");
 						}
 					}
 				}
@@ -885,7 +888,7 @@ public class DrawableWorld : IDrawableBatch
 								allowUp = false;
 								break;
 							}
-
+							Logger.Instance.LogInfo($"Encountering {World[x][top].Phase} at top - move factor is {moveFactor}");
 						}
 					}
 				}
@@ -905,7 +908,7 @@ public class DrawableWorld : IDrawableBatch
 				if (left >= 0 && left < STUFF_WIDTH)
 				{
 					// iterate across that row within the sprites x coords and check if downward movement should be arrested
-					for (var y = top; y > bottom; y--)
+					for (var y = top - 1; y > bottom + 1; y--)
 					{
 						// if outside the world bound just continue to next in row
 						if (y < 0 || y >= STUFF_HEIGHT)
@@ -926,6 +929,7 @@ public class DrawableWorld : IDrawableBatch
 								allowLeft = false;
 								break;
 							}
+							Logger.Instance.LogInfo($"Encountering {World[left][y].Phase} at left - move factor is {moveFactor}");
 						}
 					}
 				}
@@ -936,7 +940,7 @@ public class DrawableWorld : IDrawableBatch
 				}
 				#endregion
 				//================================================
-				// LEFT collision
+				// RIGHT collision
 				//================================================ww
 				#region
 				// get the row directly below the sprite
@@ -945,7 +949,7 @@ public class DrawableWorld : IDrawableBatch
 				if (right >= 0 && right < STUFF_WIDTH)
 				{
 					// iterate across that row within the sprites x coords and check if downward movement should be arrested
-					for (var y = top; y > bottom; y--)
+					for (var y = top - 1; y > bottom + 1; y--)
 					{
 						// if outside the world bound just continue to next in row
 						if (y < 0 || y >= STUFF_HEIGHT)
@@ -966,6 +970,7 @@ public class DrawableWorld : IDrawableBatch
 								allowRight = false;
 								break;
 							}
+							Logger.Instance.LogInfo($"Encountering {World[right][y].Phase} at right - move factor is {moveFactor}");
 						}
 					}
 				}
@@ -980,7 +985,7 @@ public class DrawableWorld : IDrawableBatch
 			//move upwards
 			if (allowUp && InputManager.Keyboard.KeyDown(Keys.W))
 			{
-				Player.Sprite.Y += (moveFactor * 2);
+				Player/*.Sprite*/.Y += (moveFactor * 2);
 
 				//Player.Sprite.Acceleration.Y += PLAYER_MOVE_FACTOR;
 				//Player.Sprite.Position.Y += 10;
@@ -989,18 +994,18 @@ public class DrawableWorld : IDrawableBatch
 			// move left
 			if (allowLeft && InputManager.Keyboard.KeyDown(Keys.A))
 			{
-				Player.Sprite.X -= moveFactor;
+				Player/*.Sprite*/.X -= moveFactor;
 			}
 			// move down
 			if (allowDown)
 			{
 
 				//gravity
-				Player.Sprite.Y -= /*-*/moveFactor * .7f;
+				Player/*.Sprite*/.Y -= /*-*/moveFactor * .7f;
 				Player.Falling = true;
 				if (InputManager.Keyboard.KeyDown(Keys.S))
 				{
-					Player.Sprite.Y -= moveFactor;
+					Player/*.Sprite*/.Y -= moveFactor;
 				}
 
 
@@ -1013,31 +1018,31 @@ public class DrawableWorld : IDrawableBatch
 			// move right
 			if (allowRight && InputManager.Keyboard.KeyDown(Keys.D))
 			{
-				Player.Sprite.X += moveFactor;
+				Player/*.Sprite*/.X += moveFactor;
 			}
 			// move to top left
 			if (InputManager.Keyboard.KeyDown(Keys.Insert))
 			{
-				Player.Sprite.Top = RESOLUTION_Y;
-				Player.Sprite.Left = 0;
+				Player/*.Sprite*/.Top = RESOLUTION_Y;
+				Player/*.Sprite*/.Left = 0;
 			}
 			// move to top right
 			if (InputManager.Keyboard.KeyDown(Keys.Home))
 			{
-				Player.Sprite.Top = RESOLUTION_Y;
-				Player.Sprite.Right = RESOLUTION_X;
+				Player/*.Sprite*/.Top = RESOLUTION_Y;
+				Player/*.Sprite*/.Right = RESOLUTION_X;
 			}
 			// move to bottom right
 			if (InputManager.Keyboard.KeyDown(Keys.End))
 			{
-				Player.Sprite.Bottom = 0;
-				Player.Sprite.Right = RESOLUTION_X;
+				Player/*.Sprite*/.Bottom = 0;
+				Player/*.Sprite*/.Right = RESOLUTION_X;
 			}
 			// move to bottom left
 			if (InputManager.Keyboard.KeyDown(Keys.Delete))
 			{
-				Player.Sprite.Left = 0;
-				Player.Sprite.Bottom = 0;
+				Player/*.Sprite*/.Left = 0;
+				Player/*.Sprite*/.Bottom = 0;
 			}
 			//int spriteX;// = (int)((Player.Sprite.Left + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
 			//int spriteY;// = (int)((Player.Sprite.Right + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
@@ -1091,7 +1096,7 @@ public class DrawableWorld : IDrawableBatch
 						"|            |\n" +
 						"|            |\n" +
 					   $" --- [{bottom}] ---\n\n " +
-					   $"WIDTH=[{Player.Sprite.Width}]";
+					   $"WIDTH=[{Player.Width}]";
 					Logger.Instance.LogInfo(xyz);
 
 

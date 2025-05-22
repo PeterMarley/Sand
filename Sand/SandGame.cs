@@ -94,7 +94,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		Window.Position = new Point(0, 0);//p;
 		var w = FlatRedBallServices.Game.GraphicsDevice.Adapter.CurrentDisplayMode.Width;
 		var h = FlatRedBallServices.Game.GraphicsDevice.Adapter.CurrentDisplayMode.Height;
-		FlatRedBallServices.GraphicsOptions.SetResolution(w, h);
+		//FlatRedBallServices.GraphicsOptions.SetResolution(w, h);
 		//============================================================================
 #endif
 
@@ -127,9 +127,9 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 			//_world = StuffWorldFactory.WaterBottom3Y();
 			//_world = StuffWorldFactory.WaterBottomHalf();
 			//_world = WorldFactory.SandAlmostEverywhere();
-			_world = WorldFactory.GetDevStuffWorld_002();
+			//_world = WorldFactory.GetDevStuffWorld_002();
 			//_world = WorldFactory.WaterBottomHalf();
-			//_world = WorldFactory.StoneAroundEdges();
+			_world = WorldFactory.StoneAroundEdges();
 			////_world = WorldFactory.WaterSloshingInAllAbout();
 
 			SpriteManager.AddDrawableBatch(_world);

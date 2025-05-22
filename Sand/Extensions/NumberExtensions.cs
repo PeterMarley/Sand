@@ -1,4 +1,5 @@
 ﻿using FlatRedBall;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -18,6 +19,29 @@ public static class NumberExtensions
 		var offsetX = sprite.Width / 2;
 		var offsetY = sprite.Height / 2;
 
+/*		EG, GETTING TOP:
+			 *
+			 *(int)(
+			 *(sprite.Y             // centre of sprite (in world coords)
+			 * +offsetY             // move to top of sprint
+			 * +HALF_RESOLUTION_Y       // adjust coordinate origin (center origin sprite VS bottom left origin drawableworld)
+			 *      )
+			 * / STUFF_SCALE),				// adjust to stuff units*/
+			 
+
+			return (
+				/*top*/(int)((sprite.Y + offsetY + HALF_RESOLUTION_Y) / STUFF_DIVISOR),
+				/*right*/(int)((sprite.X + offsetX + HALF_RESOLUTION_X) / STUFF_DIVISOR),
+				/*bottom*/(int)((sprite.Y - offsetY + HALF_RESOLUTION_Y) / STUFF_DIVISOR),
+				/*left*/(int)((sprite.X - offsetX + HALF_RESOLUTION_X) / STUFF_DIVISOR)
+			);
+	}
+
+/*	public static (int top, int right, int bottom, int left) ToStuffCoord(Sprite sprite)
+	{
+		var offsetX = 0; *//*sprite.Width / 2;*//*
+		var offsetY = 0; *//*sprite.Height / 2;*/
+
 		/*		EG, GETTING TOP:
 		 *
 		 * (int)(
@@ -26,15 +50,23 @@ public static class NumberExtensions
 		 *		+ HALF_RESOLUTION_Y		// adjust coordinate origin (center origin sprite VS bottom left origin drawableworld)
 		 *		) 
 		 * / STUFF_SCALE),				// adjust to stuff units
-		 */
+		 *//*
+
+		
+
+		var t = sprite.Top / STUFF_SCALE / STUFF_HEIGHT;
+		var r = sprite.Right / STUFF_SCALE / STUFF_WIDTH;
+		var b = sprite.Bottom / STUFF_SCALE / STUFF_HEIGHT;
+		var l = sprite.Left / STUFF_SCALE / STUFF_WIDTH;
+
 
 		return (
-			/*top*/        (int)((sprite.Y + offsetY + HALF_RESOLUTION_Y) / STUFF_DIVISOR),
-			/*right*/    (int)((sprite.X + offsetX + HALF_RESOLUTION_X) / STUFF_DIVISOR),
-			/*bottom*/    (int)((sprite.Y - offsetY + HALF_RESOLUTION_Y) / STUFF_DIVISOR),
-			/*left*/    (int)((sprite.X - offsetX + HALF_RESOLUTION_X) / STUFF_DIVISOR)
+			*//*top*//*        (int)t,
+			*//*right*//*    (int)r,
+			*//*bottom*//*    (int)b,
+			*//*left*//*    (int)l
 		);
-	}
+	}*/
 
 	//// ie get the x and y of a stuff, and get its sprite coord
 	public static (float xWorld, float yWorld) ToWorldCoords(int xStuff, int yStuff)=> (ToWorldCoordsX(xStuff),ToWorldCoordsY(yStuff));

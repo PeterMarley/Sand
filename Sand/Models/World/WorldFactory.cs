@@ -106,6 +106,34 @@ public static class WorldFactory
 
 		return world;
 	}
+
+	public static DrawableWorld StoneAroundEdges2()
+	{
+		var world = new DrawableWorld();
+		//for (int x = 0; x < world.World.Length; x++)
+		//{
+		//	for (int y = 0; y < world.World[x].Length / 2; y++)
+		//	{
+		//		world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
+		//	}
+		//}
+		//return world;
+
+		for (int x = 0; x < world.World.Length; x++)
+		{
+			for (int y = 0; y < world.World[x].Length; y++)
+			{
+				if (x == 0 || x == world.World.Length - 1 // if at far left or right
+				|| y == 0 || y == world.World[x].Length - 1) // if at far top or bottom
+				{
+					world.World[x][y] = StuffFactory.Instance.Get(Stuffs.BASIC_STONE);
+				}
+			}
+		}
+
+		return world;
+	}
+
 	public static DrawableWorld WaterSloshingInAllAbout()
 	{
 		var world = new DrawableWorld();

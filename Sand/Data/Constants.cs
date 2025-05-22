@@ -37,6 +37,8 @@ public class Constants
 	//---------------------------------------------------
 	/// <summary>Controls whether dormant colours are shown in CMYK</summary>]
 	public const bool SHOW_STUFF_DORMANCY_COLORS = false;
+	/// <summary>Controls the player's hitbox is highlighted</summary>]
+	public const bool SHOW_PLAYER_HITBOX = true;
 
 }
 
