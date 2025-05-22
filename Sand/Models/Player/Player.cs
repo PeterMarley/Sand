@@ -31,19 +31,19 @@ public class Player
 	private bool lookingRight = true;
 	public bool Falling { get; set; }
 
-	private string AnimChainName_Walk = "Walk";
-	private string AnimChainName_Run = "Run";
-	private string AnimChainName_Stop = "Stop";
-	private string AnimChainName_Idle = "Idle";
-	private string AnimChainName_Fall = "Fall";
-	private string AnimChainName_Die = "Die";
-	private string AnimChainName_Damage = "Damage";
-	private string AnimChainName_Dash = "Dash";
+	private const string AnimChainName_Walk	= "Walk";
+	private const string AnimChainName_Run	= "Run";
+	private const string AnimChainName_Stop	= "Stop";
+	private const string AnimChainName_Idle	= "Idle";
+	private const string AnimChainName_Fall	= "Fall";
+	private const string AnimChainName_Die	= "Die";
+	private const string AnimChainName_Damage = "Damage";
+	private const string AnimChainName_Dash	= "Dash";
 
 	public Player()
 	{
 	
-		CreatePlayerTexture001_WeeSquareBoyo();
+		//CreatePlayerTexture001_WeeSquareBoyo();
 		//CreatePlayerTexture002_SpriteyMcSpriteSprite();
 		CreatePlayerTexture003_SpritesLikeANormalPerson();
 

@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Sand.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using static FlatRedBall.Input.Mouse;
 using static Sand.Constants;
@@ -20,14 +21,28 @@ namespace Sand;
 
 public class DrawableWorld : IDrawableBatch
 {
-	
+
+	//========================================
+	// The World
+	//========================================
+
 	/// <summary>Outer array is X, inner array is Y.</summary>
-	public Stuff[][] World { get; private set; }
-	public List<List<Point>> WorldChunks { get; set; }
-	private Texture2D WorldTexture;
-	private Sprite WorldSprite;
+	public Stuff[][]			World { get; private set; }
+	/// <summary>Each inner list is a chunk's worth of coordinates.</summary>
+	public List<List<Point>>	WorldChunks { get; set; }
+
+	private Texture2D			WorldTexture;
+	private Sprite				WorldSprite;
+
+	//========================================
+	// The Player
+	//========================================
 
 	public Player Player { get; private set; }
+
+	//========================================
+	// IDrawableBatch
+	//========================================
 
 	public float X { get; set; }
 	public float Y { get; set; }
@@ -38,7 +53,6 @@ public class DrawableWorld : IDrawableBatch
 	{
 		PrepareWorld();
 		PreparePlayer();
-
 
 		void PrepareWorld() 
 		{
@@ -68,30 +82,55 @@ public class DrawableWorld : IDrawableBatch
 			var cursor = new Point(0, 0);
 
 			// these outer two loops are the row and cols of chunks
-			for (int chunkRow = 0; chunkRow < chunkCols; chunkRow++)
+			for (int chunkRow = 0; chunkRow < chunkRows; chunkRow++)
 			{
-				for (int chunkCol = 0; chunkCol < chunkRows; chunkCol++)
+				for (int chunkCol = 0; chunkCol < chunkCols; chunkCol++)
 				{
 
 					// container for all points in a chunk
 					var chunkPoints = new List<Point>(chunkWidth * chunkHeight);
-
+					var alternatingHorizontalTracking = true;
 					// inner loops are for the pixels in each chunk
 					for (int y = cursor.Y; y < cursor.Y + chunkHeight; y++)
 					{
-						for (int x = cursor.X; x < cursor.X + chunkWidth; x++)
+						// a completely awful implementation of switching scan direction
+						// backwards and forwards on the x axis as you advance each separate row
+						int xInit, xTerm, xIncr;
+						Func<int, bool> termCheck;
+						if (alternatingHorizontalTracking)
 						{
-							chunkPoints.Add(new Point(x, y));
+							xInit = cursor.X;
+							xTerm = cursor.X + chunkWidth;
+							xIncr = 1;
+							termCheck = (x) => x < xTerm + chunkWidth;
+						}
+						else
+						{
+							xInit = cursor.X + chunkWidth;
+							xTerm = cursor.X;
+							xIncr = -1;
+							termCheck = (x) => x >= xTerm;
+						}
+
+						for (int x = xInit; termCheck(x); x+=xIncr)
+						{
+							if (x >= 0 && x < STUFF_WIDTH && y >= 0 && y < STUFF_HEIGHT)
+							{
+								chunkPoints.Add(new Point(x, y));
+							}
 						}
 					}
 					WorldChunks.Add(chunkPoints);
 
-					// move the cursor over one column to new chunk
-					cursor = new Point(cursor.X + chunkWidth, cursor.Y);
+					// IF NOT LAST column in row of chunks - move the cursor over one column to new chunk
+					// OTHERWISE set the col back to first for new row
+					cursor = new Point(chunkCol != chunkCols - 1 ? cursor.X + chunkWidth : 0, cursor.Y);
 				}
 
-				// move the cursor up one row to new chunk
+				// move the cursor up one row to new chunk - doesn't matter if new cursor falls off the
+				// grid as this is last operation of the nested loops
 				cursor = new Point(cursor.X, cursor.Y + chunkHeight);
+
 			}
 		}
 		void PreparePlayer() 
@@ -518,7 +557,86 @@ public class DrawableWorld : IDrawableBatch
 
 		try
 		{
-			var i = 0;
+			//========================================
+			// Old version of world update loop
+			//========================================
+
+			/*var i = 0;
+			for (var yIndex = 0; yIndex < STUFF_HEIGHT; yIndex++)
+			{
+				for (var xIndexSource = 0; xIndexSource < STUFF_WIDTH; xIndexSource++, i++)
+				{
+
+					//=======================================================
+					// we adjust the x index depending if we're going
+					//	left to right (ltr) => 0 to last index
+					//	right to left (rtl) => last index to 0
+					//=======================================================
+					int xIndex = ltr ? xIndexSource : STUFF_WIDTH - 1 - xIndexSource;
+
+					p.X = xIndex;
+					p.Y = yIndex;
+
+					// get stuff here
+					var stuff = World[xIndex][yIndex];
+
+					// if nothing here then move on to next Stuff **NOTE** dormancy is checked in apply gravity
+					if (stuff == null*//* || stuff.CheckDormancy()*//*)
+					{
+						continue;
+					}
+
+					ApplyGravity(xIndex, yIndex);
+				}
+
+				// flip the direction of the next horizontal traversal - for reasons
+				ltr = !ltr;
+			}*/
+
+			//=======================================================
+			// New version of world update loop (utilising chunks)
+			//=======================================================
+
+
+			// choose which chunks to update
+			var chunksToUpdate = new List<List<Point>>();
+			var currentFrame = TimeManager.CurrentFrame;
+			var alteratingSeed = currentFrame % 2 == 0;
+
+			for (int iChunk = 0; iChunk < WorldChunks.Count; iChunk++)
+			{
+				// this if is the gate deciding which chunks are to be updated this Update invocation
+				if (alteratingSeed)// every other chunk
+				{ 
+					chunksToUpdate.Add(WorldChunks[iChunk]);
+					alteratingSeed = false;
+				}
+				else
+				{
+					alteratingSeed = true;
+				}
+			}
+
+			// we iterate through the points in each chunk, one chunk at a time
+			foreach (var chunkPoints in chunksToUpdate) 
+			{
+				foreach (var point in chunkPoints)
+				{
+					var xIndex = point.X;
+					var yIndex = point.Y;
+
+					// make point viewable to scope that encloses the try catch for error logging
+					p = point;
+
+					// if something here then apply gravity **NOTE** dormancy is checked in apply gravity
+					if (World.Get(point) != null)
+					{
+						ApplyGravity(xIndex, yIndex);
+					}
+				}
+			}
+
+/*			var i = 0;
 			for (var yIndex = 0; yIndex < STUFF_HEIGHT; yIndex++)
 			{
 				for (var xIndexSource = 0; xIndexSource < STUFF_WIDTH; xIndexSource++, i++)
@@ -539,7 +657,7 @@ public class DrawableWorld : IDrawableBatch
 					var stuff = World[xIndex][yIndex];
 
 					// if nothing here then move on to next Stuff **NOTE** dormancy is checked in apply gravity
-					if (stuff == null/* || stuff.CheckDormancy()*/)
+					if (stuff == null*//* || stuff.CheckDormancy()*//*)
 					{
 						continue;
 					}
@@ -549,7 +667,7 @@ public class DrawableWorld : IDrawableBatch
 
 				// flip the direction of the next horizontal traversal - for reasons
 				ltr = !ltr;
-			}
+			}*/
 		}
 		catch (Exception applyGravEx)
 		{
@@ -633,7 +751,7 @@ public class DrawableWorld : IDrawableBatch
 
 				if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)))
 				{
-					SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 10);
+					SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 70);
 					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
 
 				}

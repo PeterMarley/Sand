@@ -18,10 +18,10 @@ public class Stuff
 	public bool CheckDormancy() 
 	{
 		DormantChecks++;
-		//if (DormantChecks > 5)
-		//{
-		//	_dormant = false;
-		//}
+		if (DormantChecks > 9 && TimeManager.CurrentFrame % DormantChecks > (DormantChecks - 1) / 2)
+		{
+			_dormant = false;
+		}
 		return _dormant;
 	}
 
