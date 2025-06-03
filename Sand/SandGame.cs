@@ -123,14 +123,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		}
 		else if (!didPrep)
 		{
-			//_world = StuffWorldFactory.GetDevStuffWorld_000();
-			//_world = StuffWorldFactory.WaterBottom3Y();
-			//_world = StuffWorldFactory.WaterBottomHalf();
-			//_world = WorldFactory.SandAlmostEverywhere();
-			//_world = WorldFactory.GetDevStuffWorld_002();
-			//_world = WorldFactory.WaterBottomHalf();
-			_world = WorldFactory.StoneAroundEdges();
-			////_world = WorldFactory.WaterSloshingInAllAbout();
+			_world = new DrawableWorld(WorldSetup.Empty);
 
 			SpriteManager.AddDrawableBatch(_world);
 			didPrep = true;

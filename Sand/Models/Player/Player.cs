@@ -33,7 +33,7 @@ public class Player
 	private bool lookingRight = true;
 	public bool Falling { get; set; }
 
-	private const string AnimChainName_Walk	= "Walk";
+	private const string AnimChainName_Float	= "Float";
 	private const string AnimChainName_Run	= "Run";
 	private const string AnimChainName_Stop	= "Stop";
 	private const string AnimChainName_Idle	= "Idle";
@@ -84,6 +84,7 @@ public class Player
 				Position = Sprite.Position,
 				Height = Sprite.Height * FRACTION_OF_SPRITE_VISIBLE,
 				Width = Sprite.Width * FRACTION_OF_SPRITE_VISIBLE,
+				Color = Color.Red
 			};
 
 			ShapeManager.AddAxisAlignedRectangle(_hitbox); // <--- Makes circle visible
@@ -107,10 +108,10 @@ public class Player
 
 			Sprite = SpriteManager.AddSprite(new AnimationChainList()
 			{
-				GetAnimationChain(0, 6, AnimChainName_Walk),
+				GetAnimationChain(0, 6, AnimChainName_Idle),
 				GetAnimationChain(1, 8, AnimChainName_Run),
 				GetAnimationChain(2, 4, AnimChainName_Stop),
-				GetAnimationChain(3, 6, AnimChainName_Idle),
+				GetAnimationChain(3, 6, AnimChainName_Float),
 				GetAnimationChain(4, 6, AnimChainName_Fall),
 				GetAnimationChain(5, 10, AnimChainName_Die),
 				GetAnimationChain(6, 4, AnimChainName_Damage),
@@ -280,13 +281,13 @@ public class Player
 			if (pressingA)
 			{
 				lookingRight = false;
-				Sprite.CurrentChainName = AnimChainName_Walk;
+				Sprite.CurrentChainName = AnimChainName_Float;
 			}
 
 			if (pressingD)
 			{
 				lookingRight = true;
-				Sprite.CurrentChainName = AnimChainName_Walk;
+				Sprite.CurrentChainName = AnimChainName_Float;
 			}
 
 			if (!pressingA && !pressingD)
@@ -331,27 +332,78 @@ public class Player
 		return NumberExtensions.ToStuffCoord(Sprite);
 	}
 
+	public (int top, int right, int bottom, int left) GetHitboxBounds()
+	{
+		return NumberExtensions.ToStuffCoord(_hitbox);
+	}
+
 	//public float x => Sprite.X;
 	#region Dimensions
-	public float X { get => Sprite.X;			set { Sprite.X = value;			_hitbox.Position = Sprite.Position; } }
-	public float Y { get => Sprite.Y;			set { Sprite.Y = value;			_hitbox.Position = Sprite.Position; } }
+	public float X
+	{
+		get => Sprite.X;
+		set
+		{
+			Sprite.X = value;
+			_hitbox.Position = Sprite.Position;
+		}
+	}
+	public float Y
+	{
+		get => Sprite.Y;
+		set
+		{
+			Sprite.Y = value;
+			_hitbox.Position = Sprite.Position;
+		}
+	}
+	//public float Y { get => Sprite.Y; set { Sprite.Y = value; _hitbox.Position = Sprite.Position; } }
 
-	/*CIRCLE*//*public float Top { get => Sprite.Top;		set { Sprite.Top = value;		_hitbox.Position = Sprite.Position; } }*/
-	/*AXIS RECT*/public float Top { get => _hitbox.Position.Y + _hitbox.Height / 2; set { Sprite.Top = value; _hitbox.Position = Sprite.Position; } }
+	///*CIRCLE*//*public float Top { get => Sprite.Top;		set { Sprite.Top = value;		_hitbox.Position = Sprite.Position; } }*/
+	///*AXIS RECT*/public float Top { get => _hitbox.Position.Y + _hitbox.Height / 2; set { Sprite.Top = value; _hitbox.Position = Sprite.Position; } }
 
-	/*CIRCLE*//*public float Right { get => Sprite.Right;	set { Sprite.Right = value;		_hitbox.Position = Sprite.Position; } }*/
-	/*AXIS RECT*/public float Right { get => Sprite.Position.X + Sprite.Width / 2; set { Sprite.Right = value; _hitbox.Position = Sprite.Position; } }
+	///*CIRCLE*//*public float Right { get => Sprite.Right;	set { Sprite.Right = value;		_hitbox.Position = Sprite.Position; } }*/
+	///*AXIS RECT*/public float Right { get => Sprite.Position.X + Sprite.Width / 2; set { Sprite.Right = value; _hitbox.Position = Sprite.Position; } }
 
-	/*CIRCLE*//*public float Bottom	{ get => Sprite.Bottom;	set { Sprite.Bottom = value;	_hitbox.Position = Sprite.Position; } }*/
-	/*AXIS RECT*/public float Bottom { get => _hitbox.Position.Y - _hitbox.Height / 2; set { Sprite.Bottom = value; _hitbox.Position = Sprite.Position; } }
+	///*CIRCLE*//*public float Bottom	{ get => Sprite.Bottom;	set { Sprite.Bottom = value;	_hitbox.Position = Sprite.Position; } }*/
+	///*AXIS RECT*/public float Bottom { get => _hitbox.Position.Y - _hitbox.Height / 2; set { Sprite.Bottom = value; _hitbox.Position = Sprite.Position; } }
 
-	/*CIRCLE*//*public float Left { get => Sprite.Left;		set { Sprite.Left = value;		_hitbox.Position = Sprite.Position; } }*/
-	/*AXIS RECT*/public float Left { get => Sprite.Position.X - _hitbox.Width / 2; set { Sprite.Left = value; _hitbox.Position = Sprite.Position; } }
+	///*CIRCLE*//*public float Left { get => Sprite.Left;		set { Sprite.Left = value;		_hitbox.Position = Sprite.Position; } }*/
+	///*AXIS RECT*/public float Left { get => Sprite.Position.X - _hitbox.Width / 2; set { Sprite.Left = value; _hitbox.Position = Sprite.Position; } }
 
 
 
 	public float Width { get => Sprite.Width * FRACTION_OF_SPRITE_VISIBLE;	set { Sprite.Width = value;		_hitbox.Position = Sprite.Position; } }
 	public float Height { get => Sprite.Height * FRACTION_OF_SPRITE_VISIBLE;	set { Sprite.Height = value;	_hitbox.Position = Sprite.Position; } }
+
+	public void PrintPosition()
+	{
+		var (top, right, bottom, left) = this.GetPositionStuff();
+
+		var abs = Math.Abs(left);
+		var adj = (abs < 10 ? "  " : (abs < 100 ? " " : (abs < 1000 ? "" : "")));
+		//var xyz =
+		//   $"\n ----{spriteGridTop}---- \n" +
+		//	"|            |\n" +
+		//	"|            |\n" +
+		//   $"{spriteGridLeft}         {adj}|     HEIGHT=[{Player.Sprite.Height}]\n" +
+		//   $"|            {spriteGridRight}\n" +
+		//	"|            |\n" +
+		//	"|            |\n" +
+		//   $" ----{spriteGridBottom}----\n\n " +
+		//   $"WIDTH=[{Player.Sprite.Width}]";
+		var xyz =
+		   $"\n --- [{top}] --- \n" +
+			"|            |\n" +
+			"|            |\n" +
+		   $"[{left}]\n" +
+		   $"|           [{right}]\n" +
+			"|            |\n" +
+			"|            |\n" +
+		   $" --- [{bottom}] ---\n\n " +
+		   $"WIDTH=[{Width}]";
+		Logger.Instance.LogInfo(xyz);
+	}
 
 	#endregion
 }

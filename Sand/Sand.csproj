@@ -37,6 +37,7 @@
     <Compile Include="Extensions\ArrayExtensions.cs" />
     <Compile Include="Extensions\NumberExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Models\MyDataStructure.cs" />
     <Compile Include="Models\World\DrawableWorld.cs" />
     <Compile Include="Models\World\WorldFactory.cs" />
     <Compile Include="Models\Player\Player.cs" />

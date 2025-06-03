@@ -26,10 +26,12 @@ public class DrawableWorld : IDrawableBatch
 	// The World
 	//========================================
 
-	/// <summary>Outer array is X, inner array is Y.</summary>
-	public Stuff[][]			World { get; private set; }
+	///// <summary>Outer array is X, inner array is Y.</summary>
+	//public Stuff[][] World { get; private set; }
 	/// <summary>Each inner list is a chunk's worth of coordinates.</summary>
-	public List<List<Point>>	WorldChunks { get; set; }
+	//public List<List<Point>> WorldChunks { get; set; }
+
+	public MyDataStructure Structure { get; set; }
 
 	private Texture2D			WorldTexture;
 	private Sprite				WorldSprite;
@@ -49,90 +51,14 @@ public class DrawableWorld : IDrawableBatch
 	public float Z { get; init; } = 0;
 	public bool UpdateEveryFrame { get; set; } = true;
 
-	public DrawableWorld()
+	public DrawableWorld(WorldSetup worldSetup)
 	{
-		PrepareWorld();
+		PrepareWorld(worldSetup);
 		PreparePlayer();
 
-		void PrepareWorld() 
+		void PrepareWorld(WorldSetup worldSetup) 
 		{
-			//========================================
-			// PREPARE THE WORLD DATA STRUCTURE
-			//========================================
-
-			World = new Stuff[STUFF_WIDTH][];
-			for (int x = 0; x < World.Length; x++)
-			{
-				World[x] = new Stuff[STUFF_HEIGHT];
-			}
-
-			//========================================
-			// PREPARE THE SUBGRIDS FOR MULTITHREADING!
-			//				(OLDE GODS WONT YE SAVE US)
-			//========================================
-
-			WorldChunks = [];
-
-			const int chunksLong = 10;
-			/*const int chunkRows = 10;
-			const int chunkCols = 10;*/
-
-			int chunkWidth = STUFF_WIDTH / chunksLong/*chunkRows*/;
-			int chunkHeight = STUFF_HEIGHT / chunksLong/*chunkCols*/;
-
-			var cursor = new Point(0, 0);
-
-			// these outer two loops are the row and cols of chunks
-			for (int chunkRow = 0; chunkRow < chunksLong/*chunkCols*/; chunkRow++)
-			{
-				for (int chunkCol = 0; chunkCol < chunksLong/*chunkRows*/; chunkCol++)
-				{
-
-					// container for all points in a chunk
-					var chunkPoints = new List<Point>(chunkWidth * chunkHeight);
-					var alternatingHorizontalTracking = true;
-					// inner loops are for the pixels in each chunk
-					for (int y = cursor.Y; y < cursor.Y + chunkHeight; y++)
-					{
-						// a completely awful implementation of switching scan direction
-						// backwards and forwards on the x axis as you advance each separate row
-						int xInit, xTerm, xIncr;
-						Func<int, bool> termCheck;
-						if (alternatingHorizontalTracking)
-						{
-							xInit = cursor.X;
-							xTerm = cursor.X + chunkWidth;
-							xIncr = 1;
-							termCheck = (x) => x < xTerm + chunkWidth;
-						}
-						else
-						{
-							xInit = cursor.X + chunkWidth;
-							xTerm = cursor.X;
-							xIncr = -1;
-							termCheck = (x) => x >= xTerm;
-						}
-
-						for (int x = xInit; termCheck(x); x+=xIncr)
-						{
-							if (x >= 0 && x < STUFF_WIDTH && y >= 0 && y < STUFF_HEIGHT)
-							{
-								chunkPoints.Add(new Point(x, y));
-							}
-						}
-					}
-					WorldChunks.Add(chunkPoints);
-
-					// IF NOT LAST column in row of chunks - move the cursor over one column to new chunk
-					// OTHERWISE set the col back to first for new row
-					cursor = new Point(chunkCol != chunksLong/*chunkCols*/ - 1 ? cursor.X + chunkWidth : 0, cursor.Y);
-				}
-
-				// move the cursor up one row to new chunk - doesn't matter if new cursor falls off the
-				// grid as this is last operation of the nested loops
-				cursor = new Point(cursor.X, cursor.Y + chunkHeight);
-
-			}
+			Structure = new MyDataStructure(worldSetup);
 		}
 		void PreparePlayer() 
 		{
@@ -146,49 +72,49 @@ public class DrawableWorld : IDrawableBatch
 
 	#region Adding Stuff
 
-	public void SafeAddStuffIfEmpty_InSquare(string stuffType, int x, int y, int length)
-	{
-		for (int i = x - length; i < x + length; i++)
-		{
-			for (int j = y - length; j < y + length; j++)
-			{
-				SafeAddStuffIfEmpty(stuffType, i, j);
-			}
-		}
-	}
+	//public void SafeAddStuffIfEmpty_InSquare(string stuffType, int x, int y, int length)
+	//{
+	//	for (int i = x - length; i < x + length; i++)
+	//	{
+	//		for (int j = y - length; j < y + length; j++)
+	//		{
+	//			SafeAddStuffIfEmpty(stuffType, i, j);
+	//		}
+	//	}
+	//}
 
-	public void ForceAddStuff_InSquare(string stuffType, int x, int y, int length)
-	{
-		for (int i = x - length; i < x + length; i++)
-		{
-			for (int j = y - length; j < y + length; j++)
-			{
-				ForceAddStuff(stuffType, i, j);
-			}
-		}
-	}
+	//public void ForceAddStuff_InSquare(string stuffType, int x, int y, int length)
+	//{
+	//	for (int i = x - length; i < x + length; i++)
+	//	{
+	//		for (int j = y - length; j < y + length; j++)
+	//		{
+	//			ForceAddStuff(stuffType, i, j);
+	//		}
+	//	}
+	//}
 
-	public void ForceAddStuff(string stuffType, int x, int y)
-	{
-		if (x >= 0 && x < World.Length && y >= 0 && y < World[0].Length)
-		{
-			var stuff = StuffFactory.Instance.Get(stuffType);
-			World[x][y] = stuff;//.SetPosition(x, y);
-								//stuff.X = x;
-								//stuff.Y = y;
-		}
-	}
+	//public void ForceAddStuff(string stuffType, int x, int y)
+	//{
+	//	if (x >= 0 && x < World.Length && y >= 0 && y < World[0].Length)
+	//	{
+	//		var stuff = StuffFactory.Instance.Get(stuffType);
+	//		World[x][y] = stuff;//.SetPosition(x, y);
+	//							//stuff.X = x;
+	//							//stuff.Y = y;
+	//	}
+	//}
 
-	public void SafeAddStuffIfEmpty(string stuffType, int x, int y)
-	{
-		if (x >= 0 && x < World.Length && y >= 0 && y < World[0].Length && World[x][y] == null)
-		{
-			var stuff = StuffFactory.Instance.Get(stuffType);
-			World[x][y] = stuff;//.SetPosition(x, y);
-								//stuff.X = x;
-								//stuff.Y = y;
-		}
-	}
+	//public void SafeAddStuffIfEmpty(string stuffType, int x, int y)
+	//{
+	//	if (x >= 0 && x < World.Length && y >= 0 && y < World[0].Length && World[x][y] == null)
+	//	{
+	//		var stuff = StuffFactory.Instance.Get(stuffType);
+	//		World[x][y] = stuff;//.SetPosition(x, y);
+	//							//stuff.X = x;
+	//							//stuff.Y = y;
+	//	}
+	//}
 
 	#endregion
 
@@ -196,7 +122,7 @@ public class DrawableWorld : IDrawableBatch
 
 	public void ApplyGravity(int xIndex, int yIndex)
 	{
-		var stuff = World[xIndex][yIndex];
+		var stuff = Structure.Get(xIndex, yIndex);
 
 		//if (stuff == null)
 		//{
@@ -299,7 +225,7 @@ public class DrawableWorld : IDrawableBatch
 			if (rowBelowIndex < 0) return;
 
 			// if dormant, and theres nothing below, finish
-			if (stuff.CheckDormancy() && World[xIndex][rowBelowIndex] != null) // this is not null check basically enables erroneously dormant stuff to right itself
+			if (stuff.CheckDormancy() && Structure.Get(xIndex, rowBelowIndex) != null) // this is not null check basically enables erroneously dormant stuff to right itself
 			{
 				return;
 			}
@@ -417,134 +343,9 @@ public class DrawableWorld : IDrawableBatch
 		}
 	}
 
-	private const int NOT_MOVED_DORMANT_TRIGGER = 10;
 	public bool Move(Point from, Point to)
 	{
-		var stuffAtSource = World[from.X][from.Y];
-		var stuffAtTarget = World[to.X][to.Y];
-
-		if (stuffAtSource == null) return true;
-
-		var didMove = stuffAtSource.Phase switch
-		{
-			Phase.Powder => MovePowder(from, to),
-			Phase.Liquid => MoveLiquid(from, to),
-			_ => false,
-		};
-
-		if (!didMove)
-		{
-			if (stuffAtSource.DormantChecks > NOT_MOVED_DORMANT_TRIGGER)
-			{
-				stuffAtSource.Dormant = true;
-			}
-
-			//if (stuffAtTarget != null)
-			//{
-			//	if (stuffAtTarget.NotMovedCount > NOT_MOVED_DORMANT_TRIGGER)
-			//	{
-			//		stuffAtTarget.Dormant = true;
-			//	}
-			//}
-		}
-		else
-		{
-			stuffAtSource.Dormant = false;
-			if (stuffAtTarget != null)
-			{
-				stuffAtTarget.Dormant = false;
-			}
-		}
-
-		return false;
-
-		bool MovePowder(Point from, Point to)
-		{
-			// check for stuff at target
-			var didMove = false;
-
-			Stuff stuffTarget = World.Get(to);
-			var sourceHasStuff = stuffAtSource != null;
-			var targetHasStuff = stuffTarget != null;
-
-			// if not stuff at target fall to here and finish
-			if (stuffTarget == null // nothing at target
-			|| stuffTarget is not { Phase: Phase.Solid or Phase.Powder }) // or thing at target is not a solid
-			{
-				World[to.X][to.Y] = stuffAtSource;
-				World[from.X][from.Y] = null;
-				didMove = true;
-			}
-
-			var hasDisplacedLiquid = false;
-			if (stuffTarget != null && stuffTarget is { Phase: Phase.Liquid })
-			{
-				hasDisplacedLiquid = LiquidDisplacement();
-			}
-
-			return didMove || hasDisplacedLiquid;
-
-			bool LiquidDisplacement()
-			{
-				//=======================================================================
-				// LIQUID DISPLACEMENT
-				//=======================================================================
-				var hasDisplaced = false;
-
-				// if stuff at the target, but target NOT solid (we know that source IS solid), then
-				// fall here - liquid, gas displacement means the thing pushed out of the way has
-				// to go up
-				if (targetHasStuff && stuffTarget is not { Phase: Phase.Solid or Phase.Powder })
-				{
-					// up upwards in Y-axis (checkling one left and right also) from displaced liqud
-					// until empty stuff found - staying within the water column.
-					// Once we fall out of bounds of array just stop looping as the target is already
-					// garbage awaiting collection.
-					var waterColumnX = to.X;
-					for (int cursorY = to.Y; !hasDisplaced && cursorY < World[0].Length; cursorY++)
-					{
-
-						///////////////////////////////////////////////////////
-						// lets try randomly going left, on or right of yCoord in water column droping
-						// there if empty, so 1/3 itll land left, on or right of cursorY
-						///////////////////////////////////////////////////////
-						for (var i = 0; !hasDisplaced && i < Randoms.Instance.Ind_leftRightMid.Length; i++)
-						{
-							var adjCursorX = waterColumnX + Randoms.Instance.Ind_leftRightMid[i];
-							if (adjCursorX >= 0 && adjCursorX < World.Length && World[adjCursorX][cursorY] == null)
-							{
-								// move this displaced liquid to here
-								World[adjCursorX][cursorY] = stuffTarget;//.SetPosition(adjCursorX, cursorY); ;
-								hasDisplaced = true;// BREAKS both loops
-								stuffAtTarget.Dormant = false;
-							}
-						}
-					}
-
-					// no empty spot found so "destroy" the displayers stuff (for now)
-					// TODO this will need updated when screen can move
-				}
-				//}
-
-				return hasDisplaced;
-			}
-		}
-
-		bool MoveLiquid(Point from, Point to)
-		{
-			var stuffSource = World[from.X][from.Y];
-			var stuffTarget = World[to.X][to.Y];
-			// if not stuff at target fall to here and finish
-			if (stuffTarget == null)
-			{
-				// update world
-				World[to.X][to.Y] = stuffSource;
-				World[from.X][from.Y] = null;
-				return true;
-			}
-
-			return false;
-		}
+		return Structure.Move(from, to);
 	}
 
 	#endregion
@@ -554,74 +355,19 @@ public class DrawableWorld : IDrawableBatch
 	public void Update()
 	{
 		var p = new Point();
-		var ltr = true;
 
 		try
 		{
-			//========================================
-			// Old version of world update loop
-			//========================================
-
-			/*var i = 0;
-			for (var yIndex = 0; yIndex < STUFF_HEIGHT; yIndex++)
-			{
-				for (var xIndexSource = 0; xIndexSource < STUFF_WIDTH; xIndexSource++, i++)
-				{
-
-					//=======================================================
-					// we adjust the x index depending if we're going
-					//	left to right (ltr) => 0 to last index
-					//	right to left (rtl) => last index to 0
-					//=======================================================
-					int xIndex = ltr ? xIndexSource : STUFF_WIDTH - 1 - xIndexSource;
-
-					p.X = xIndex;
-					p.Y = yIndex;
-
-					// get stuff here
-					var stuff = World[xIndex][yIndex];
-
-					// if nothing here then move on to next Stuff **NOTE** dormancy is checked in apply gravity
-					if (stuff == null*//* || stuff.CheckDormancy()*//*)
-					{
-						continue;
-					}
-
-					ApplyGravity(xIndex, yIndex);
-				}
-
-				// flip the direction of the next horizontal traversal - for reasons
-				ltr = !ltr;
-			}*/
-
 			//=======================================================
 			// New version of world update loop (utilising chunks)
 			//=======================================================
 
-
 			// choose which chunks to update
-			var chunksToUpdate = new List<List<Point>>();
-			var currentFrame = TimeManager.CurrentFrame;
-			var alteratingSeed = currentFrame % 2 == 0;
+			var chunksToUpdate = Structure.GetChunksToUpdate();
 
-			for (int iChunk = 0; iChunk < WorldChunks.Count; iChunk++)
+			foreach (var chunk in chunksToUpdate)
 			{
-				// this if is the gate deciding which chunks are to be updated this Update invocation
-				if (alteratingSeed)// every other chunk
-				{ 
-					chunksToUpdate.Add(WorldChunks[iChunk]);
-					alteratingSeed = false;
-				}
-				else
-				{
-					alteratingSeed = true;
-				}
-			}
-
-			// we iterate through the points in each chunk, one chunk at a time
-			foreach (var chunkPoints in chunksToUpdate) 
-			{
-				foreach (var point in chunkPoints)
+				foreach (var point in chunk.Points_BottomLeftToTopRight_AlternatingRowDirection)
 				{
 					var xIndex = point.X;
 					var yIndex = point.Y;
@@ -630,49 +376,16 @@ public class DrawableWorld : IDrawableBatch
 					p = point;
 
 					// if something here then apply gravity **NOTE** dormancy is checked in apply gravity
-					if (World.Get(point) != null)
+					if (Structure.Get(point) != null)
 					{
 						ApplyGravity(xIndex, yIndex);
 					}
 				}
 			}
-
-/*			var i = 0;
-			for (var yIndex = 0; yIndex < STUFF_HEIGHT; yIndex++)
-			{
-				for (var xIndexSource = 0; xIndexSource < STUFF_WIDTH; xIndexSource++, i++)
-				{
-
-					//==========================================================||
-					// we adjust the x index depending if we're going
-					//	left to right (ltr) => 0 to last index
-					//	right to left (rtl) => last index to 0
-					//==========================================================||
-
-					int xIndex = ltr ? xIndexSource : STUFF_WIDTH - 1 - xIndexSource;
-
-					p.X = xIndex;
-					p.Y = yIndex;
-
-					// get stuff here
-					var stuff = World[xIndex][yIndex];
-
-					// if nothing here then move on to next Stuff **NOTE** dormancy is checked in apply gravity
-					if (stuff == null*//* || stuff.CheckDormancy()*//*)
-					{
-						continue;
-					}
-
-					ApplyGravity(xIndex, yIndex);
-				}
-
-				// flip the direction of the next horizontal traversal - for reasons
-				ltr = !ltr;
-			}*/
 		}
-		catch (Exception applyGravEx)
+		catch (Exception updateException)
 		{
-			Logger.Instance.LogError(applyGravEx, $"(x,y)=({p.X},{p.Y}), (maxX, maxY)=({STUFF_WIDTH - 1},{STUFF_HEIGHT - 1})");
+			Logger.Instance.LogError(updateException, $"(x,y)=({p.X},{p.Y}), (maxX, maxY)=({STUFF_WIDTH - 1},{STUFF_HEIGHT - 1})");
 			throw;
 		}
 	}
@@ -683,16 +396,7 @@ public class DrawableWorld : IDrawableBatch
 		try
 		{
 			// interate through the World and get the color data of all Stuffs there
-			var colorData = new Color[STUFF_HEIGHT * STUFF_WIDTH];
-			var colorIndex = 0;
-
-			for (var y = World[0].Length - 1; y >= 0; y--)
-			{
-				for (var x = 0; x < World.Length; x++)
-				{
-					colorData[colorIndex++] = World[x][y] == null ? Color.Black : World[x][y].Color;
-				}
-			}
+			var colorData = Structure.GetColorData();
 
 			if (WorldSprite == null)
 			{
@@ -752,26 +456,26 @@ public class DrawableWorld : IDrawableBatch
 
 				if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)))
 				{
-					SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 15);
+					Structure.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 15);
 					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
 
 				}
 
 				if ((InputManager.Mouse.ButtonPushed(MouseButtons.RightButton) || InputManager.Mouse.ButtonDown(MouseButtons.RightButton)))
 				{
-					SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 10);
+					Structure.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 10);
 					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
 				}
 
 				if ((InputManager.Mouse.ButtonPushed(MouseButtons.MiddleButton) || InputManager.Mouse.ButtonDown(MouseButtons.MiddleButton)))
 				{
-					ForceAddStuff_InSquare(Stuffs.BASIC_STONE, x, y, 10);
+					Structure.ForceAddStuff_InSquare(Stuffs.BASIC_STONE, x, y, 10);
 					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
 				}
 
 				if ((InputManager.Mouse.ButtonPushed(MouseButtons.XButton1) || InputManager.Mouse.ButtonDown(MouseButtons.XButton1)))
 				{
-					ForceAddStuff_InSquare(Stuffs.BASIC_LAVA2, x, y, 2);
+					Structure.ForceAddStuff_InSquare(Stuffs.BASIC_LAVA2, x, y, 2);
 					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
 				}
 
@@ -779,7 +483,7 @@ public class DrawableWorld : IDrawableBatch
 				if (InputManager.Keyboard.KeyDown(Keys.E))
 				{
 					var (top, right, bottom, left) = Player.GetPositionStuff(); /*NumberExtensions.ToStuffCoord(Player.Sprite);*/
-					ForceAddStuff_InSquare(Stuffs.BASIC_STONE, left, bottom, 2);
+					Structure.ForceAddStuff_InSquare(Stuffs.BASIC_STONE, left, bottom, 2);
 				}
 			}
 		}
@@ -787,325 +491,51 @@ public class DrawableWorld : IDrawableBatch
 		void AffectPlayer()
 		{
 
-			//Gravity;
-			//Player.Sprite.Velocity.Y -= /*-*/1;
+			var collision = Structure.Collision(Player, GRAV_MAGNITUDE, PLAYER_MOVE_FACTOR);
 
-			//Wind Resistance
-			//if (Player.Sprite.Velocity.Y < 0)
-			//{
-			//	Player.Sprite.Velocity.Y += 3;
-			//}
+			var allowUp = collision.AllowUp;
+			var allowRight = collision.AllowRight;
+			var allowDown = collision.AllowDown;
+			var allowLeft = collision.AllowLeft;
+			var moveFactor = collision.MoveFactor;
 
-			var (top, right, bottom, left) = Player.GetPositionStuff();/* NumberExtensions.ToStuffCoord(Player.Sprite);*/
-			var gravMagnitude = GRAV_MAGNITUDE;
-			var moveFactor = PLAYER_MOVE_FACTOR;
-			bool allowUp = true;
-			bool allowRight = true;
-			bool allowDown = true;
-			bool allowLeft = true;
-			bool inLiquid = false;
-
-			try
-			{
-				Collision();
-			}
-			catch (Exception ex)
-			{
-				throw;
-			}
-
-			void Collision()
-			{
-				//================================================
-				// bottom collision
-				//================================================
-				#region
-				// get the row directly below the sprite
-				bottom--;
-				// if bottom coord index safe
-				if (bottom >= 0 && bottom < STUFF_HEIGHT)
-				{
-					// iterate across that row within the sprites x coords and check if downward movement should be arrested
-					for (var x = left; x < right; x++)
-					{
-						// if outside the world bound just continue to next in row
-						if (x < 0 || x >= STUFF_WIDTH)
-						{
-							continue;
-						}
-
-						// if there is something here then stop
-						if (World[x][bottom] != null)
-						{
-							if (World[x][bottom].Phase == Phase.Liquid)
-							{
-								inLiquid = true;
-								moveFactor = PLAYER_MOVE_FACTOR / 2;
-							}
-							else
-							{
-								allowDown = false;
-								break;
-							}
-							Logger.Instance.LogInfo($"Encountering {World[x][bottom].Phase} at bottom - move factor is {moveFactor}");
-						}
-					}
-				}
-				// if bottom coord index is not safe
-				else if (bottom < 0)
-				{
-					allowDown = false;
-				}
-				#endregion
-				//================================================
-				// TOP collision
-				//================================================ww
-				#region
-				// get the row directly below the sprite
-				top++;
-				// if bottom coord index safe
-				if (top >= 0 && top < STUFF_HEIGHT)
-				{
-					// iterate across that row within the sprites x coords and check if downward movement should be arrested
-					for (var x = left; x < right; x++)
-					{
-						// if outside the world bound just continue to next in row
-						if (x < 0 || x >= STUFF_WIDTH)
-						{
-							continue;
-						}
-
-						// if there is something here then stop
-						if (World[x][top] != null)
-						{
-							if (World[x][top].Phase == Phase.Liquid)
-							{
-								inLiquid = true;
-								moveFactor = PLAYER_MOVE_FACTOR / 2;
-							}
-							else
-							{
-								allowUp = false;
-								break;
-							}
-							Logger.Instance.LogInfo($"Encountering {World[x][top].Phase} at top - move factor is {moveFactor}");
-						}
-					}
-				}
-				// if bottom coord index is not safe
-				else if (top >= STUFF_HEIGHT)
-				{
-					allowUp = false;
-				}
-				#endregion
-				//================================================
-				// LEFT collision
-				//================================================ww
-				#region
-				// get the row directly below the sprite
-				left--;
-				// if bottom coord index safe
-				if (left >= 0 && left < STUFF_WIDTH)
-				{
-					// iterate across that row within the sprites x coords and check if downward movement should be arrested
-					for (var y = top - 1; y > bottom + 1; y--)
-					{
-						// if outside the world bound just continue to next in row
-						if (y < 0 || y >= STUFF_HEIGHT)
-						{
-							continue;
-						}
-
-						// if there is something here then stop
-						if (World[left][y] != null)
-						{
-							if (World[left][y].Phase == Phase.Liquid)
-							{
-								inLiquid = true;
-								moveFactor = PLAYER_MOVE_FACTOR / 2;
-							}
-							else
-							{
-								allowLeft = false;
-								break;
-							}
-							Logger.Instance.LogInfo($"Encountering {World[left][y].Phase} at left - move factor is {moveFactor}");
-						}
-					}
-				}
-				// if bottom coord index is not safe
-				else if (left < 0)
-				{
-					allowLeft = false;
-				}
-				#endregion
-				//================================================
-				// RIGHT collision
-				//================================================ww
-				#region
-				// get the row directly below the sprite
-				right++;
-				// if bottom coord index safe
-				if (right >= 0 && right < STUFF_WIDTH)
-				{
-					// iterate across that row within the sprites x coords and check if downward movement should be arrested
-					for (var y = top - 1; y > bottom + 1; y--)
-					{
-						// if outside the world bound just continue to next in row
-						if (y < 0 || y >= STUFF_HEIGHT)
-						{
-							continue;
-						}
-
-						// if there is something here then stop
-						if (World[right][y] != null)
-						{
-							if (World[right][y].Phase == Phase.Liquid)
-							{
-								inLiquid = true;
-								moveFactor = PLAYER_MOVE_FACTOR / 2;
-							}
-							else
-							{
-								allowRight = false;
-								break;
-							}
-							Logger.Instance.LogInfo($"Encountering {World[right][y].Phase} at right - move factor is {moveFactor}");
-						}
-					}
-				}
-				// if bottom coord index is not safe
-				else if (right >= STUFF_WIDTH)
-				{
-					allowRight = false;
-				}
-				#endregion
-			}
-
-			//move upwards
+			//move ↑
 			if (allowUp && InputManager.Keyboard.KeyDown(Keys.W))
 			{
-				Player/*.Sprite*/.Y += (moveFactor * 2);
-
-				//Player.Sprite.Acceleration.Y += PLAYER_MOVE_FACTOR;
-				//Player.Sprite.Position.Y += 10;
+				Player.Y += (moveFactor * 2);
 			}
 
-			// move left
+			// move ←
 			if (allowLeft && InputManager.Keyboard.KeyDown(Keys.A))
 			{
-				Player/*.Sprite*/.X -= moveFactor;
+				Player.X -= moveFactor;
 			}
-			// move down
+
+			// move ↓
 			if (allowDown)
 			{
-
 				//gravity
-				Player/*.Sprite*/.Y -= /*-*/moveFactor * .7f;
+				Player.Y -= moveFactor * .7f;
 				Player.Falling = true;
 				if (InputManager.Keyboard.KeyDown(Keys.S))
 				{
-					Player/*.Sprite*/.Y -= moveFactor;
+					Player.Y -= moveFactor;
 				}
-
-
 			}
 			else 
 			{
 				Player.Falling = false;
 			}
 
-			// move right
+			// move →
 			if (allowRight && InputManager.Keyboard.KeyDown(Keys.D))
 			{
-				Player/*.Sprite*/.X += moveFactor;
+				Player.X += moveFactor;
 			}
-			// move to top left
-			if (InputManager.Keyboard.KeyDown(Keys.Insert))
+
+			if (InputManager.Keyboard.KeyPushed(Keys.Q))
 			{
-				Player/*.Sprite*/.Top = RESOLUTION_Y;
-				Player/*.Sprite*/.Left = 0;
-			}
-			// move to top right
-			if (InputManager.Keyboard.KeyDown(Keys.Home))
-			{
-				Player/*.Sprite*/.Top = RESOLUTION_Y;
-				Player/*.Sprite*/.Right = RESOLUTION_X;
-			}
-			// move to bottom right
-			if (InputManager.Keyboard.KeyDown(Keys.End))
-			{
-				Player/*.Sprite*/.Bottom = 0;
-				Player/*.Sprite*/.Right = RESOLUTION_X;
-			}
-			// move to bottom left
-			if (InputManager.Keyboard.KeyDown(Keys.Delete))
-			{
-				Player/*.Sprite*/.Left = 0;
-				Player/*.Sprite*/.Bottom = 0;
-			}
-			//int spriteX;// = (int)((Player.Sprite.Left + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-			//int spriteY;// = (int)((Player.Sprite.Right + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-			//int left;// = (int)((Player.Sprite.Left + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-			//int right;// = (int)((Player.Sprite.Right + 1000) / STUFF_SCALE);// - (Player.StuffWidth / 2));// + (RESOLUTION_X / 2);
-			//int top;// = (int)((Player.Sprite.Top + 1000) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-			//int bottom;// = (int)((Player.Sprite.Bottom + 1000) / STUFF_SCALE);// - (Player.StuffHeight / 2));// + (RESOLUTION_X / 2);
-			try
-			{
-				//========================================================
-				// build up a collection of points surrounding the sprite
-				//========================================================
-
-
-				//** left and rights => for every y between bottom and top, take the left most and right most x
-
-				// LEFT TODO
-				// RIGHT TODO
-
-				//** top and bottoms => for every x between left and right, take the top and bottom most y
-
-				// TOP TODO
-				// BOTTOM
-				if (InputManager.Keyboard.KeyPushed(Keys.Q))
-				{
-
-					//spriteGridLeft = left;
-					//spriteGridRight = right;
-					//spriteGridTop = top;
-					//spriteGridBottom = bottom;
-
-
-					var abs = Math.Abs(left);
-					var adj = (abs < 10 ? "  " : (abs < 100 ? " " : (abs < 1000 ? "" : "")));
-					//var xyz =
-					//   $"\n ----{spriteGridTop}---- \n" +
-					//	"|            |\n" +
-					//	"|            |\n" +
-					//   $"{spriteGridLeft}         {adj}|     HEIGHT=[{Player.Sprite.Height}]\n" +
-					//   $"|            {spriteGridRight}\n" +
-					//	"|            |\n" +
-					//	"|            |\n" +
-					//   $" ----{spriteGridBottom}----\n\n " +
-					//   $"WIDTH=[{Player.Sprite.Width}]";
-					var xyz =
-					   $"\n --- [{top}] --- \n" +
-						"|            |\n" +
-						"|            |\n" +
-					   $"[{left}]\n" +
-					   $"|           [{right}]\n" +
-						"|            |\n" +
-						"|            |\n" +
-					   $" --- [{bottom}] ---\n\n " +
-					   $"WIDTH=[{Player.Width}]";
-					Logger.Instance.LogInfo(xyz);
-
-
-				}
-			}
-			catch (Exception ex)
-			{
-				Logger.Instance.LogError(ex, "Checking collisions ex");
-				throw;
+				Player.PrintPosition();
 			}
 		}
 	}
