@@ -27,6 +27,8 @@ public class SpriteService
 
 	private readonly Texture2D _water = FlatRedBallServices.Load<Texture2D>("Content/TextureImages/WaterPixel_01_2c4847.png");
 
+	private readonly Texture2D _checkerboardBg = FlatRedBallServices.Load<Texture2D>("Content/TextureImages/Checkerboard_BG_8x8.png");
+
 	private Random _random = new();
 
 	private int _lastUsedColourIndex = 0;
@@ -48,6 +50,14 @@ public class SpriteService
 		_textureArray = [_white, _cyan, _red];
 		_sandTextures = [_sand01, _sand02, _sand03, _sand04, _sand05, _sand06, _sand07];
 	}
+
+	//public Sprite GetCheckerboardBg()
+	//{
+		
+	//	var sprite = SpriteManager.AddSprite(_checkerboardBg);
+	//	//sprite.TextureScale = Constants.STUFF_SCALE;
+	//	return sprite;
+	//}
 
 	//#region Sprite Gets
 

@@ -106,8 +106,9 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		base.Initialize();
 	}
 
-	private int FRAME_COUNT_BETWEEN_UPDATE = 30;
-	private int FRAME_COUNT_BETWEEN_DRAW = 120;
+	private int FRAME_COUNT_BETWEEN_UPDATE = 1;
+	private int FRAME_COUNT_BETWEEN_DRAW = 1;
+
 	private bool didPrep = false;
 	protected override void Update(GameTime gameTime)
 	{
@@ -125,7 +126,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		{
 			_world = new DrawableWorld(WorldSetup.Empty);
 
-			SpriteManager.AddDrawableBatch(_world);
+			//SpriteManager.AddDrawableBatch(_world);
 			didPrep = true;
 		}
 

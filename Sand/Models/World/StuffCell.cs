@@ -9,76 +9,12 @@ using static Sand.Constants;
 using Color = Microsoft.Xna.Framework.Color;
 
 namespace Sand;
-public enum WorldSetup
-{ 
-	Empty,
-	StoneAroundEdges,
-	StoneAroundEdges2,
-	WaterBottomHalf,
-	WaterSloshingAbout
-}
-public class Chunk 
-{
-	private readonly int _width;
-	private readonly int _height;
-	private readonly Point _origin;
 
-	/// <summary><code>
-	/// /=====================>
-	/// \=====================\
-	/// /=====================/
-	/// \=====================\
-	/// >=====================/
-	/// </code></summary>
-	public List<Point> Points_BottomLeftToTopRight_AlternatingRowDirection { get; private init; }
-
-
-	public Chunk(Point origin, int chunkWidth, int chunkHeight)
-	{
-		_width = chunkWidth;
-		_height = chunkHeight;
-		_origin = origin;
-
-
-		//=======================================================
-		// Pre-Generate useful lists of points
-		//=======================================================
-
-		var leftToRight = true;
-
-		Points_BottomLeftToTopRight_AlternatingRowDirection = new List<Point>(chunkWidth * chunkHeight);
-		for (int y = origin.Y; y < origin.Y + chunkHeight; y++)
-		{
-			// switching horizontal scan direction for each row
-			if (leftToRight)
-			{
-				for (int x = origin.X; x < origin.X + chunkWidth + chunkWidth; x++)
-				{
-					if (x >= 0 && x < STUFF_WIDTH && y >= 0 && y < STUFF_HEIGHT)
-					{
-						Points_BottomLeftToTopRight_AlternatingRowDirection.Add(new Point(x, y));
-					}
-				}
-			}
-			else
-			{
-				for (int x = origin.X + chunkWidth; x >= origin.X; x--)
-				{
-					if (x >= 0 && x < STUFF_WIDTH && y >= 0 && y < STUFF_HEIGHT)
-					{
-						Points_BottomLeftToTopRight_AlternatingRowDirection.Add(new Point(x, y));
-					}
-				}
-			}
-
-		}
-	}
-}
-public class MyDataStructure
+public class StuffCell
 {
 	private const int NOT_MOVED_DORMANT_TRIGGER = 10;
 
-	public MyDataStructure(WorldSetup setup = WorldSetup.Empty) 
+	public StuffCell(WorldSetup setup = WorldSetup.Empty) 
 	{
 		//========================================
 		// PREPARE THE WORLD DATA STRUCTURE
@@ -95,25 +31,25 @@ public class MyDataStructure
 		//				(OLDE GODS WONT YE SAVE US)
 		//========================================
 
-		WorldChunks = [];
+		Chunks = [];
 
 		const int chunksLong = 10;
 		/*const int chunkRows = 10;
 		const int chunkCols = 10;*/
 
-		int chunkWidth = STUFF_WIDTH / chunksLong/*chunkRows*/;
-		int chunkHeight = STUFF_HEIGHT / chunksLong/*chunkCols*/;
+		int chunkWidth = STUFF_WIDTH / chunksLong;
+		int chunkHeight = STUFF_HEIGHT / chunksLong;
 
 		var cursor = new Point(0, 0);
 		var leftToRight = true;
 
 		// these outer two loops are the row and cols of chunks
-		for (int chunkRow = 0; chunkRow < chunksLong/*chunkCols*/; chunkRow++)
+		for (int chunkRow = 0; chunkRow < chunksLong; chunkRow++)
 		{
-			for (int chunkCol = 0; chunkCol < chunksLong/*chunkRows*/; chunkCol++)
+			for (int chunkCol = 0; chunkCol < chunksLong; chunkCol++)
 			{
 				// create new chunk
-				WorldChunks.Add(new Chunk(cursor, chunkWidth, chunkHeight));
+				Chunks.Add(new Chunk(cursor, chunkWidth, chunkHeight));
 
 				leftToRight = !leftToRight;
 
@@ -125,67 +61,8 @@ public class MyDataStructure
 			// move the cursor up one row to new chunk - doesn't matter if new cursor falls off the
 			// grid as this is last operation of the nested loops
 			cursor = new Point(cursor.X, cursor.Y + chunkHeight);
-
 		}
-		////////////////////////////////////////////////////////////////
-		/// THIS WAS THE ORIGINAL CHUNKING ALG
-		///////////////////////////////////////////////////////////////////
-		//int chunkWidth = STUFF_WIDTH / chunksLong/*chunkRows*/;
-		//int chunkHeight = STUFF_HEIGHT / chunksLong/*chunkCols*/;
-
-		//var cursor = new Point(0, 0);
-		//var leftToRight = true;
-
-		//// these outer two loops are the row and cols of chunks
-		//for (int chunkRow = 0; chunkRow < chunksLong/*chunkCols*/; chunkRow++)
-		//{
-		//	for (int chunkCol = 0; chunkCol < chunksLong/*chunkRows*/; chunkCol++)
-		//	{
-
-		//		// container for all points in a chunk
-		//		var chunkPoints = new List<Point>(chunkWidth * chunkHeight);
-		//		// inner loops are for the pixels in each chunk
-		//		for (int y = cursor.Y; y < cursor.Y + chunkHeight; y++)
-		//		{
-		//			// switching horizontal scan direction for each row
-		//			if (leftToRight)
-		//			{
-		//				for (int x = cursor.X; x < cursor.X + chunkWidth + chunkWidth; x++)
-		//				{
-		//					if (x >= 0 && x < STUFF_WIDTH && y >= 0 && y < STUFF_HEIGHT)
-		//					{
-		//						chunkPoints.Add(new Point(x, y));
-		//					}
-		//				}
-		//			}
-		//			else
-		//			{
-		//				for (int x = cursor.X + chunkWidth; x >= cursor.X; x--)
-		//				{
-		//					if (x >= 0 && x < STUFF_WIDTH && y >= 0 && y < STUFF_HEIGHT)
-		//					{
-		//						chunkPoints.Add(new Point(x, y));
-		//					}
-		//				}
-		//			}
-
-		//		}
-
-		//		WorldChunks.Add(chunkPoints);
-
-		//		leftToRight = !leftToRight;
-
-		//		// IF NOT LAST column in row of chunks - move the cursor over one column to new chunk
-		//		// OTHERWISE set the col back to first for new row
-		//		cursor = new Point(chunkCol != chunksLong/*chunkCols*/ - 1 ? cursor.X + chunkWidth : 0, cursor.Y);
-		//	}
-
-		//	// move the cursor up one row to new chunk - doesn't matter if new cursor falls off the
-		//	// grid as this is last operation of the nested loops
-		//	cursor = new Point(cursor.X, cursor.Y + chunkHeight);
-
-		//}
-		////////////////////////////////////////////////////////////////
+		
 		switch (setup)
 		{
 			case WorldSetup.Empty:
@@ -200,7 +77,6 @@ public class MyDataStructure
 						|| y == 0 || y == World[x].Length - 1) // if at far top or bottom
 						{
 							ForceAddStuff(Stuffs.BASIC_STONE, x, y);
-							//world.World[x][y] = StuffFactory.Instance.Get(Stuffs.BASIC_STONE);
 						}
 					}
 				}
@@ -214,7 +90,6 @@ public class MyDataStructure
 						|| y == 0 || y == World[x].Length - 1) // if at far top or bottom
 						{
 							ForceAddStuff(Stuffs.BASIC_STONE, x, y);
-							//world.World[x][y] = StuffFactory.Instance.Get(Stuffs.BASIC_STONE);
 						}
 					}
 				}
@@ -244,10 +119,10 @@ public class MyDataStructure
 				break;
 		}
 	}
+
 	/// <summary>Outer array is X, inner array is Y.</summary>
 	public Stuff[][] World { get; private set; }
-	/// <summary>Each inner list is a chunk's worth of coordinates.</summary>
-	public List<Chunk> WorldChunks { get; set; }
+	public List<Chunk> Chunks { get; set; }
 
 	public void SafeAddStuffIfEmpty_InSquare(string stuffType, int x, int y, int length)
 	{
@@ -504,19 +379,19 @@ public class MyDataStructure
 		{
 			for (var x = 0; x < World.Length; x++)
 			{
-				colorData[colorIndex++] = World[x][y] == null ? Color.White : World[x][y].Color;
+				colorData[colorIndex++] = World[x][y] == null ? Color.Transparent : World[x][y].Color;
 			}
 		}
 
 		return colorData;
 	}
 
-	public Stuff Get(Point p)
+	public Stuff GetStuffAt(Point p)
 	{
-		return Get(p.X, p.Y);
+		return GetStuffAt(p.X, p.Y);
 	}
 
-	public Stuff Get(int x, int y)
+	public Stuff GetStuffAt(int x, int y)
 	{
 		return World[x][y];
 	}
@@ -566,7 +441,7 @@ public class MyDataStructure
 			// check for stuff at target
 			var didMove = false;
 
-			Stuff stuffTarget = Get(to);
+			Stuff stuffTarget = GetStuffAt(to);
 			var sourceHasStuff = stuffAtSource != null;
 			var targetHasStuff = stuffTarget != null;
 
@@ -662,12 +537,12 @@ public class MyDataStructure
 			var currentFrame = TimeManager.CurrentFrame;
 			var alteratingSeed = currentFrame % 2 == 0;
 
-			for (int iChunk = 0; iChunk < WorldChunks.Count; iChunk++)
+			for (int iChunk = 0; iChunk < Chunks.Count; iChunk++)
 			{
 				// this if is the gate deciding which chunks are to be updated this Update invocation
 				if (alteratingSeed)// every other chunk
 				{
-					chunksToUpdate.Add(WorldChunks[iChunk]);
+					chunksToUpdate.Add(Chunks[iChunk]);
 					alteratingSeed = false;
 				}
 				else

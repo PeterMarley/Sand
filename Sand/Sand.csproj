@@ -14,6 +14,7 @@
     <RootNamespace>Sand</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Content\TextureImages\Checkerboard_BG_8x8.png" />
     <None Remove="Content\TextureImages\CyanPixel.png" />
     <None Remove="Content\TextureImages\RedPixel.png" />
     <None Remove="Content\TextureImages\SandPixel_01_e3d292.png" />
@@ -37,11 +38,12 @@
     <Compile Include="Extensions\ArrayExtensions.cs" />
     <Compile Include="Extensions\NumberExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Models\MyDataStructure.cs" />
+    <Compile Include="Models\World\Chunk.cs" />
+    <Compile Include="Models\World\StuffCell.cs" />
     <Compile Include="Models\World\DrawableWorld.cs" />
-    <Compile Include="Models\World\WorldFactory.cs" />
     <Compile Include="Models\Player\Player.cs" />
     <Compile Include="Models\Stuff\Stuff.cs" />
+    <Compile Include="Models\World\WorldSetup.cs" />
     <Compile Include="Services\FastRandomBoolGenerator.cs" />
     <Compile Include="Services\ConfigService.cs" />
     <Compile Include="Services\Randoms.cs" />
@@ -54,6 +56,9 @@
     <Compile Include="Models\Stuff\StuffFactory.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\TextureImages\Checkerboard_BG_8x8.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Content\TextureImages\CyanPixel.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
