@@ -88,7 +88,7 @@ public class Player
 		{
 
 			var tSpriteSheet = FlatRedBallServices.Load<Texture2D>("C:\\Dev\\FlatRedBall\\Sand\\Sand\\Content\\TextureImages\\satiro-Sheet v1.1.png");
-			var timeIdleDefault = 0.2f;
+			var timeIdleDefault = 0.1f;
 
 			Sprite = SpriteManager.AddSprite(new AnimationChainList()
 			{
