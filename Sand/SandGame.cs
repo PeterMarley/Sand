@@ -6,6 +6,7 @@ using static FlatRedBall.Input.Mouse;
 using System.Threading.Tasks;
 using static Sand.Constants;
 using System.Diagnostics;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Sand;
 
@@ -77,6 +78,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 			$"\tSHOW_STUFF_DORMANCY_COLORS=={SHOW_STUFF_DORMANCY_COLORS}\n" +
 			$"===============================================================\n";
 		Logger.Instance.LogInfo(configPrintStr);
+		FlatRedBallServices.GraphicsOptions.TextureFilter = TextureFilter.Point;
 
 		//============================================================================
 		// SETs to comfy dev left screen
@@ -103,10 +105,17 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 		_tLoadMaterials = Task.Run(StuffFactory.Instance.LoadMaterialsAsync);
 
+		var wsWidth = RESOLUTION_X * 2;
+		var wsHeight = RESOLUTION_Y * 2;
+
+		Camera.Main.Orthogonal = true;
+		Camera.Main.OrthogonalWidth = wsWidth;
+		Camera.Main.OrthogonalHeight = wsHeight;
+
 		base.Initialize();
 	}
 
-	private int FRAME_COUNT_BETWEEN_UPDATE = 1;
+	//private int FRAME_COUNT_BETWEEN_UPDATE = 1;
 	private int FRAME_COUNT_BETWEEN_DRAW = 1;
 
 	private bool didPrep = false;
@@ -124,7 +133,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		}
 		else if (!didPrep)
 		{
-			_world = new DrawableWorld(WorldSetup.Empty);
+			_world = new DrawableWorld(WorldSetup.StoneAroundEdges2);
 
 			//SpriteManager.AddDrawableBatch(_world);
 			didPrep = true;
@@ -139,10 +148,11 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 			Debugger.Break();
 		}
 
-		if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE == 0)
-		{
-			_world.Update();
-		}
+		//// MOVED THE IF INTO UpdateWorldManually
+		//if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE == 0)
+		//{
+		_world.Update();
+		//}
 
 		_world.ProcessControlsInput();
 
@@ -161,7 +171,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 		if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_DRAW == 0)
 		{
-			_world.Draw(Camera.Main);
+			_world.DrawWorldManually(Camera.Main);
 		}
 
 		base.Draw(gameTime);

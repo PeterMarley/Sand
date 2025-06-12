@@ -38,6 +38,7 @@
     <Compile Include="Extensions\ArrayExtensions.cs" />
     <Compile Include="Extensions\NumberExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Models\World\CheckerBoardBackground.cs" />
     <Compile Include="Models\World\Chunk.cs" />
     <Compile Include="Models\World\StuffCell.cs" />
     <Compile Include="Models\World\DrawableWorld.cs" />

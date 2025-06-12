@@ -1,4 +1,6 @@
 ﻿using FlatRedBall;
+using FlatRedBall.Graphics;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,11 +12,11 @@ using Color = Microsoft.Xna.Framework.Color;
 
 namespace Sand;
 
-public class StuffCell
+public class StuffCell : IDrawableBatch
 {
 	private const int NOT_MOVED_DORMANT_TRIGGER = 10;
 
-	public StuffCell(WorldSetup setup = WorldSetup.Empty) 
+	public StuffCell(WorldSetup setup = WorldSetup.Empty)
 	{
 		//========================================
 		// PREPARE THE WORLD DATA STRUCTURE
@@ -62,7 +64,7 @@ public class StuffCell
 			// grid as this is last operation of the nested loops
 			cursor = new Point(cursor.X, cursor.Y + chunkHeight);
 		}
-		
+
 		switch (setup)
 		{
 			case WorldSetup.Empty:
@@ -118,11 +120,111 @@ public class StuffCell
 				}
 				break;
 		}
+
+		if (WorldSprite == null)
+		{
+
+			var wsWidth = RESOLUTION_X * 2;
+			var wsHeight = RESOLUTION_Y * 2;
+
+			WorldTexture = new Texture2D(FlatRedBallServices.GraphicsDevice, STUFF_WIDTH, STUFF_HEIGHT);
+			WorldTexture.SetData(GetColorData());
+
+			WorldSprite = SpriteManager.AddManualSprite(WorldTexture);
+			WorldSprite.Width = wsWidth;// RESOLUTION_X * 2;
+			WorldSprite.Height = wsHeight;// RESOLUTION_Y * 2;
+			WorldSprite.X += RESOLUTION_X / 2;
+			WorldSprite.Y += RESOLUTION_Y / 2;
+			WorldSprite.Z = Z_IND_WORLD;
+			/*WorldSprite.X = -5000;
+			WorldSprite.Y = -5000;*/
+
+
+			Camera.Main.Orthogonal = true;
+			Camera.Main.OrthogonalWidth = WorldSprite.Width;
+			Camera.Main.OrthogonalHeight = WorldSprite.Height;
+			Camera.Main.OrthogonalWidth = wsWidth;
+			Camera.Main.OrthogonalHeight = wsHeight;
+		}
+
+		SpriteManager.AddDrawableBatch(this);
 	}
 
 	/// <summary>Outer array is X, inner array is Y.</summary>
 	public Stuff[][] World { get; private set; }
 	public List<Chunk> Chunks { get; set; }
+	private Texture2D WorldTexture { get; set; }
+	private Sprite WorldSprite { get; set; }
+
+	public float X => 0;
+
+	public float Y => 0;
+
+	public float Z => 0;
+
+	public bool UpdateEveryFrame => true;
+
+	public void Draw(Camera camera)
+	{
+		//===================================================
+		// DRAW WORLD TEXTURE
+		//===================================================
+
+		// interate through the World and get the color data of all Stuffs there
+		var colorData = GetColorData();
+
+/*		if (WorldSprite == null)
+		{
+
+			var wsWidth = RESOLUTION_X * 2;
+			var wsHeight = RESOLUTION_Y * 2;
+
+			WorldTexture = new Texture2D(FlatRedBallServices.GraphicsDevice, STUFF_WIDTH, STUFF_HEIGHT);
+			WorldTexture.SetData(colorData);
+
+			WorldSprite = SpriteManager.AddManualSprite(WorldTexture);
+			WorldSprite.Width = RESOLUTION_X;// wsWidth;// RESOLUTION_X * 2;
+			WorldSprite.Height = RESOLUTION_Y;// wsHeight;// RESOLUTION_Y * 2;
+			WorldSprite.X += RESOLUTION_X / 2;
+			WorldSprite.Y += RESOLUTION_Y / 2;
+			WorldSprite.Z = Z_IND_WORLD;
+			WorldSprite.X = -5000;
+			WorldSprite.Y = -5000;
+
+
+			Camera.Main.Orthogonal = true;
+			Camera.Main.OrthogonalWidth = WorldSprite.Width;
+			Camera.Main.OrthogonalHeight = WorldSprite.Height;
+			Camera.Main.OrthogonalWidth = wsWidth;
+			Camera.Main.OrthogonalHeight = wsHeight;
+		}*/
+
+		if (SHOW_WORLD)
+		{
+			WorldTexture.SetData(colorData);
+			SpriteManager.ManualUpdate(WorldSprite);
+		}
+
+
+		//BgSpriteBatch.Draw(WorldTexture, new Rectangle(0,0, RESOLUTION_X, RESOLUTION_Y), Color.White);
+		// change tto
+		//BgSpriteBatch.Draw(WorldTexture, new Rectangle(0, 0, RESOLUTION_X, RESOLUTION_Y), null, Color.White, 0f, Vector2.Zero, SpriteEffects.None, 0.0f);
+
+
+	}
+
+	public void Update()
+	{
+		if (WorldSprite != null)
+		{
+			WorldSprite.Visible = SHOW_WORLD;
+		}
+	}
+
+	public void Destroy()
+	{
+		//throw new NotImplementedException();
+	}
 
 	public void SafeAddStuffIfEmpty_InSquare(string stuffType, int x, int y, int length)
 	{
@@ -370,7 +472,7 @@ public class StuffCell
 		};
 	}
 
-	public Color[] GetColorData() 
+	public Color[] GetColorData()
 	{
 		var colorData = new Color[STUFF_HEIGHT * STUFF_WIDTH];
 		var colorIndex = 0;
@@ -560,4 +662,6 @@ public class StuffCell
 
 		return chunksToUpdate;
 	}
+
+
 }

@@ -37,11 +37,7 @@ public class DrawableWorld
 	//========================================
 
 	public Player Player { get; private set; }
-
-	//========================================
-	// IDrawableBatch
-	//========================================
-
+	private CheckerBoardBackground Background { get; set; } 
 	public DrawableWorld(WorldSetup worldSetup)
 	{
 		PrepareBackground();
@@ -50,12 +46,7 @@ public class DrawableWorld
 
 		void PrepareBackground()
 		{
-			BgTexture = FlatRedBallServices.Load<Texture2D>("Content/TextureImages/Checkerboard_BG_8x8.png");
-			float tWidth = BgTexture.Width;
-			float tHeight = BgTexture.Height;
-			int maxCol = (int)(Constants.RESOLUTION_X / tWidth);
-			int maxRow = (int)(Constants.RESOLUTION_Y / tHeight);
-			BgSpriteBatch = new SpriteBatch(FlatRedBallServices.GraphicsDevice, maxCol * maxRow);
+			Background = new CheckerBoardBackground();
 		}
 		void PrepareWorld(WorldSetup worldSetup) 
 		{
@@ -282,9 +273,14 @@ public class DrawableWorld
 	#endregion
 
 	#region Game Loop Methods called by SandGame
-
+	private const int _FRAME_COUNT_BETWEEN_UPDATE = 1;
 	public void Update()
 	{
+/*		if (TimeManager.CurrentFrame % _FRAME_COUNT_BETWEEN_UPDATE != 0)
+		{
+			return;
+		}
+*/
 		var p = new Point();
 
 		try
@@ -321,9 +317,9 @@ public class DrawableWorld
 		}
 	}
 
-	public void Draw(Camera camera)
+	public void DrawWorldManually(Camera camera)
 	{
-
+/*
 		try
 		{
 			//===================================================
@@ -331,7 +327,17 @@ public class DrawableWorld
 			//===================================================
 
 			// Required or sprite batch texture will be blurry
-			BgSpriteBatch.Begin(samplerState: SamplerState.PointClamp);
+			BgSpriteBatch.Begin(
+				sortMode: SpriteSortMode.BackToFront,// enable depth sorting
+				samplerState: SamplerState.PointClamp // ensure texture isnt stretched, but remains true "pixels" and not blurry
+			);
+			BgSpriteBatch.Begin(
+	sortMode: SpriteSortMode.BackToFront,
+	blendState: BlendState.AlphaBlend,
+	samplerState: SamplerState.PointClamp,
+	depthStencilState: DepthStencilState.Default,
+	rasterizerState: RasterizerState.CullNone
+);
 
 			float tWidth = BgTexture.Width;
 			float tHeight = BgTexture.Height;
@@ -339,15 +345,15 @@ public class DrawableWorld
 			int maxCol = (int)(Constants.RESOLUTION_X / tWidth);
 			int maxRow = (int)(Constants.RESOLUTION_Y / tHeight);
 
-			for (int x = 0; x < maxCol; x++)
-			{
-				for (int y = 0; y < maxRow; y++)
-				{
-					Vector2 v = new Vector2(x * tWidth, y * tHeight);
-					BgSpriteBatch.Draw(BgTexture, v, Color.White);
-					//BgSpriteBatch.Draw(BgTexture, v, null, Color.White, 0f, new Vector2(0,0), new Vector2(1, 1), SpriteEffects.None, 0.5f);
-				}
-			}
+			//for (int x = 0; x < maxCol; x++)
+			//{
+			//	for (int y = 0; y < maxRow; y++)
+			//	{
+			//		Vector2 v = new Vector2(x * tWidth, y * tHeight);
+			//		BgSpriteBatch.Draw(BgTexture, v, Color.White);
+			//		//BgSpriteBatch.Draw(BgTexture, v, null, Color.White, 0f, new Vector2(0,0), new Vector2(1, 1), SpriteEffects.None, 0.5f);
+			//	}
+			//}
 
 			//===================================================
 			// DRAW WORLD TEXTURE
@@ -357,7 +363,6 @@ public class DrawableWorld
 			var colorData = StuffCell.GetColorData();
 			if (WorldSprite == null)
 			{
-				FlatRedBallServices.GraphicsOptions.TextureFilter = TextureFilter.Point;
 
 				var wsWidth = RESOLUTION_X * 2;
 				var wsHeight = RESOLUTION_Y * 2;
@@ -365,19 +370,19 @@ public class DrawableWorld
 				WorldTexture = new Texture2D(FlatRedBallServices.GraphicsDevice, STUFF_WIDTH, STUFF_HEIGHT);
 				WorldTexture.SetData(colorData);
 
-				/*WorldSprite = SpriteManager.AddSprite(WorldTexture);
+				WorldSprite = SpriteManager.AddSprite(WorldTexture);
 				WorldSprite.Width = wsWidth;// RESOLUTION_X * 2;
 				WorldSprite.Height = wsHeight;// RESOLUTION_Y * 2;
 				WorldSprite.X += RESOLUTION_X / 2;
 				WorldSprite.Y += RESOLUTION_Y / 2;
-				WorldSprite.Z = 0.9f;*/
-/*				WorldSprite.X = -5000;
-				WorldSprite.Y = -5000;*/
+				WorldSprite.Z = 0.9f;
+				WorldSprite.X = -5000;
+				WorldSprite.Y = -5000;
 
 
 				Camera.Main.Orthogonal = true;
-				/*				Camera.Main.OrthogonalWidth = WorldSprite.Width;
-								Camera.Main.OrthogonalHeight = WorldSprite.Height;*/
+				Camera.Main.OrthogonalWidth = WorldSprite.Width;
+				Camera.Main.OrthogonalHeight = WorldSprite.Height;
 				Camera.Main.OrthogonalWidth = wsWidth;
 				Camera.Main.OrthogonalHeight = wsHeight;
 			}
@@ -387,7 +392,10 @@ public class DrawableWorld
 				SpriteManager.ManualUpdate(WorldSprite);
 			}
 
-			BgSpriteBatch.Draw(WorldTexture, new Rectangle(0,0, RESOLUTION_X, RESOLUTION_Y), Color.White);
+			//BgSpriteBatch.Draw(WorldTexture, new Rectangle(0,0, RESOLUTION_X, RESOLUTION_Y), Color.White);
+			// change tto
+			BgSpriteBatch.Draw(WorldTexture, new Rectangle(0, 0, RESOLUTION_X, RESOLUTION_Y), null, Color.White, 0f, Vector2.Zero, SpriteEffects.None, 0.0f);
+
 
 			//===================================================
 			// DRAW PLAYER TEXTURE
@@ -399,7 +407,7 @@ public class DrawableWorld
 		{
 			Logger.Instance.LogError(drawWorldEx, $"Failed to process and apply the colour of each {nameof(Stuff)} to the {nameof(WorldTexture)}");
 			throw;
-		}
+		}*/
 	}
 
 	// Not Implemented
