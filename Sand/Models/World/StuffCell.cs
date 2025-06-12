@@ -280,6 +280,9 @@ public class StuffCell : IDrawableBatch
 
 		public int MoveFactor;
 		public int GravMagnitude;
+
+		public int MoveLeftOffsetY;
+		public int MoveRightOffsetY;
 	}
 
 	public PlayerCollisionResult Collision(Player player, int initialGravMagnitude, int initialMoveFactor) //player
@@ -294,6 +297,8 @@ public class StuffCell : IDrawableBatch
 		bool allowDown = true;
 		bool allowLeft = true;
 		bool inLiquid = false;
+		int moveLeftOffsetY = 0;
+		int moveRightOffsetY = 0;
 
 		//================================================
 		// bottom collision
@@ -377,6 +382,10 @@ public class StuffCell : IDrawableBatch
 			allowUp = false;
 		}
 		#endregion
+
+		const int UPHILL_WALK_VERT_THRESHOLD = 8;
+		var lastY = bottom + 2;
+
 		//================================================
 		// LEFT collision
 		//================================================ww
@@ -387,7 +396,7 @@ public class StuffCell : IDrawableBatch
 		if (left >= 0 && left < STUFF_WIDTH)
 		{
 			// iterate across that row within the sprites x coords and check if downward movement should be arrested
-			for (var y = top - 1; y > bottom + 1; y--)
+			for (var y = top - 1; y >= lastY; y--)
 			{
 				// if outside the world bound just continue to next in row
 				if (y < 0 || y >= STUFF_HEIGHT)
@@ -395,21 +404,50 @@ public class StuffCell : IDrawableBatch
 					continue;
 				}
 
-				// if there is something here then stop
+				// if there is something here
 				if (World[left][y] != null)
 				{
-					if (World[left][y].Phase == Phase.Liquid)
+					// if its a liquid, slow down
+					if (World[left][y] is { Phase: Phase.Liquid })
 					{
 						inLiquid = true;
 						adjustedMoveFactor = initialMoveFactor / 2;
 					}
-					else
+					else if (World[left][y] is { Phase: Phase.Solid } or { Phase: Phase.Powder })
 					{
-						allowLeft = false;
-						break;
+						//===========================
+						// WALK UPHILL LEFT
+						//===========================
+
+						// check up to n "pixels" above the blocker, and if space then offset left movement's Y by that much and allowLeft
+						if (y == lastY)
+						{
+							for (var i = 1; i <= UPHILL_WALK_VERT_THRESHOLD; i++)
+							{
+								if (y + i >= STUFF_HEIGHT || y + i < 0)
+								{
+									break;
+								}
+
+								// if the left blocker has space above, allow left, but require a single y coord offset of the height of a Stuff
+								if (World[left][y + i] == null)
+								{
+									allowLeft = true;
+									moveLeftOffsetY += (i * STUFF_SCALE) + (1 * STUFF_SCALE);
+									break;
+								}
+								else if (i == UPHILL_WALK_VERT_THRESHOLD)
+								{
+									// else dont allow left
+									allowLeft = false;
+									break;
+								}
+							}	
+						}
 					}
 					//Logger.Instance.LogInfo($"Encountering {World[left][y].Phase} at left - move factor is {moveFactor}");
 				}
+			
 			}
 		}
 		// if bottom coord index is not safe
@@ -428,7 +466,7 @@ public class StuffCell : IDrawableBatch
 		if (right >= 0 && right < STUFF_WIDTH)
 		{
 			// iterate across that row within the sprites x coords and check if downward movement should be arrested
-			for (var y = top - 1; y > bottom + 1; y--)
+			for (var y = top - 1; y >= lastY; y--)
 			{
 				// if outside the world bound just continue to next in row
 				if (y < 0 || y >= STUFF_HEIGHT)
@@ -436,20 +474,48 @@ public class StuffCell : IDrawableBatch
 					continue;
 				}
 
-				// if there is something here then stop
+				// if there is something here
 				if (World[right][y] != null)
 				{
-					if (World[right][y].Phase == Phase.Liquid)
+					// if its a liquid, slow down
+					if (World[right][y] is { Phase: Phase.Liquid })
 					{
 						inLiquid = true;
 						adjustedMoveFactor = initialMoveFactor / 2;
 					}
-					else
+					else if (World[right][y] is { Phase: Phase.Solid } or { Phase: Phase.Powder })
 					{
-						allowRight = false;
-						break;
+						//===========================
+						// WALK UPHILL RIGHT
+						//===========================
+
+						// check up to n "pixels" above the blocker, and if space then offset left movement's Y by that much and allowLeft
+						if (y == lastY)
+						{
+							for (var i = 1; i <= UPHILL_WALK_VERT_THRESHOLD; i++)
+							{
+								if (y + i >= STUFF_HEIGHT || y + i < 0)
+								{
+									break;
+								}
+
+								// if the left blocker has space above, allow left, but require a single y coord offset of the height of a Stuff
+								if (World[right][y + i] == null)
+								{
+									allowRight = true;
+									moveRightOffsetY += (i * STUFF_SCALE) + (1 * STUFF_SCALE);
+									break;
+								}
+								else if (i == UPHILL_WALK_VERT_THRESHOLD)
+								{
+									// else dont allow left
+									allowRight = false;
+									break;
+								}
+							}
+						}
 					}
-					//Logger.Instance.LogInfo($"Encountering {World[right][y].Phase} at right - move factor is {moveFactor}");
+					//Logger.Instance.LogInfo($"Encountering {World[left][y].Phase} at left - move factor is {moveFactor}");
 				}
 			}
 		}
@@ -468,7 +534,9 @@ public class StuffCell : IDrawableBatch
 			AllowLeft = allowLeft,
 			InLiquid = inLiquid,
 			MoveFactor = adjustedMoveFactor,
-			GravMagnitude = adjustedGravMagnitude
+			GravMagnitude = adjustedGravMagnitude,
+			MoveLeftOffsetY = moveLeftOffsetY,
+			MoveRightOffsetY = moveRightOffsetY
 		};
 	}
 

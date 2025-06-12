@@ -476,6 +476,8 @@ public class DrawableWorld
 			var allowDown = collision.AllowDown;
 			var allowLeft = collision.AllowLeft;
 			var moveFactor = collision.MoveFactor;
+			var moveLeftOffsetY = collision.MoveLeftOffsetY;
+			var moveRightOffsetY = collision.MoveRightOffsetY;
 
 			//move ↑
 			if (allowUp && InputManager.Keyboard.KeyDown(Keys.W))
@@ -487,6 +489,7 @@ public class DrawableWorld
 			if (allowLeft && InputManager.Keyboard.KeyDown(Keys.A))
 			{
 				Player.X -= moveFactor;
+				Player.Y += moveLeftOffsetY;
 			}
 
 			// move ↓
@@ -509,6 +512,7 @@ public class DrawableWorld
 			if (allowRight && InputManager.Keyboard.KeyDown(Keys.D))
 			{
 				Player.X += moveFactor;
+				Player.Y += moveRightOffsetY;
 			}
 
 			if (InputManager.Keyboard.KeyPushed(Keys.Q))
