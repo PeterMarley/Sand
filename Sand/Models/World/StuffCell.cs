@@ -16,7 +16,7 @@ public class StuffCell : IDrawableBatch
 {
 	private const int NOT_MOVED_DORMANT_TRIGGER = 10;
 
-	public StuffCell(WorldSetup setup = WorldSetup.Empty)
+	public StuffCell(int offset, StuffCellSetup setup = StuffCellSetup.Empty)
 	{
 		//========================================
 		// PREPARE THE WORLD DATA STRUCTURE
@@ -67,10 +67,10 @@ public class StuffCell : IDrawableBatch
 
 		switch (setup)
 		{
-			case WorldSetup.Empty:
+			case StuffCellSetup.Empty:
 			default:
 				break;
-			case WorldSetup.StoneAroundEdges:
+			case StuffCellSetup.StoneAroundEdges:
 				for (int x = 0; x < World.Length; x++)
 				{
 					for (int y = 0; y < World[x].Length; y++)
@@ -83,7 +83,7 @@ public class StuffCell : IDrawableBatch
 					}
 				}
 				break;
-			case WorldSetup.StoneAroundEdges2:
+			case StuffCellSetup.StoneAroundEdges2:
 				for (int x = 0; x < World.Length; x++)
 				{
 					for (int y = 0; y < World[x].Length; y++)
@@ -96,7 +96,7 @@ public class StuffCell : IDrawableBatch
 					}
 				}
 				break;
-			case WorldSetup.WaterBottomHalf:
+			case StuffCellSetup.WaterBottomHalf:
 				for (int x = 0; x < World.Length; x++)
 				{
 					for (int y = 0; y < World[x].Length / 2; y++)
@@ -105,7 +105,7 @@ public class StuffCell : IDrawableBatch
 					}
 				}
 				break;
-			case WorldSetup.WaterSloshingAbout:
+			case StuffCellSetup.WaterSloshingAbout:
 				var i = 0;
 				for (int x = 0; x < World.Length; x++)
 				{
@@ -133,16 +133,30 @@ public class StuffCell : IDrawableBatch
 			WorldSprite = SpriteManager.AddManualSprite(WorldTexture);
 			WorldSprite.Width = wsWidth;// RESOLUTION_X * 2;
 			WorldSprite.Height = wsHeight;// RESOLUTION_Y * 2;
-			WorldSprite.X += RESOLUTION_X / 2;
+
+			WorldSprite.X += RESOLUTION_X / 2 + (offset * RESOLUTION_X * 2);
 			WorldSprite.Y += RESOLUTION_Y / 2;
+
+			// instead offset setting X & Y props to account for:
+			//		1. centre of sprite being 0,0 (prefer bottom left is 0,0)
+			//		2. the position of this stuff cell in the greater whole
+
+			//// 1.
+			//var bottomLeftOriginOffset_x = World.Length / 2f;
+			//var bottomLeftOriginOffset_y = World[0].Length / 2f;
+
+			//2.
+
+			/*			WorldSprite.X = initX;
+						WorldSprite.Y = initY;*/
 			WorldSprite.Z = Z_IND_WORLD;
 			/*WorldSprite.X = -5000;
 			WorldSprite.Y = -5000;*/
 
 
 			Camera.Main.Orthogonal = true;
-			Camera.Main.OrthogonalWidth = WorldSprite.Width;
-			Camera.Main.OrthogonalHeight = WorldSprite.Height;
+			//Camera.Main.OrthogonalWidth = WorldSprite.Width;
+			//Camera.Main.OrthogonalHeight = WorldSprite.Height;
 			Camera.Main.OrthogonalWidth = wsWidth;
 			Camera.Main.OrthogonalHeight = wsHeight;
 		}

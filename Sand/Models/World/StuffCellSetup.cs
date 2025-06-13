@@ -1,6 +1,6 @@
 ﻿namespace Sand;
 
-public enum WorldSetup
+public enum StuffCellSetup
 { 
 	Empty,
 	StoneAroundEdges,

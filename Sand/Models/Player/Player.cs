@@ -256,7 +256,7 @@ public class Player
 
 	}
 
-	public void Turn()
+	public void TurnDirectionFacing()
 	{
 
 		try
@@ -302,7 +302,6 @@ public class Player
 		}
 		catch (Exception ex)
 		{
-
 			throw;
 		}
 

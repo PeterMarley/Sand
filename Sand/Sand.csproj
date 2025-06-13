@@ -44,7 +44,7 @@
     <Compile Include="Models\World\DrawableWorld.cs" />
     <Compile Include="Models\Player\Player.cs" />
     <Compile Include="Models\Stuff\Stuff.cs" />
-    <Compile Include="Models\World\WorldSetup.cs" />
+    <Compile Include="Models\World\StuffCellSetup.cs" />
     <Compile Include="Services\FastRandomBoolGenerator.cs" />
     <Compile Include="Services\ConfigService.cs" />
     <Compile Include="Services\Randoms.cs" />

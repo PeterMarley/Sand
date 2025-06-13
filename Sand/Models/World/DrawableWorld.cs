@@ -26,7 +26,8 @@ public class DrawableWorld
 	// The World
 	//========================================
 
-	public StuffCell StuffCell { get; set; }
+	//public StuffCell StuffCell { get; set; }
+	public StuffCell[] StuffCells { get; set; }
 	private Texture2D WorldTexture { get; set; }
 	private Sprite WorldSprite { get; set; }
 	private SpriteBatch BgSpriteBatch { get; set; }
@@ -38,7 +39,7 @@ public class DrawableWorld
 
 	public Player Player { get; private set; }
 	private CheckerBoardBackground Background { get; set; } 
-	public DrawableWorld(WorldSetup worldSetup)
+	public DrawableWorld(StuffCellSetup worldSetup)
 	{
 		PrepareBackground();
 		PrepareWorld(worldSetup);
@@ -48,9 +49,16 @@ public class DrawableWorld
 		{
 			Background = new CheckerBoardBackground();
 		}
-		void PrepareWorld(WorldSetup worldSetup) 
+		void PrepareWorld(StuffCellSetup worldSetup) 
 		{
-			StuffCell = new StuffCell(worldSetup);
+			
+			//StuffCell = new StuffCell(worldSetup);
+			StuffCells =
+			[
+				new StuffCell(-1, worldSetup),
+				new StuffCell(0, worldSetup),
+				new StuffCell(1, worldSetup)
+			];
 		}
 		void PreparePlayer() 
 		{
@@ -65,7 +73,8 @@ public class DrawableWorld
 
 	public void ApplyGravity(int xIndex, int yIndex)
 	{
-		var stuff = StuffCell.GetStuffAt(xIndex, yIndex);
+		//TODO stuff cell naive quick impl
+		var stuff = StuffCells[1].GetStuffAt(xIndex, yIndex);
 
 		switch (stuff.Phase)
 		{
@@ -147,7 +156,8 @@ public class DrawableWorld
 			if (rowBelowIndex < 0) return;
 
 			// if dormant, and theres nothing below, finish
-			if (stuff.CheckDormancy() && StuffCell.GetStuffAt(xIndex, rowBelowIndex) != null) // this is not null check basically enables erroneously dormant stuff to right itself
+			//TODO stuff cell naive quick impl
+			if (stuff.CheckDormancy() && StuffCells[1].GetStuffAt(xIndex, rowBelowIndex) != null) // this is not null check basically enables erroneously dormant stuff to right itself
 			{
 				return;
 			}
@@ -267,7 +277,8 @@ public class DrawableWorld
 
 	public bool Move(Point from, Point to)
 	{
-		return StuffCell.Move(from, to);
+		//TODO stuff cell naive quick impl
+		return StuffCells[1].Move(from, to);
 	}
 
 	#endregion
@@ -290,7 +301,9 @@ public class DrawableWorld
 			//=======================================================
 
 			// choose which chunks to update
-			var chunksToUpdate = StuffCell.GetChunksToUpdate();
+			//var chunksToUpdate = StuffCell.GetChunksToUpdate();
+			//TODO stuff cell naive quick impl
+			var chunksToUpdate = StuffCells[1].GetChunksToUpdate();
 
 			foreach (var chunk in chunksToUpdate)
 			{
@@ -303,7 +316,10 @@ public class DrawableWorld
 					p = point;
 
 					// if something here then apply gravity **NOTE** dormancy is checked in apply gravity
-					if (StuffCell.GetStuffAt(point) != null)
+
+					//if (StuffCell.GetStuffAt(point) != null)
+					//TODO stuff cell naive quick impl
+					if (StuffCells[1].GetStuffAt(point) != null)
 					{
 						ApplyGravity(xIndex, yIndex);
 					}
@@ -423,7 +439,6 @@ public class DrawableWorld
 	{
 		AffectWorld();
 		AffectPlayer();
-		Player.Turn();
 
 		void AffectWorld()
 		{
@@ -432,28 +447,42 @@ public class DrawableWorld
 				var x = InputManager.Mouse.X / STUFF_SCALE;
 				var y = (FlatRedBallServices.GraphicsDevice.Viewport.Height - InputManager.Mouse.Y) / STUFF_SCALE;
 
+				if (InputManager.Keyboard.KeyDown(Keys.Z))
+				{
+					Camera.Main.X -= 1 * STUFF_SCALE;
+				}
+
+				if (InputManager.Keyboard.KeyDown(Keys.C))
+				{
+					Camera.Main.X += 1 * STUFF_SCALE;
+				}
+
 				if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)))
 				{
-					StuffCell.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 15);
+					//TODO stuff cell naive quick impl
+					StuffCells[1].SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 15);
 					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
 
 				}
 
 				if ((InputManager.Mouse.ButtonPushed(MouseButtons.RightButton) || InputManager.Mouse.ButtonDown(MouseButtons.RightButton)))
 				{
-					StuffCell.SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 10);
+					//TODO stuff cell naive quick impl
+					StuffCells[1].SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 10);
 					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
 				}
 
 				if ((InputManager.Mouse.ButtonPushed(MouseButtons.MiddleButton) || InputManager.Mouse.ButtonDown(MouseButtons.MiddleButton)))
 				{
-					StuffCell.ForceAddStuff_InSquare(Stuffs.BASIC_STONE, x, y, 10);
+					//TODO stuff cell naive quick impl
+					StuffCells[1].ForceAddStuff_InSquare(Stuffs.BASIC_STONE, x, y, 10);
 					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
 				}
 
 				if ((InputManager.Mouse.ButtonPushed(MouseButtons.XButton1) || InputManager.Mouse.ButtonDown(MouseButtons.XButton1)))
 				{
-					StuffCell.ForceAddStuff_InSquare(Stuffs.BASIC_LAVA2, x, y, 2);
+					//TODO stuff cell naive quick impl
+					StuffCells[1].ForceAddStuff_InSquare(Stuffs.BASIC_LAVA2, x, y, 2);
 					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
 				}
 
@@ -461,64 +490,76 @@ public class DrawableWorld
 				if (InputManager.Keyboard.KeyDown(Keys.E))
 				{
 					var (top, right, bottom, left) = Player.GetPositionStuff(); /*NumberExtensions.ToStuffCoord(Player.Sprite);*/
-					StuffCell.ForceAddStuff_InSquare(Stuffs.BASIC_STONE, left, bottom, 2);
+
+					//StuffCell.ForceAddStuff_InSquare(Stuffs.BASIC_STONE, left, bottom, 2);
+
+					//TODO stuff cell naive quick impl
+					StuffCells[1].ForceAddStuff_InSquare(Stuffs.BASIC_STONE, left, bottom, 2);
 				}
 			}
 		}
-
 		void AffectPlayer()
 		{
 
-			var collision = StuffCell.Collision(Player, GRAV_MAGNITUDE, PLAYER_MOVE_FACTOR);
+			// TODO current => same for each cell
+			//	   eventual => pinpoint where the player is and do all cells as needed
+			/*foreach (var stuffCell in StuffCells)
+			{*/
+			//TODO stuff cell naive quick impl
+			var stuffCell = StuffCells[1];
+			var collision = stuffCell.Collision(Player, GRAV_MAGNITUDE, PLAYER_MOVE_FACTOR);
 
-			var allowUp = collision.AllowUp;
-			var allowRight = collision.AllowRight;
-			var allowDown = collision.AllowDown;
-			var allowLeft = collision.AllowLeft;
-			var moveFactor = collision.MoveFactor;
-			var moveLeftOffsetY = collision.MoveLeftOffsetY;
-			var moveRightOffsetY = collision.MoveRightOffsetY;
+				var allowUp = collision.AllowUp;
+				var allowRight = collision.AllowRight;
+				var allowDown = collision.AllowDown;
+				var allowLeft = collision.AllowLeft;
+				var moveFactor = collision.MoveFactor;
+				var moveLeftOffsetY = collision.MoveLeftOffsetY;
+				var moveRightOffsetY = collision.MoveRightOffsetY;
 
-			//move ↑
-			if (allowUp && InputManager.Keyboard.KeyDown(Keys.W))
-			{
-				Player.Y += (moveFactor * 2);
-			}
-
-			// move ←
-			if (allowLeft && InputManager.Keyboard.KeyDown(Keys.A))
-			{
-				Player.X -= moveFactor;
-				Player.Y += moveLeftOffsetY;
-			}
-
-			// move ↓
-			if (allowDown)
-			{
-				//gravity
-				Player.Y -= moveFactor * .7f;
-				Player.Falling = true;
-				if (InputManager.Keyboard.KeyDown(Keys.S))
+				//move ↑
+				if (allowUp && InputManager.Keyboard.KeyDown(Keys.W))
 				{
-					Player.Y -= moveFactor;
+					Player.Y += (moveFactor * 2);
 				}
-			}
-			else 
-			{
-				Player.Falling = false;
-			}
 
-			// move →
-			if (allowRight && InputManager.Keyboard.KeyDown(Keys.D))
-			{
-				Player.X += moveFactor;
-				Player.Y += moveRightOffsetY;
-			}
+				// move ←
+				if (allowLeft && InputManager.Keyboard.KeyDown(Keys.A))
+				{
+					Player.X -= moveFactor;
+					Player.Y += moveLeftOffsetY;
+				}
+
+				// move ↓
+				if (allowDown)
+				{
+					//gravity
+					Player.Y -= moveFactor * .7f;
+					Player.Falling = true;
+					if (InputManager.Keyboard.KeyDown(Keys.S))
+					{
+						Player.Y -= moveFactor;
+					}
+				}
+				else
+				{
+					Player.Falling = false;
+				}
+
+				// move →
+				if (allowRight && InputManager.Keyboard.KeyDown(Keys.D))
+				{
+					Player.X += moveFactor;
+					Player.Y += moveRightOffsetY;
+				}
+			/*}*/
 
 			if (InputManager.Keyboard.KeyPushed(Keys.Q))
 			{
 				Player.PrintPosition();
 			}
+
+			Player.TurnDirectionFacing();
 		}
 	}
 
