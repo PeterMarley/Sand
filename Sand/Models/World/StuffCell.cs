@@ -422,21 +422,23 @@ public class StuffCell : IDrawableBatch
 						// check up to n "pixels" above the blocker, and if space then offset left movement's Y by that much and allowLeft
 						if (y == lastY)
 						{
-							for (var i = 1; i <= UPHILL_WALK_VERT_THRESHOLD; i++)
+							for (var yCursorOffset = 1; yCursorOffset <= UPHILL_WALK_VERT_THRESHOLD; yCursorOffset++)
 							{
-								if (y + i >= STUFF_HEIGHT || y + i < 0)
+								if (y + yCursorOffset >= STUFF_HEIGHT || y + yCursorOffset < 0)
 								{
 									break;
 								}
 
+								var stuff = World[left][y + yCursorOffset];
+
 								// if the left blocker has space above, allow left, but require a single y coord offset of the height of a Stuff
-								if (World[left][y + i] == null)
+								if (stuff == null || stuff is { Phase: Phase.Liquid })
 								{
 									allowLeft = true;
-									moveLeftOffsetY += (i * STUFF_SCALE) + (1 * STUFF_SCALE);
+									moveLeftOffsetY += (yCursorOffset * STUFF_SCALE) + (1 * STUFF_SCALE);
 									break;
 								}
-								else if (i == UPHILL_WALK_VERT_THRESHOLD)
+								else if (yCursorOffset == UPHILL_WALK_VERT_THRESHOLD)
 								{
 									// else dont allow left
 									allowLeft = false;
@@ -458,7 +460,7 @@ public class StuffCell : IDrawableBatch
 		#endregion
 		//================================================
 		// RIGHT collision
-		//================================================ww
+		//================================================
 		#region
 		// get the row directly below the sprite
 		right++;
@@ -492,21 +494,23 @@ public class StuffCell : IDrawableBatch
 						// check up to n "pixels" above the blocker, and if space then offset left movement's Y by that much and allowLeft
 						if (y == lastY)
 						{
-							for (var i = 1; i <= UPHILL_WALK_VERT_THRESHOLD; i++)
+							for (var yCursorOffset = 1; yCursorOffset <= UPHILL_WALK_VERT_THRESHOLD; yCursorOffset++)
 							{
-								if (y + i >= STUFF_HEIGHT || y + i < 0)
+								if (y + yCursorOffset >= STUFF_HEIGHT || y + yCursorOffset < 0)
 								{
 									break;
 								}
 
+								var stuff = World[right][y + yCursorOffset];
+
 								// if the left blocker has space above, allow left, but require a single y coord offset of the height of a Stuff
-								if (World[right][y + i] == null)
+								if (stuff == null || stuff is { Phase: Phase.Liquid })
 								{
 									allowRight = true;
-									moveRightOffsetY += (i * STUFF_SCALE) + (1 * STUFF_SCALE);
+									moveRightOffsetY += (yCursorOffset * STUFF_SCALE) + (1 * STUFF_SCALE);
 									break;
 								}
-								else if (i == UPHILL_WALK_VERT_THRESHOLD)
+								else if (yCursorOffset == UPHILL_WALK_VERT_THRESHOLD)
 								{
 									// else dont allow left
 									allowRight = false;
