@@ -25,8 +25,8 @@ public class Player
 	private AnimationChain _acIdleRight01;
 	private AnimationChain _acIdleLeft01;
 	public Sprite Sprite { get; private set; }
-	public int StuffHeight => height / Constants.STUFF_SCALE;
-	public int StuffWidth => width / Constants.STUFF_SCALE;
+	public int StuffHeight => height / Constants.STUFF_TO_PIXEL_SCALE;
+	public int StuffWidth => width / Constants.STUFF_TO_PIXEL_SCALE;
 
 	private const int width = 100;
 	private const int height = 100;

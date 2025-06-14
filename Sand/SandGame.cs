@@ -55,8 +55,8 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		FlatRedBallServices.InitializeFlatRedBall(this, graphics);
 
 		// set up camera and viewport
-		Camera.Main.UsePixelCoordinates(true, STUFF_WIDTH * STUFF_SCALE, STUFF_HEIGHT * STUFF_SCALE); // makes the camera 2x as big (1 => 4 squares)
-		FlatRedBallServices.GraphicsOptions.SetResolution(STUFF_WIDTH * STUFF_SCALE, STUFF_HEIGHT * STUFF_SCALE); // Makes the viewport twice as big
+		Camera.Main.UsePixelCoordinates(true, STUFF_CELL_WIDTH * STUFF_TO_PIXEL_SCALE, STUFF_CELL_HEIGHT * STUFF_TO_PIXEL_SCALE); // makes the camera 2x as big (1 => 4 squares)
+		FlatRedBallServices.GraphicsOptions.SetResolution(STUFF_CELL_WIDTH * STUFF_TO_PIXEL_SCALE, STUFF_CELL_HEIGHT * STUFF_TO_PIXEL_SCALE); // Makes the viewport twice as big
 		IsMouseVisible = true;
 		Window.AllowUserResizing = false;
 
@@ -66,11 +66,11 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 			$"\n=============================================================\n" +
 			$"\tCONFIG VALUES\n" +
 			$"===============================================================\n" +
-			$"\tSTUFF_SCALE={STUFF_SCALE}\n" +
+			$"\tSTUFF_SCALE={STUFF_TO_PIXEL_SCALE}\n" +
 			$"\tRESOLUTION_X={RESOLUTION_X}\n" +
 			$"\tRESOLUTION_Y={RESOLUTION_Y}\n" +
-			$"\tSTUFF_WIDTH={STUFF_WIDTH}\n" +
-			$"\tSTUFF_HEIGHT={STUFF_HEIGHT}\n\n" +
+			$"\tSTUFF_WIDTH={STUFF_CELL_WIDTH}\n" +
+			$"\tSTUFF_HEIGHT={STUFF_CELL_HEIGHT}\n\n" +
 			$"\tPRINT_STUFF_WORLD={PRINT_STUFF_WORLD}\n" +
 			$"\tPRINT_STUFF_WORLD_FRAMES={PRINT_STUFF_WORLD_FRAMES}\n\n" +
 			$"\tLOG_TO_CONSOLE={LOG_TO_CONSOLE}\n" +

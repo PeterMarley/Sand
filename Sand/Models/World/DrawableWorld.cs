@@ -134,7 +134,7 @@ public class DrawableWorld
 				else
 				{
 					// check below and right
-					if (colRightIndex < STUFF_WIDTH && Move(cell, new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
+					if (colRightIndex < STUFF_CELL_WIDTH && Move(cell, new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
 					{
 						return;
 						//break;
@@ -194,7 +194,7 @@ public class DrawableWorld
 				else
 				{
 					// check below and right
-					if (colRightIndex < STUFF_WIDTH && Move(cell, new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
+					if (colRightIndex < STUFF_CELL_WIDTH && Move(cell, new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
 					{
 						break;
 					}
@@ -226,7 +226,7 @@ public class DrawableWorld
 					else
 					{
 						// check right
-						if (colRightIndex < STUFF_WIDTH && Move(cell, new(xIndex, yIndex), new(colRightIndex, yIndex)))
+						if (colRightIndex < STUFF_CELL_WIDTH && Move(cell, new(xIndex, yIndex), new(colRightIndex, yIndex)))
 						{
 							break;
 						}
@@ -386,7 +386,7 @@ PLAYER
 				}
 				catch (Exception updateException)
 				{
-					Logger.Instance.LogError(updateException, $"(x,y)=({p.X},{p.Y}), (maxX, maxY)=({STUFF_WIDTH - 1},{STUFF_HEIGHT - 1})");
+					Logger.Instance.LogError(updateException, $"(x,y)=({p.X},{p.Y}), (maxX, maxY)=({STUFF_CELL_WIDTH - 1},{STUFF_CELL_HEIGHT - 1})");
 					throw;
 				}
 				i++;
@@ -435,8 +435,8 @@ PLAYER
 			var positionRelativeToOrigin_X = worldCoord.X - cellOrigin.X;
 			var positionRelativeToOrigin_Y = worldCoord.Y - cellOrigin.Y;
 
-			var stuffX = (int)(positionRelativeToOrigin_X / STUFF_SCALE);
-			var stuffY = (int)(positionRelativeToOrigin_Y / STUFF_SCALE);
+			var stuffX = (int)(positionRelativeToOrigin_X / STUFF_TO_PIXEL_SCALE);
+			var stuffY = (int)(positionRelativeToOrigin_Y / STUFF_TO_PIXEL_SCALE);
 
 			stuffPosition = new Point(stuffX, stuffY);
 
@@ -462,7 +462,7 @@ PLAYER
 			var sdfsdf = "";
 		}
 
-		Console.WriteLine($"{nameof(StuffPositionForWorldCoord)} - chunkIndex={chunkIndex} stuffPosition={stuffPosition} (MAX={Constants.STUFF_WIDTH},{Constants.STUFF_HEIGHT})");
+		Console.WriteLine($"{nameof(StuffPositionForWorldCoord)} - chunkIndex={chunkIndex} stuffPosition={stuffPosition} (MAX={Constants.STUFF_CELL_WIDTH},{Constants.STUFF_CELL_HEIGHT})");
 
 		return (
 			chunkIndex ?? throw new InvalidOperationException("chunkIndex not found"),
@@ -486,19 +486,19 @@ PLAYER
 			if (InputManager.Mouse.IsInGameWindow())
 			{
 				// get x and y of ??? something, unsure
-				var x = InputManager.Mouse.X / STUFF_SCALE;
-				var y = (FlatRedBallServices.GraphicsDevice.Viewport.Height - InputManager.Mouse.Y) / STUFF_SCALE;
+				var x = InputManager.Mouse.X / STUFF_TO_PIXEL_SCALE;
+				var y = (FlatRedBallServices.GraphicsDevice.Viewport.Height - InputManager.Mouse.Y) / STUFF_TO_PIXEL_SCALE;
 
 				// get mouse pointer 
 
 				if (InputManager.Keyboard.KeyDown(Keys.Z))
 				{
-					Camera.Main.X -= 5 * STUFF_SCALE;
+					Camera.Main.X -= 5 * STUFF_TO_PIXEL_SCALE;
 				}
 
 				if (InputManager.Keyboard.KeyDown(Keys.C))
 				{
-					Camera.Main.X += 5 * STUFF_SCALE;
+					Camera.Main.X += 5 * STUFF_TO_PIXEL_SCALE;
 				}
 
 				if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) /*|| InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)*/))

@@ -7,7 +7,7 @@ using FlatRedBall;
 namespace Sand;
 
 /// <summary>
-/// Describes a world "pixel", isnt a pixel really, but its a pixel scaled up as per configuration <see cref="STUFF_SCALE"/>.
+/// Describes a world "pixel", isnt a pixel really, but its a pixel scaled up as per configuration <see cref="STUFF_TO_PIXEL_SCALE"/>.
 /// 
 /// Finaliser removes from SpriteManage so fugeddaboudit
 /// </summary>

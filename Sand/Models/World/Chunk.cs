@@ -41,7 +41,7 @@ public class Chunk
 			{
 				for (int x = origin.X; x < origin.X + chunkWidth + chunkWidth; x++)
 				{
-					if (x >= 0 && x < STUFF_WIDTH && y >= 0 && y < STUFF_HEIGHT)
+					if (x >= 0 && x < STUFF_CELL_WIDTH && y >= 0 && y < STUFF_CELL_HEIGHT)
 					{
 						Points_BottomLeftToTopRight_AlternatingRowDirection.Add(new Point(x, y));
 					}
@@ -51,7 +51,7 @@ public class Chunk
 			{
 				for (int x = origin.X + chunkWidth; x >= origin.X; x--)
 				{
-					if (x >= 0 && x < STUFF_WIDTH && y >= 0 && y < STUFF_HEIGHT)
+					if (x >= 0 && x < STUFF_CELL_WIDTH && y >= 0 && y < STUFF_CELL_HEIGHT)
 					{
 						Points_BottomLeftToTopRight_AlternatingRowDirection.Add(new Point(x, y));
 					}

@@ -22,7 +22,7 @@ public class StuffCell : IDrawableBatch
 		// PREPARE THE WORLD DATA STRUCTURE
 		//========================================
 		Offset = offset;
-		World = new Stuff[STUFF_WIDTH, STUFF_HEIGHT];
+		World = new Stuff[STUFF_CELL_WIDTH, STUFF_CELL_HEIGHT];
 
 		//========================================
 		// PREPARE THE SUBGRIDS FOR MULTITHREADING!
@@ -31,20 +31,18 @@ public class StuffCell : IDrawableBatch
 
 		Chunks = [];
 
-		const int chunksLong = 10;
-		/*const int chunkRows = 10;
-		const int chunkCols = 10;*/
+		//const int chunksLong = STUFF_CELL_CHUNKS_LONG;
 
-		int chunkWidth = STUFF_WIDTH / chunksLong;
-		int chunkHeight = STUFF_HEIGHT / chunksLong;
+		int chunkWidth = STUFF_CELL_WIDTH / STUFF_CELL_CHUNKS_LONG;
+		int chunkHeight = STUFF_CELL_HEIGHT / STUFF_CELL_CHUNKS_LONG;
 
 		var cursor = new Point(0, 0);
 		var leftToRight = true;
 
 		// these outer two loops are the row and cols of chunks
-		for (int chunkRow = 0; chunkRow < chunksLong; chunkRow++)
+		for (int chunkRow = 0; chunkRow < STUFF_CELL_CHUNKS_LONG; chunkRow++)
 		{
-			for (int chunkCol = 0; chunkCol < chunksLong; chunkCol++)
+			for (int chunkCol = 0; chunkCol < STUFF_CELL_CHUNKS_LONG; chunkCol++)
 			{
 				// create new chunk
 				Chunks.Add(new Chunk(cursor, chunkWidth, chunkHeight));
@@ -53,7 +51,7 @@ public class StuffCell : IDrawableBatch
 
 				// IF NOT LAST column in row of chunks - move the cursor over one column to new chunk
 				// OTHERWISE set the col back to first for new row
-				cursor = new Point(chunkCol != chunksLong/*chunkCols*/ - 1 ? cursor.X + chunkWidth : 0, cursor.Y);
+				cursor = new Point(chunkCol != STUFF_CELL_CHUNKS_LONG/*chunkCols*/ - 1 ? cursor.X + chunkWidth : 0, cursor.Y);
 			}
 
 			// move the cursor up one row to new chunk - doesn't matter if new cursor falls off the
@@ -67,12 +65,12 @@ public class StuffCell : IDrawableBatch
 			default:
 				break;
 			case StuffCellSetup.StoneAroundEdges:
-				for (int x = 0; x < STUFF_WIDTH; x++)
+				for (int x = 0; x < STUFF_CELL_WIDTH; x++)
 				{
-					for (int y = 0; y < STUFF_HEIGHT; y++)
+					for (int y = 0; y < STUFF_CELL_HEIGHT; y++)
 					{
-						if (x == 0 || x == STUFF_WIDTH - 1 // if at far left or right
-						|| y == 0 || y == STUFF_HEIGHT - 1) // if at far top or bottom
+						if (x == 0 || x == STUFF_CELL_WIDTH - 1 // if at far left or right
+						|| y == 0 || y == STUFF_CELL_HEIGHT - 1) // if at far top or bottom
 						{
 							ForceAddStuff(Stuffs.BASIC_STONE, x, y);
 						}
@@ -80,12 +78,12 @@ public class StuffCell : IDrawableBatch
 				}
 				break;
 			case StuffCellSetup.StoneAroundEdges2:
-				for (int x = 0; x < STUFF_WIDTH; x++)
+				for (int x = 0; x < STUFF_CELL_WIDTH; x++)
 				{
-					for (int y = 0; y < STUFF_HEIGHT; y++)
+					for (int y = 0; y < STUFF_CELL_HEIGHT; y++)
 					{
-						if (x == 0 || x == STUFF_WIDTH - 1 // if at far left or right
-						|| y == 0 || y == STUFF_HEIGHT - 1) // if at far top or bottom
+						if (x == 0 || x == STUFF_CELL_WIDTH - 1 // if at far left or right
+						|| y == 0 || y == STUFF_CELL_HEIGHT - 1) // if at far top or bottom
 						{
 							ForceAddStuff(Stuffs.BASIC_STONE, x, y);
 						}
@@ -93,9 +91,9 @@ public class StuffCell : IDrawableBatch
 				}
 				break;
 			case StuffCellSetup.WaterBottomHalf:
-				for (int x = 0; x < STUFF_WIDTH; x++)
+				for (int x = 0; x < STUFF_CELL_WIDTH; x++)
 				{
-					for (int y = 0; y < STUFF_HEIGHT / 2; y++)
+					for (int y = 0; y < STUFF_CELL_HEIGHT / 2; y++)
 					{
 						SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
 					}
@@ -103,9 +101,9 @@ public class StuffCell : IDrawableBatch
 				break;
 			case StuffCellSetup.WaterSloshingAbout:
 				var i = 0;
-				for (int x = 0; x < STUFF_WIDTH; x++)
+				for (int x = 0; x < STUFF_CELL_WIDTH; x++)
 				{
-					for (int y = 0; y < STUFF_HEIGHT; y++)
+					for (int y = 0; y < STUFF_CELL_HEIGHT; y++)
 					{
 						if (y > 4)
 						{
@@ -123,7 +121,7 @@ public class StuffCell : IDrawableBatch
 			var wsWidth = Camera.Main.OrthogonalWidth;
 			var wsHeight = Camera.Main.OrthogonalHeight;
 
-			WorldTexture = new Texture2D(FlatRedBallServices.GraphicsDevice, STUFF_WIDTH, STUFF_HEIGHT);
+			WorldTexture = new Texture2D(FlatRedBallServices.GraphicsDevice, STUFF_CELL_WIDTH, STUFF_CELL_HEIGHT);
 			WorldTexture.SetData(GetColorData());
 
 			WorldSprite = SpriteManager.AddManualSprite(WorldTexture);
@@ -245,7 +243,7 @@ public class StuffCell : IDrawableBatch
 
 	public void ForceAddStuff(string stuffType, int x, int y)
 	{
-		if (x >= 0 && x < STUFF_WIDTH && y >= 0 && y < STUFF_HEIGHT)
+		if (x >= 0 && x < STUFF_CELL_WIDTH && y >= 0 && y < STUFF_CELL_HEIGHT)
 		{
 			var stuff = StuffFactory.Instance.Get(stuffType);
 			World[x, y] = stuff;//.SetPosition(x, y);
@@ -256,7 +254,7 @@ public class StuffCell : IDrawableBatch
 
 	public void SafeAddStuffIfEmpty(string stuffType, int x, int y)
 	{
-		if (x >= 0 && x < STUFF_WIDTH && y >= 0 && y < STUFF_HEIGHT && World[x, y] == null)
+		if (x >= 0 && x < STUFF_CELL_WIDTH && y >= 0 && y < STUFF_CELL_HEIGHT && World[x, y] == null)
 		{
 			var stuff = StuffFactory.Instance.Get(stuffType);
 			World[x, y] = stuff;//.SetPosition(x, y);
@@ -303,13 +301,13 @@ public class StuffCell : IDrawableBatch
 		// get the row directly below the sprite
 		bottom--;
 		// if bottom coord index safe
-		if (bottom >= 0 && bottom < STUFF_HEIGHT)
+		if (bottom >= 0 && bottom < STUFF_CELL_HEIGHT)
 		{
 			// iterate across that row within the sprites x coords and check if downward movement should be arrested
 			for (var x = left; x < right; x++)
 			{
 				// if outside the world bound just continue to next in row
-				if (x < 0 || x >= STUFF_WIDTH)
+				if (x < 0 || x >= STUFF_CELL_WIDTH)
 				{
 					continue;
 				}
@@ -344,13 +342,13 @@ public class StuffCell : IDrawableBatch
 		// get the row directly below the sprite
 		top++;
 		// if bottom coord index safe
-		if (top >= 0 && top < STUFF_HEIGHT)
+		if (top >= 0 && top < STUFF_CELL_HEIGHT)
 		{
 			// iterate across that row within the sprites x coords and check if downward movement should be arrested
 			for (var x = left; x < right; x++)
 			{
 				// if outside the world bound just continue to next in row
-				if (x < 0 || x >= STUFF_WIDTH)
+				if (x < 0 || x >= STUFF_CELL_WIDTH)
 				{
 					continue;
 				}
@@ -373,7 +371,7 @@ public class StuffCell : IDrawableBatch
 			}
 		}
 		// if bottom coord index is not safe
-		else if (top >= STUFF_HEIGHT)
+		else if (top >= STUFF_CELL_HEIGHT)
 		{
 			allowUp = false;
 		}
@@ -389,13 +387,13 @@ public class StuffCell : IDrawableBatch
 		// get the row directly below the sprite
 		left--;
 		// if bottom coord index safe
-		if (left >= 0 && left < STUFF_WIDTH)
+		if (left >= 0 && left < STUFF_CELL_WIDTH)
 		{
 			// iterate across that row within the sprites x coords and check if downward movement should be arrested
 			for (var y = top - 1; y >= lastY; y--)
 			{
 				// if outside the world bound just continue to next in row
-				if (y < 0 || y >= STUFF_HEIGHT)
+				if (y < 0 || y >= STUFF_CELL_HEIGHT)
 				{
 					continue;
 				}
@@ -420,7 +418,7 @@ public class StuffCell : IDrawableBatch
 						{
 							for (var yCursorOffset = 1; yCursorOffset <= UPHILL_WALK_VERT_THRESHOLD; yCursorOffset++)
 							{
-								if (y + yCursorOffset >= STUFF_HEIGHT || y + yCursorOffset < 0)
+								if (y + yCursorOffset >= STUFF_CELL_HEIGHT || y + yCursorOffset < 0)
 								{
 									break;
 								}
@@ -431,7 +429,7 @@ public class StuffCell : IDrawableBatch
 								if (stuff == null || stuff is { Phase: Phase.Liquid })
 								{
 									allowLeft = true;
-									moveLeftOffsetY += (yCursorOffset * STUFF_SCALE) + (1 * STUFF_SCALE);
+									moveLeftOffsetY += (yCursorOffset * STUFF_TO_PIXEL_SCALE) + (1 * STUFF_TO_PIXEL_SCALE);
 									break;
 								}
 								else if (yCursorOffset == UPHILL_WALK_VERT_THRESHOLD)
@@ -461,13 +459,13 @@ public class StuffCell : IDrawableBatch
 		// get the row directly below the sprite
 		right++;
 		// if bottom coord index safe
-		if (right >= 0 && right < STUFF_WIDTH)
+		if (right >= 0 && right < STUFF_CELL_WIDTH)
 		{
 			// iterate across that row within the sprites x coords and check if downward movement should be arrested
 			for (var y = top - 1; y >= lastY; y--)
 			{
 				// if outside the world bound just continue to next in row
-				if (y < 0 || y >= STUFF_HEIGHT)
+				if (y < 0 || y >= STUFF_CELL_HEIGHT)
 				{
 					continue;
 				}
@@ -492,7 +490,7 @@ public class StuffCell : IDrawableBatch
 						{
 							for (var yCursorOffset = 1; yCursorOffset <= UPHILL_WALK_VERT_THRESHOLD; yCursorOffset++)
 							{
-								if (y + yCursorOffset >= STUFF_HEIGHT || y + yCursorOffset < 0)
+								if (y + yCursorOffset >= STUFF_CELL_HEIGHT || y + yCursorOffset < 0)
 								{
 									break;
 								}
@@ -503,7 +501,7 @@ public class StuffCell : IDrawableBatch
 								if (stuff == null || stuff is { Phase: Phase.Liquid })
 								{
 									allowRight = true;
-									moveRightOffsetY += (yCursorOffset * STUFF_SCALE) + (1 * STUFF_SCALE);
+									moveRightOffsetY += (yCursorOffset * STUFF_TO_PIXEL_SCALE) + (1 * STUFF_TO_PIXEL_SCALE);
 									break;
 								}
 								else if (yCursorOffset == UPHILL_WALK_VERT_THRESHOLD)
@@ -520,7 +518,7 @@ public class StuffCell : IDrawableBatch
 			}
 		}
 		// if bottom coord index is not safe
-		else if (right >= STUFF_WIDTH)
+		else if (right >= STUFF_CELL_WIDTH)
 		{
 			allowRight = false;
 		}
@@ -542,12 +540,12 @@ public class StuffCell : IDrawableBatch
 
 	public Color[] GetColorData()
 	{
-		var colorData = new Color[STUFF_HEIGHT * STUFF_WIDTH];
+		var colorData = new Color[STUFF_CELL_HEIGHT * STUFF_CELL_WIDTH];
 		var colorIndex = 0;
 
-		for (var y = STUFF_HEIGHT - 1; y >= 0; y--)
+		for (var y = STUFF_CELL_HEIGHT - 1; y >= 0; y--)
 		{
-			for (var x = 0; x < STUFF_WIDTH; x++)
+			for (var x = 0; x < STUFF_CELL_WIDTH; x++)
 			{
 				colorData[colorIndex++] = World[x, y] == null ? Color.Transparent : World[x, y].Color;
 			}
@@ -649,7 +647,7 @@ public class StuffCell : IDrawableBatch
 					// Once we fall out of bounds of array just stop looping as the target is already
 					// garbage awaiting collection.
 					var waterColumnX = to.X;
-					for (int cursorY = to.Y; !hasDisplaced && cursorY < STUFF_HEIGHT; cursorY++)
+					for (int cursorY = to.Y; !hasDisplaced && cursorY < STUFF_CELL_HEIGHT; cursorY++)
 					{
 
 						///////////////////////////////////////////////////////
@@ -659,7 +657,7 @@ public class StuffCell : IDrawableBatch
 						for (var i = 0; !hasDisplaced && i < Randoms.Instance.Ind_leftRightMid.Length; i++)
 						{
 							var adjCursorX = waterColumnX + Randoms.Instance.Ind_leftRightMid[i];
-							if (adjCursorX >= 0 && adjCursorX < STUFF_WIDTH && World[adjCursorX, cursorY] == null)
+							if (adjCursorX >= 0 && adjCursorX < STUFF_CELL_WIDTH && World[adjCursorX, cursorY] == null)
 							{
 								// move this displaced liquid to here
 								World[adjCursorX, cursorY] = stuffTarget;//.SetPosition(adjCursorX, cursorY); ;

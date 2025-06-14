@@ -14,7 +14,7 @@ public static class NumberExtensions
 {
 	private const int HALF_RESOLUTION_X = RESOLUTION_X / 2;
 	private const int HALF_RESOLUTION_Y = RESOLUTION_Y / 2;
-	private const int STUFF_DIVISOR = STUFF_SCALE * 2;
+	private const int STUFF_DIVISOR = STUFF_TO_PIXEL_SCALE * 2;
 	public static (int top, int right, int bottom, int left) ToStuffCoord(Sprite sprite)
 	{
 		var offsetX = sprite.Width / 2;

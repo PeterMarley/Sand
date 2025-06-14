@@ -5,16 +5,18 @@ public class Constants
 	//---------------------------------------------------
 	//	DIMENSIONS										|
 	//---------------------------------------------------
-	/// <summary>A Stuff element is this many pixels per side.</summary>
-	public const int STUFF_SCALE = 4;//5;
-	/// <summary>Window resolution x</summary>
+	/// <summary>Window resolution X</summary>
 	public const int RESOLUTION_X = 1500;//1500;
-	/// <summary>Window resolution y</summary>
+	/// <summary>Window resolution Y</summary>
 	public const int RESOLUTION_Y = 800;//800;
-	/// <summary>The number of X-axis elements</summary>
-	public const int STUFF_WIDTH = RESOLUTION_X / STUFF_SCALE;
-	/// <summary>The number of Y-axis elements</summary>
-	public const int STUFF_HEIGHT = RESOLUTION_Y / STUFF_SCALE;
+	/// <summary>This many pixels per <see cref="Sand.Stuff"/></summary>
+	public const int STUFF_TO_PIXEL_SCALE = 4;//5;
+	/// <summary><see cref="Sand.StuffCell"/>'s are is this many <see cref="Sand.Stuff"/> wide</summary>
+	public const int STUFF_CELL_WIDTH = RESOLUTION_X / STUFF_TO_PIXEL_SCALE;
+	/// <summary><see cref="Sand.StuffCell"/>'s are is this many <see cref="Sand.Stuff"/> high</summary>
+	public const int STUFF_CELL_HEIGHT = RESOLUTION_Y / STUFF_TO_PIXEL_SCALE;
+	/// <summary><see cref="Sand.StuffCell"/> has this many chunks across the x and the y axies - same number up and across for now</summary>
+	public const int STUFF_CELL_CHUNKS_LONG = 10;
 
 	//===================================================
 	//	PRINTING										|
