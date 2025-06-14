@@ -23,6 +23,8 @@ public class Constants
 	public const bool PRINT_STUFF_WORLD = false;
 	/// <summary>The number of frames between each world print</summary>]
 	public const int PRINT_STUFF_WORLD_FRAMES = 1;
+	/// <summary>Print important world coords to console on left click</summary>]
+	public const bool PRINT_POSITIONS_ON_CLICK = true;
 
 	//===================================================
 	//	LOGGING											|

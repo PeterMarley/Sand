@@ -38,7 +38,7 @@ public class DrawableWorld
 	//========================================
 
 	public Player Player { get; private set; }
-	private CheckerBoardBackground Background { get; set; } 
+	private CheckerBoardBackground Background { get; set; }
 	public DrawableWorld(StuffCellSetup worldSetup)
 	{
 		PrepareBackground();
@@ -49,7 +49,7 @@ public class DrawableWorld
 		{
 			Background = new CheckerBoardBackground();
 		}
-		void PrepareWorld(StuffCellSetup worldSetup) 
+		void PrepareWorld(StuffCellSetup worldSetup)
 		{
 
 			//StuffCell = new StuffCell(worldSetup);
@@ -67,7 +67,7 @@ public class DrawableWorld
 				new StuffCell(2, worldSetup)
 			];
 		}
-		void PreparePlayer() 
+		void PreparePlayer()
 		{
 			Player = new Player();
 
@@ -294,97 +294,41 @@ public class DrawableWorld
 	private const int _FRAME_COUNT_BETWEEN_UPDATE = 1;
 	public void Update()
 	{
-/*		if (TimeManager.CurrentFrame % _FRAME_COUNT_BETWEEN_UPDATE != 0)
+		SetupWorldCoords();
+		ProcessChunks();
+
+		void SetupWorldCoords()
 		{
-			return;
-		}
-*/
-		var p = new Point();
+			var camBottomLeft = new Vector2(Camera.Main.X - (RESOLUTION_X / 2), Camera.Main.Y - (RESOLUTION_Y / 2));
+			var mRel = new Vector2(InputManager.Mouse.X, RESOLUTION_Y - InputManager.Mouse.Y);
 
-		try
-		{
-			//=======================================================
-			// New version of world update loop (utilising chunks)
-			//=======================================================
-
-			// choose which chunks to update
-			//var chunksToUpdate = StuffCell.GetChunksToUpdate();
-			//TODO stuff cell naive quick impl
-			var chunksToUpdate = StuffCells[1].GetChunksToUpdate();
-
-			foreach (var chunk in chunksToUpdate)
+			WorldCoords = new WorldCoordsWrapper()
 			{
-				foreach (var point in chunk.Points_BottomLeftToTopRight_AlternatingRowDirection)
-				{
-					var xIndex = point.X;
-					var yIndex = point.Y;
+				MouseRelative = mRel,
+				CameraCentre = new Vector2(Camera.Main.X, Camera.Main.Y),
+				CameraBottomLeft = camBottomLeft,
+				CameraOffSet = camBottomLeft,
+				CameraTopRight = new Vector2(Camera.Main.X + (RESOLUTION_X / 2), Camera.Main.Y + (RESOLUTION_Y / 2)),
+				MouseAbsolute = new Vector2(mRel.X + camBottomLeft.X, mRel.Y + camBottomLeft.Y)
+			};
 
-					// make point viewable to scope that encloses the try catch for error logging
-					p = point;
-
-					// if something here then apply gravity **NOTE** dormancy is checked in apply gravity
-
-					//if (StuffCell.GetStuffAt(point) != null)
-					//TODO stuff cell naive quick impl
-					if (StuffCells[1].GetStuffAt(point) != null)
-					{
-						ApplyGravity(xIndex, yIndex);
-					}
-				}
-			}
-		}
-		catch (Exception updateException)
-		{
-			Logger.Instance.LogError(updateException, $"(x,y)=({p.X},{p.Y}), (maxX, maxY)=({STUFF_WIDTH - 1},{STUFF_HEIGHT - 1})");
-			throw;
-		}
-	}
-
-	// Not Implemented
-	public void Destroy()
-	{
-		throw new NotImplementedException();
-	}
-
-
-	private const int PLAYER_MOVE_FACTOR = 15;
-	private const int GRAV_MAGNITUDE = 1;
-	public void ProcessControlsInput()
-	{
-		DoDebugShit();
-		AffectWorld();
-		AffectPlayer();
-
-		void DoDebugShit() 
-		{
-			if (InputManager.Mouse.IsInGameWindow() && InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton))
+			if (PRINT_POSITIONS_ON_CLICK && InputManager.Mouse.IsInGameWindow() && InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton))
 			{
-				var mRel = new Vector2(InputManager.Mouse.X, RESOLUTION_Y - InputManager.Mouse.Y);
-
-				var camCentre = new Vector2(Camera.Main.X, Camera.Main.Y);
-				var camBottomLeft = new Vector2(Camera.Main.X - (RESOLUTION_X / 2), Camera.Main.Y - (RESOLUTION_Y / 2));
-				var camOffSet = camBottomLeft;
-				var camTopRight = new Vector2(Camera.Main.X + (RESOLUTION_X / 2), Camera.Main.Y + (RESOLUTION_Y / 2));
-
-				var mAbs = new Vector2(mRel.X + camBottomLeft.X, mRel.Y + camBottomLeft.Y);
-
-				var camZ = Camera.Main.Z;
-
 				var msg =
-	/*$@"
-	========================================
-	CONSTANTS
-		- ✓ Resolution ........... {Constants.RESOLUTION_X},{Constants.RESOLUTION_Y}
-		- ✓ Stuff W & H ,,,,,,,,,, {Constants.STUFF_WIDTH},{Constants.STUFF_HEIGHT}
-		- ✓ Stuff Scale .......... {Constants.STUFF_SCALE}*/
+/*$@"
+========================================
+CONSTANTS
+	- ✓ Resolution ........... {Constants.RESOLUTION_X},{Constants.RESOLUTION_Y}
+	- ✓ Stuff W & H ,,,,,,,,,, {Constants.STUFF_WIDTH},{Constants.STUFF_HEIGHT}
+	- ✓ Stuff Scale .......... {Constants.STUFF_SCALE}*/
 $@"
 CAMERA
-	- ✓ Camera (Centre)   {camCentre}
-	- ✓ Camera (btm left) {camBottomLeft} -= aka CAMERA OFFSET =-
-	- ✓ Camera (top rigt) {camTopRight}
+	- ✓ Camera (Centre)   {WorldCoords.CameraCentre}
+	- ✓ Camera (btm left) {WorldCoords.CameraBottomLeft} -= aka CAMERA OFFSET =-
+	- ✓ Camera (top rigt) {WorldCoords.CameraTopRight}
 MOUSE
-	- ✓ Mouse Relative    {mRel}
-	- ✓ Mouse Absolute    {mAbs}
+	- ✓ Mouse Relative    {WorldCoords.MouseRelative}
+	- ✓ Mouse Absolute    {WorldCoords.MouseAbsolute}
 PLAYER
 	- ✓ Player Absolute   {Player.X},{Player.Y}
 ========================================
@@ -394,6 +338,76 @@ PLAYER
 
 			}
 		}
+		void ProcessChunks()
+		{
+
+			/*		if (TimeManager.CurrentFrame % _FRAME_COUNT_BETWEEN_UPDATE != 0)
+					{
+						return;
+					}
+			*/
+			var p = new Point();
+
+			try
+			{
+				//=======================================================
+				// New version of world update loop (utilising chunks)
+				//=======================================================
+
+				// choose which chunks to update
+				//var chunksToUpdate = StuffCell.GetChunksToUpdate();
+				//TODO stuff cell naive quick impl
+				var chunksToUpdate = StuffCells[1].GetChunksToUpdate();
+
+				foreach (var chunk in chunksToUpdate)
+				{
+					foreach (var point in chunk.Points_BottomLeftToTopRight_AlternatingRowDirection)
+					{
+						var xIndex = point.X;
+						var yIndex = point.Y;
+
+						// make point viewable to scope that encloses the try catch for error logging
+						p = point;
+
+						// if something here then apply gravity **NOTE** dormancy is checked in apply gravity
+
+						//if (StuffCell.GetStuffAt(point) != null)
+						//TODO stuff cell naive quick impl
+						if (StuffCells[1].GetStuffAt(point) != null)
+						{
+							ApplyGravity(xIndex, yIndex);
+						}
+					}
+				}
+			}
+			catch (Exception updateException)
+			{
+				Logger.Instance.LogError(updateException, $"(x,y)=({p.X},{p.Y}), (maxX, maxY)=({STUFF_WIDTH - 1},{STUFF_HEIGHT - 1})");
+				throw;
+			}
+		}
+
+	}
+
+	// Not Implemented
+	public void Destroy()
+	{
+		throw new NotImplementedException();
+	}
+
+
+
+	public WorldCoordsWrapper WorldCoords { get; private set; }
+	private const int PLAYER_MOVE_FACTOR = 15;
+	private const int GRAV_MAGNITUDE = 1;
+	public void ProcessControlsInput()
+	{
+
+		AffectWorld();
+		AffectPlayer();
+
+
+
 		void AffectWorld()
 		{
 			if (InputManager.Mouse.IsInGameWindow())
@@ -466,49 +480,49 @@ PLAYER
 			var stuffCell = StuffCells[1];
 			var collision = stuffCell.Collision(Player, GRAV_MAGNITUDE, PLAYER_MOVE_FACTOR);
 
-				var allowUp = collision.AllowUp;
-				var allowRight = collision.AllowRight;
-				var allowDown = collision.AllowDown;
-				var allowLeft = collision.AllowLeft;
-				var moveFactor = collision.MoveFactor;
-				var moveLeftOffsetY = collision.MoveLeftOffsetY;
-				var moveRightOffsetY = collision.MoveRightOffsetY;
+			var allowUp = collision.AllowUp;
+			var allowRight = collision.AllowRight;
+			var allowDown = collision.AllowDown;
+			var allowLeft = collision.AllowLeft;
+			var moveFactor = collision.MoveFactor;
+			var moveLeftOffsetY = collision.MoveLeftOffsetY;
+			var moveRightOffsetY = collision.MoveRightOffsetY;
 
-				//move ↑
-				if (allowUp && InputManager.Keyboard.KeyDown(Keys.W))
-				{
-					Player.Y += (moveFactor * 2);
-				}
+			//move ↑
+			if (allowUp && InputManager.Keyboard.KeyDown(Keys.W))
+			{
+				Player.Y += (moveFactor * 2);
+			}
 
-				// move ←
-				if (allowLeft && InputManager.Keyboard.KeyDown(Keys.A))
-				{
-					Player.X -= moveFactor;
-					Player.Y += moveLeftOffsetY;
-				}
+			// move ←
+			if (allowLeft && InputManager.Keyboard.KeyDown(Keys.A))
+			{
+				Player.X -= moveFactor;
+				Player.Y += moveLeftOffsetY;
+			}
 
-				// move ↓
-				if (allowDown)
+			// move ↓
+			if (allowDown)
+			{
+				/*//gravity
+				Player.Y -= moveFactor * .7f;
+				Player.Falling = true;*/
+				if (InputManager.Keyboard.KeyDown(Keys.S))
 				{
-					/*//gravity
-					Player.Y -= moveFactor * .7f;
-					Player.Falling = true;*/
-					if (InputManager.Keyboard.KeyDown(Keys.S))
-					{
-						Player.Y -= moveFactor;
-					}
+					Player.Y -= moveFactor;
 				}
-				else
-				{
-					Player.Falling = false;
-				}
+			}
+			else
+			{
+				Player.Falling = false;
+			}
 
-				// move →
-				if (allowRight && InputManager.Keyboard.KeyDown(Keys.D))
-				{
-					Player.X += moveFactor;
-					Player.Y += moveRightOffsetY;
-				}
+			// move →
+			if (allowRight && InputManager.Keyboard.KeyDown(Keys.D))
+			{
+				Player.X += moveFactor;
+				Player.Y += moveRightOffsetY;
+			}
 			/*}*/
 
 			if (InputManager.Keyboard.KeyPushed(Keys.Q))
@@ -518,11 +532,21 @@ PLAYER
 
 			Player.TurnDirectionFacing();
 		}
-		
+
 	}
 
 	#endregion
 
 	#endregion
 
+}
+public struct WorldCoordsWrapper
+{
+	public Vector2 MouseRelative;
+	public Vector2 MouseAbsolute;
+
+	public Vector2 CameraCentre;
+	public Vector2 CameraBottomLeft;
+	public Vector2 CameraOffSet;
+	public Vector2 CameraTopRight;
 }
