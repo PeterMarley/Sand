@@ -148,7 +148,6 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 			Debugger.Break();
 		}
 
-		//// MOVED THE IF INTO UpdateWorldManually
 		//if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE == 0)
 		//{
 		_world.Update();
@@ -167,11 +166,6 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		if (!didPrep)
 		{
 			return;
-		}
-
-		if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_DRAW == 0)
-		{
-			_world.DrawWorldManually(Camera.Main);
 		}
 
 		base.Draw(gameTime);

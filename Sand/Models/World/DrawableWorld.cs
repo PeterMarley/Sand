@@ -51,13 +51,20 @@ public class DrawableWorld
 		}
 		void PrepareWorld(StuffCellSetup worldSetup) 
 		{
-			
+
 			//StuffCell = new StuffCell(worldSetup);
+
+			Camera.Main.Orthogonal = true;
+			//Camera.Main.OrthogonalWidth = WorldSprite.Width;
+			//Camera.Main.OrthogonalHeight = WorldSprite.Height;
+			Camera.Main.OrthogonalWidth = RESOLUTION_X * 2;
+			Camera.Main.OrthogonalHeight = RESOLUTION_Y * 2;
+
 			StuffCells =
 			[
-				new StuffCell(-1, worldSetup),
 				new StuffCell(0, worldSetup),
-				new StuffCell(1, worldSetup)
+				new StuffCell(1, worldSetup),
+				new StuffCell(2, worldSetup)
 			];
 		}
 		void PreparePlayer() 
@@ -333,99 +340,6 @@ public class DrawableWorld
 		}
 	}
 
-	public void DrawWorldManually(Camera camera)
-	{
-/*
-		try
-		{
-			//===================================================
-			// DRAW BACKGROUND TEXTURE
-			//===================================================
-
-			// Required or sprite batch texture will be blurry
-			BgSpriteBatch.Begin(
-				sortMode: SpriteSortMode.BackToFront,// enable depth sorting
-				samplerState: SamplerState.PointClamp // ensure texture isnt stretched, but remains true "pixels" and not blurry
-			);
-			BgSpriteBatch.Begin(
-	sortMode: SpriteSortMode.BackToFront,
-	blendState: BlendState.AlphaBlend,
-	samplerState: SamplerState.PointClamp,
-	depthStencilState: DepthStencilState.Default,
-	rasterizerState: RasterizerState.CullNone
-);
-
-			float tWidth = BgTexture.Width;
-			float tHeight = BgTexture.Height;
-
-			int maxCol = (int)(Constants.RESOLUTION_X / tWidth);
-			int maxRow = (int)(Constants.RESOLUTION_Y / tHeight);
-
-			//for (int x = 0; x < maxCol; x++)
-			//{
-			//	for (int y = 0; y < maxRow; y++)
-			//	{
-			//		Vector2 v = new Vector2(x * tWidth, y * tHeight);
-			//		BgSpriteBatch.Draw(BgTexture, v, Color.White);
-			//		//BgSpriteBatch.Draw(BgTexture, v, null, Color.White, 0f, new Vector2(0,0), new Vector2(1, 1), SpriteEffects.None, 0.5f);
-			//	}
-			//}
-
-			//===================================================
-			// DRAW WORLD TEXTURE
-			//===================================================
-
-			// interate through the World and get the color data of all Stuffs there
-			var colorData = StuffCell.GetColorData();
-			if (WorldSprite == null)
-			{
-
-				var wsWidth = RESOLUTION_X * 2;
-				var wsHeight = RESOLUTION_Y * 2;
-
-				WorldTexture = new Texture2D(FlatRedBallServices.GraphicsDevice, STUFF_WIDTH, STUFF_HEIGHT);
-				WorldTexture.SetData(colorData);
-
-				WorldSprite = SpriteManager.AddSprite(WorldTexture);
-				WorldSprite.Width = wsWidth;// RESOLUTION_X * 2;
-				WorldSprite.Height = wsHeight;// RESOLUTION_Y * 2;
-				WorldSprite.X += RESOLUTION_X / 2;
-				WorldSprite.Y += RESOLUTION_Y / 2;
-				WorldSprite.Z = 0.9f;
-				WorldSprite.X = -5000;
-				WorldSprite.Y = -5000;
-
-
-				Camera.Main.Orthogonal = true;
-				Camera.Main.OrthogonalWidth = WorldSprite.Width;
-				Camera.Main.OrthogonalHeight = WorldSprite.Height;
-				Camera.Main.OrthogonalWidth = wsWidth;
-				Camera.Main.OrthogonalHeight = wsHeight;
-			}
-			else
-			{
-				WorldTexture.SetData(colorData);
-				SpriteManager.ManualUpdate(WorldSprite);
-			}
-
-			//BgSpriteBatch.Draw(WorldTexture, new Rectangle(0,0, RESOLUTION_X, RESOLUTION_Y), Color.White);
-			// change tto
-			BgSpriteBatch.Draw(WorldTexture, new Rectangle(0, 0, RESOLUTION_X, RESOLUTION_Y), null, Color.White, 0f, Vector2.Zero, SpriteEffects.None, 0.0f);
-
-
-			//===================================================
-			// DRAW PLAYER TEXTURE
-			//===================================================
-
-			BgSpriteBatch.End();
-		}
-		catch (Exception drawWorldEx)
-		{
-			Logger.Instance.LogError(drawWorldEx, $"Failed to process and apply the colour of each {nameof(Stuff)} to the {nameof(WorldTexture)}");
-			throw;
-		}*/
-	}
-
 	// Not Implemented
 	public void Destroy()
 	{
@@ -437,15 +351,58 @@ public class DrawableWorld
 	private const int GRAV_MAGNITUDE = 1;
 	public void ProcessControlsInput()
 	{
+		DoDebugShit();
 		AffectWorld();
 		AffectPlayer();
 
+		void DoDebugShit() 
+		{
+			if (InputManager.Mouse.IsInGameWindow() && InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton))
+			{
+				var mRel = new Vector2(InputManager.Mouse.X, RESOLUTION_Y - InputManager.Mouse.Y);
+
+				var camCentre = new Vector2(Camera.Main.X, Camera.Main.Y);
+				var camBottomLeft = new Vector2(Camera.Main.X - (RESOLUTION_X / 2), Camera.Main.Y - (RESOLUTION_Y / 2));
+				var camOffSet = camBottomLeft;
+				var camTopRight = new Vector2(Camera.Main.X + (RESOLUTION_X / 2), Camera.Main.Y + (RESOLUTION_Y / 2));
+
+				var mAbs = new Vector2(mRel.X + camBottomLeft.X, mRel.Y + camBottomLeft.Y);
+
+				var camZ = Camera.Main.Z;
+
+				var msg =
+	/*$@"
+	========================================
+	CONSTANTS
+		- ✓ Resolution ........... {Constants.RESOLUTION_X},{Constants.RESOLUTION_Y}
+		- ✓ Stuff W & H ,,,,,,,,,, {Constants.STUFF_WIDTH},{Constants.STUFF_HEIGHT}
+		- ✓ Stuff Scale .......... {Constants.STUFF_SCALE}*/
+$@"
+CAMERA
+	- ✓ Camera (Centre)   {camCentre}
+	- ✓ Camera (btm left) {camBottomLeft} -= aka CAMERA OFFSET =-
+	- ✓ Camera (top rigt) {camTopRight}
+MOUSE
+	- ✓ Mouse Relative    {mRel}
+	- ✓ Mouse Absolute    {mAbs}
+PLAYER
+	- ✓ Player Absolute   {Player.X},{Player.Y}
+========================================
+";
+
+				Logger.Instance.LogInfo(msg);
+
+			}
+		}
 		void AffectWorld()
 		{
 			if (InputManager.Mouse.IsInGameWindow())
 			{
+				// get x and y of ??? something, unsure
 				var x = InputManager.Mouse.X / STUFF_SCALE;
 				var y = (FlatRedBallServices.GraphicsDevice.Viewport.Height - InputManager.Mouse.Y) / STUFF_SCALE;
+
+				// get mouse pointer 
 
 				if (InputManager.Keyboard.KeyDown(Keys.Z))
 				{
@@ -533,9 +490,9 @@ public class DrawableWorld
 				// move ↓
 				if (allowDown)
 				{
-					//gravity
+					/*//gravity
 					Player.Y -= moveFactor * .7f;
-					Player.Falling = true;
+					Player.Falling = true;*/
 					if (InputManager.Keyboard.KeyDown(Keys.S))
 					{
 						Player.Y -= moveFactor;
@@ -561,6 +518,7 @@ public class DrawableWorld
 
 			Player.TurnDirectionFacing();
 		}
+		
 	}
 
 	#endregion

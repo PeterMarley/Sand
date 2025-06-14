@@ -124,8 +124,8 @@ public class StuffCell : IDrawableBatch
 		if (WorldSprite == null)
 		{
 
-			var wsWidth = RESOLUTION_X * 2;
-			var wsHeight = RESOLUTION_Y * 2;
+			var wsWidth = Camera.Main.OrthogonalWidth;
+			var wsHeight = Camera.Main.OrthogonalHeight;
 
 			WorldTexture = new Texture2D(FlatRedBallServices.GraphicsDevice, STUFF_WIDTH, STUFF_HEIGHT);
 			WorldTexture.SetData(GetColorData());
