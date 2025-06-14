@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Sand.Extensions;
+using Sand.Models.Stuff;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,14 +58,14 @@ public class DrawableWorld
 			Camera.Main.Orthogonal = true;
 			//Camera.Main.OrthogonalWidth = WorldSprite.Width;
 			//Camera.Main.OrthogonalHeight = WorldSprite.Height;
-			Camera.Main.OrthogonalWidth = RESOLUTION_X * 2;
-			Camera.Main.OrthogonalHeight = RESOLUTION_Y * 2;
+			Camera.Main.OrthogonalWidth = RESOLUTION_X/* * 2*/;
+			Camera.Main.OrthogonalHeight = RESOLUTION_Y/* * 2*/;
 
 			StuffCells =
 			[
+				new StuffCell(-1, worldSetup),
 				new StuffCell(0, worldSetup),
-				new StuffCell(1, worldSetup),
-				new StuffCell(2, worldSetup)
+				new StuffCell(1, worldSetup)
 			];
 		}
 		void PreparePlayer()
@@ -78,22 +79,22 @@ public class DrawableWorld
 
 	#region Moving Stuff
 
-	public void ApplyGravity(int xIndex, int yIndex)
+	public void ApplyGravity(StuffCell cell, int xIndex, int yIndex)
 	{
 		//TODO stuff cell naive quick impl
-		var stuff = StuffCells[1].GetStuffAt(xIndex, yIndex);
+		var stuff = cell.GetStuffAt(xIndex, yIndex);
 
 		switch (stuff.Phase)
 		{
 			case Phase.Powder:
-				ApplyGravityPhasePowder(xIndex, yIndex);
+				ApplyGravityPhasePowder(cell, stuff, xIndex, yIndex);
 				break;
 			case Phase.Liquid:
-				ApplyGravityPhaseLiquid(xIndex, yIndex);
+				ApplyGravityPhaseLiquid(cell, stuff, xIndex, yIndex);
 				break;
 		}
 
-		void ApplyGravityPhasePowder(int xIndex, int yIndex)
+		void ApplyGravityPhasePowder(StuffCell cell, Stuff stuff, int xIndex, int yIndex)
 		{
 			if (stuff.CheckDormancy())
 			{
@@ -109,7 +110,7 @@ public class DrawableWorld
 			if (rowBelowIndex < 0) return;
 
 			// check directly below
-			if ((rowBelowIndex - 2 >= 0 && Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 2)) || (rowBelowIndex - 1 >= 0 && Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)))))
+			if ((rowBelowIndex - 2 >= 0 && Move(cell, new(xIndex, yIndex), new(xIndex, rowBelowIndex - 2)) || (rowBelowIndex - 1 >= 0 && Move(cell, new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)))))
 			{
 				return;
 			}
@@ -124,7 +125,7 @@ public class DrawableWorld
 				if (leftSide)
 				{
 					// check below and left
-					if (colLeftIndex >= 0 && Move(new(xIndex, yIndex), new(colLeftIndex, rowBelowIndex)))
+					if (colLeftIndex >= 0 && Move(cell, new(xIndex, yIndex), new(colLeftIndex, rowBelowIndex)))
 					{
 						return;
 						//break;
@@ -133,7 +134,7 @@ public class DrawableWorld
 				else
 				{
 					// check below and right
-					if (colRightIndex < STUFF_WIDTH && Move(new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
+					if (colRightIndex < STUFF_WIDTH && Move(cell, new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
 					{
 						return;
 						//break;
@@ -143,14 +144,14 @@ public class DrawableWorld
 			}
 
 			// check directly below
-			if (Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex)))
+			if (Move(cell, new(xIndex, yIndex), new(xIndex, rowBelowIndex)))
 			{
 				return;
 			}
 
 		}
 
-		void ApplyGravityPhaseLiquid(int xIndex, int yIndex)
+		void ApplyGravityPhaseLiquid(StuffCell cell, Stuff stuff, int xIndex, int yIndex)
 		{
 
 
@@ -170,7 +171,7 @@ public class DrawableWorld
 			}
 
 			// check directly below
-			if ((rowBelowIndex - 2 >= 0 && Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 2)) || (rowBelowIndex - 1 >= 0 && Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)))))
+			if ((rowBelowIndex - 2 >= 0 && Move(cell, new(xIndex, yIndex), new(xIndex, rowBelowIndex - 2)) || (rowBelowIndex - 1 >= 0 && Move(cell, new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)))))
 			{
 				return;
 			}
@@ -185,7 +186,7 @@ public class DrawableWorld
 				if (leftSide)
 				{
 					// check below and left
-					if (colLeftIndex >= 0 && Move(new(xIndex, yIndex), new(colLeftIndex, rowBelowIndex)))
+					if (colLeftIndex >= 0 && Move(cell, new(xIndex, yIndex), new(colLeftIndex, rowBelowIndex)))
 					{
 						break;
 					}
@@ -193,7 +194,7 @@ public class DrawableWorld
 				else
 				{
 					// check below and right
-					if (colRightIndex < STUFF_WIDTH && Move(new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
+					if (colRightIndex < STUFF_WIDTH && Move(cell, new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
 					{
 						break;
 					}
@@ -217,7 +218,7 @@ public class DrawableWorld
 					if (leftSide)
 					{
 						// check left
-						if (colLeftIndex >= 0 && Move(new(xIndex, yIndex), new(colLeftIndex, yIndex)))
+						if (colLeftIndex >= 0 && Move(cell, new(xIndex, yIndex), new(colLeftIndex, yIndex)))
 						{
 							break;
 						}
@@ -225,7 +226,7 @@ public class DrawableWorld
 					else
 					{
 						// check right
-						if (colRightIndex < STUFF_WIDTH && Move(new(xIndex, yIndex), new(colRightIndex, yIndex)))
+						if (colRightIndex < STUFF_WIDTH && Move(cell, new(xIndex, yIndex), new(colRightIndex, yIndex)))
 						{
 							break;
 						}
@@ -282,10 +283,10 @@ public class DrawableWorld
 		}
 	}
 
-	public bool Move(Point from, Point to)
+	public bool Move(StuffCell cell, Point from, Point to)
 	{
 		//TODO stuff cell naive quick impl
-		return StuffCells[1].Move(from, to);
+		return cell.Move(from, to);
 	}
 
 	#endregion
@@ -299,7 +300,7 @@ public class DrawableWorld
 
 		void SetupWorldCoords()
 		{
-			var camBottomLeft = new Vector2(Camera.Main.X - (RESOLUTION_X / 2), Camera.Main.Y - (RESOLUTION_Y / 2));
+			var camBottomLeft = new Vector2((Camera.Main.X - Camera.Main.OrthogonalWidth / 2)/* - (RESOLUTION_X / 2)*/, (Camera.Main.Y - Camera.Main.OrthogonalHeight / 2)/* - (RESOLUTION_Y / 2)*/);
 			var mRel = new Vector2(InputManager.Mouse.X, RESOLUTION_Y - InputManager.Mouse.Y);
 
 			WorldCoords = new WorldCoordsWrapper()
@@ -314,6 +315,7 @@ public class DrawableWorld
 
 			if (PRINT_POSITIONS_ON_CLICK && InputManager.Mouse.IsInGameWindow() && InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton))
 			{
+				
 				var msg =
 /*$@"
 ========================================
@@ -346,44 +348,48 @@ PLAYER
 						return;
 					}
 			*/
-			var p = new Point();
-
-			try
+			int i = 0;
+			foreach (var cell in StuffCells)
 			{
-				//=======================================================
-				// New version of world update loop (utilising chunks)
-				//=======================================================
+				var p = new Point();
 
-				// choose which chunks to update
-				//var chunksToUpdate = StuffCell.GetChunksToUpdate();
-				//TODO stuff cell naive quick impl
-				var chunksToUpdate = StuffCells[1].GetChunksToUpdate();
-
-				foreach (var chunk in chunksToUpdate)
+				try
 				{
-					foreach (var point in chunk.Points_BottomLeftToTopRight_AlternatingRowDirection)
+					//=======================================================
+					// New version of world update loop (utilising chunks)
+					//=======================================================
+					// choose which chunks to update
+					//var chunksToUpdate = StuffCell.GetChunksToUpdate();
+					//TODO stuff cell naive quick impl
+					var chunksToUpdate = cell.GetChunksToUpdate();
+
+					foreach (var chunk in chunksToUpdate)
 					{
-						var xIndex = point.X;
-						var yIndex = point.Y;
-
-						// make point viewable to scope that encloses the try catch for error logging
-						p = point;
-
-						// if something here then apply gravity **NOTE** dormancy is checked in apply gravity
-
-						//if (StuffCell.GetStuffAt(point) != null)
-						//TODO stuff cell naive quick impl
-						if (StuffCells[1].GetStuffAt(point) != null)
+						foreach (var point in chunk.Points_BottomLeftToTopRight_AlternatingRowDirection)
 						{
-							ApplyGravity(xIndex, yIndex);
+							var xIndex = point.X;
+							var yIndex = point.Y;
+
+							// make point viewable to scope that encloses the try catch for error logging
+							p = point;
+
+							// if something here then apply gravity **NOTE** dormancy is checked in apply gravity
+
+							//if (StuffCell.GetStuffAt(point) != null)
+							//TODO stuff cell naive quick impl
+							if (cell.GetStuffAt(point) != null)
+							{
+								ApplyGravity(cell, xIndex, yIndex);
+							}
 						}
 					}
 				}
-			}
-			catch (Exception updateException)
-			{
-				Logger.Instance.LogError(updateException, $"(x,y)=({p.X},{p.Y}), (maxX, maxY)=({STUFF_WIDTH - 1},{STUFF_HEIGHT - 1})");
-				throw;
+				catch (Exception updateException)
+				{
+					Logger.Instance.LogError(updateException, $"(x,y)=({p.X},{p.Y}), (maxX, maxY)=({STUFF_WIDTH - 1},{STUFF_HEIGHT - 1})");
+					throw;
+				}
+				i++;
 			}
 		}
 
@@ -395,7 +401,74 @@ PLAYER
 		throw new NotImplementedException();
 	}
 
+	public (int ChunkIndex, Point StuffPosition) StuffPositionForWorldCoord(Vector2 worldCoord)
+	{
+		int? chunkIndex = null;
+		Point? stuffPosition = null;
 
+		for (int i = 0; i < StuffCells.Length; i++)
+		{
+			var chunk = StuffCells[i];
+			if (worldCoord.X >= chunk.WorldSprite.Left && worldCoord.X <= chunk.WorldSprite.Right/* + RESOLUTION_X*/)
+			{
+				if (worldCoord.Y >= chunk.WorldSprite.Bottom && worldCoord.Y < chunk.WorldSprite.Top/* + RESOLUTION_Y*/)
+				{
+					chunkIndex = i;
+					break;
+				}
+			}
+		}
+
+		if (chunkIndex.HasValue)
+		{
+			var offset = StuffCells[chunkIndex.Value].Offset;
+
+			// get origin of cell
+			var originX = 0;
+			var originY = 0; // bottom left
+
+			// offset this origin by the number or RESOLUTION_X's * OFFSET
+			var originXOffset = originX + (offset * RESOLUTION_X);
+			Point cellOrigin = new(originXOffset, originY);
+
+			// now get the distance between the origin and the coord
+			var positionRelativeToOrigin_X = worldCoord.X - cellOrigin.X;
+			var positionRelativeToOrigin_Y = worldCoord.Y - cellOrigin.Y;
+
+			var stuffX = (int)(positionRelativeToOrigin_X / STUFF_SCALE);
+			var stuffY = (int)(positionRelativeToOrigin_Y / STUFF_SCALE);
+
+			stuffPosition = new Point(stuffX, stuffY);
+
+			/*			var tX = worldCoord.X;
+						//for (int i = 0; i <= chunkIndex; i++)
+						//{
+						var adj = RESOLUTION_X * offset;
+						//tX += (RESOLUTION_X * i) - (RESOLUTION_X * StuffCells[chunkIndex.Value].Offset);
+						tX += adj;
+
+						//}
+						var temp = new Vector2(tX, worldCoord.Y);
+
+						var spX = 1;
+
+						// the temp now describes
+
+
+						var spY = 1;
+
+						stuffPosition = new Point((int)(temp.X / STUFF_SCALE), (int)(temp.Y / STUFF_SCALE));
+						//var stuffPosition = new Point(STUFF_WIDTH / 2, STUFF_HEIGHT / 2);*/
+			var sdfsdf = "";
+		}
+
+		Console.WriteLine($"{nameof(StuffPositionForWorldCoord)} - chunkIndex={chunkIndex} stuffPosition={stuffPosition} (MAX={Constants.STUFF_WIDTH},{Constants.STUFF_HEIGHT})");
+
+		return (
+			chunkIndex ?? throw new InvalidOperationException("chunkIndex not found"),
+			stuffPosition ?? throw new InvalidOperationException("stuffPosition not found")
+		);
+	}
 
 	public WorldCoordsWrapper WorldCoords { get; private set; }
 	private const int PLAYER_MOVE_FACTOR = 15;
@@ -420,18 +493,26 @@ PLAYER
 
 				if (InputManager.Keyboard.KeyDown(Keys.Z))
 				{
-					Camera.Main.X -= 1 * STUFF_SCALE;
+					Camera.Main.X -= 5 * STUFF_SCALE;
 				}
 
 				if (InputManager.Keyboard.KeyDown(Keys.C))
 				{
-					Camera.Main.X += 1 * STUFF_SCALE;
+					Camera.Main.X += 5 * STUFF_SCALE;
 				}
 
-				if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)))
+				if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) /*|| InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)*/))
 				{
+					var (chunkIndex, stuffPosition) = StuffPositionForWorldCoord(WorldCoords.MouseAbsolute);
+
+					//Logger.Instance.LogInfo($"Placing Water @ Chunk Index {chunkIndex} @ Stuff Position {stuffPosition}");
 					//TODO stuff cell naive quick impl
-					StuffCells[1].SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, x, y, 15);
+
+
+					StuffCells[chunkIndex].SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, stuffPosition.X, stuffPosition.Y, 15);
+
+
+
 					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
 
 				}

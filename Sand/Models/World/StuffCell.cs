@@ -21,7 +21,7 @@ public class StuffCell : IDrawableBatch
 		//========================================
 		// PREPARE THE WORLD DATA STRUCTURE
 		//========================================
-
+		Offset = offset;
 		World = new Stuff[STUFF_WIDTH][];
 		for (int x = 0; x < World.Length; x++)
 		{
@@ -134,7 +134,7 @@ public class StuffCell : IDrawableBatch
 			WorldSprite.Width = wsWidth;// RESOLUTION_X * 2;
 			WorldSprite.Height = wsHeight;// RESOLUTION_Y * 2;
 
-			WorldSprite.X += RESOLUTION_X / 2 + (offset * RESOLUTION_X * 2);
+			WorldSprite.X += RESOLUTION_X / 2 + (offset * RESOLUTION_X);
 			WorldSprite.Y += RESOLUTION_Y / 2;
 
 			// instead offset setting X & Y props to account for:
@@ -157,24 +157,26 @@ public class StuffCell : IDrawableBatch
 			Camera.Main.Orthogonal = true;
 			//Camera.Main.OrthogonalWidth = WorldSprite.Width;
 			//Camera.Main.OrthogonalHeight = WorldSprite.Height;
-			Camera.Main.OrthogonalWidth = wsWidth;
-			Camera.Main.OrthogonalHeight = wsHeight;
+			//Camera.Main.OrthogonalWidth = wsWidth;
+			//Camera.Main.OrthogonalHeight = wsHeight;
 		}
 
 		SpriteManager.AddDrawableBatch(this);
 	}
 
+	public int Offset { get; private set; }
+
 	/// <summary>Outer array is X, inner array is Y.</summary>
 	public Stuff[][] World { get; private set; }
 	public List<Chunk> Chunks { get; set; }
 	private Texture2D WorldTexture { get; set; }
-	private Sprite WorldSprite { get; set; }
+	public Sprite WorldSprite { get; set; }
 
-	public float X => 0;
+	public float X => Z_IND_WORLD;
 
-	public float Y => 0;
+	public float Y => Z_IND_WORLD;
 
-	public float Z => 0;
+	public float Z => Z_IND_WORLD;
 
 	public bool UpdateEveryFrame => true;
 

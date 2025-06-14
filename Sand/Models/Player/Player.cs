@@ -104,7 +104,7 @@ public class Player
 			Sprite.X = RESOLUTION_X / 2;
 			Sprite.Y = RESOLUTION_Y / 2;
 			Sprite.Z = Z_IND_PLAYER;
-			Sprite.TextureScale = 10;
+			Sprite.TextureScale = 5;
 			Sprite.CurrentChainName = AnimChainName_Idle;
 
 			Sprite.Visible = SHOW_PLAYER;
