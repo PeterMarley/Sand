@@ -22,24 +22,25 @@ namespace Sand;
 
 public class DrawableWorld
 {
+	private const int PLAYER_MOVE_FACTOR = 15;
+	private const int GRAV_MAGNITUDE = 1;
 
 	//========================================
 	// The World
 	//========================================
-
-	//public StuffCell StuffCell { get; set; }
-	public StuffCell[] StuffCells { get; set; }
-	private Texture2D WorldTexture { get; set; }
-	private Sprite WorldSprite { get; set; }
-	private SpriteBatch BgSpriteBatch { get; set; }
-	private Texture2D BgTexture { get; set; }
+	private StuffCell[] StuffCells { get; set; }
+	private CheckerBoardBackground Background { get; set; }
+	public WorldCoords WorldCoords { get; private set; }
 
 	//========================================
 	// The Player
 	//========================================
+	private Player Player { get; set; }
 
-	public Player Player { get; private set; }
-	private CheckerBoardBackground Background { get; set; }
+
+	//===========================================
+	// CTOR
+	//===========================================
 	public DrawableWorld(StuffCellSetup worldSetup)
 	{
 		PrepareBackground();
@@ -52,15 +53,6 @@ public class DrawableWorld
 		}
 		void PrepareWorld(StuffCellSetup worldSetup)
 		{
-
-			//StuffCell = new StuffCell(worldSetup);
-
-			Camera.Main.Orthogonal = true;
-			//Camera.Main.OrthogonalWidth = WorldSprite.Width;
-			//Camera.Main.OrthogonalHeight = WorldSprite.Height;
-			Camera.Main.OrthogonalWidth = RESOLUTION_X/* * 2*/;
-			Camera.Main.OrthogonalHeight = RESOLUTION_Y/* * 2*/;
-
 			StuffCells =
 			[
 				new StuffCell(-1, worldSetup),
@@ -75,8 +67,9 @@ public class DrawableWorld
 		}
 	}
 
-	#region Public API
-
+	//===========================================
+	// Moving Stuff
+	//===========================================
 	#region Moving Stuff
 
 	public void ApplyGravity(StuffCell cell, int xIndex, int yIndex)
@@ -282,17 +275,14 @@ public class DrawableWorld
 
 		}
 	}
-
 	public bool Move(StuffCell cell, Point from, Point to)
 	{
 		//TODO stuff cell naive quick impl
 		return cell.Move(from, to);
 	}
 
-	#endregion
+	#endregion Moving Stuff
 
-	#region Game Loop Methods called by SandGame
-	private const int _FRAME_COUNT_BETWEEN_UPDATE = 1;
 	public void Update()
 	{
 		SetupWorldCoords();
@@ -303,26 +293,20 @@ public class DrawableWorld
 			var camBottomLeft = new Vector2((Camera.Main.X - Camera.Main.OrthogonalWidth / 2)/* - (RESOLUTION_X / 2)*/, (Camera.Main.Y - Camera.Main.OrthogonalHeight / 2)/* - (RESOLUTION_Y / 2)*/);
 			var mRel = new Vector2(InputManager.Mouse.X, RESOLUTION_Y - InputManager.Mouse.Y);
 
-			WorldCoords = new WorldCoordsWrapper()
-			{
-				MouseRelative = mRel,
-				CameraCentre = new Vector2(Camera.Main.X, Camera.Main.Y),
-				CameraBottomLeft = camBottomLeft,
-				CameraOffSet = camBottomLeft,
-				CameraTopRight = new Vector2(Camera.Main.X + (RESOLUTION_X / 2), Camera.Main.Y + (RESOLUTION_Y / 2)),
-				MouseAbsolute = new Vector2(mRel.X + camBottomLeft.X, mRel.Y + camBottomLeft.Y)
-			};
+			WorldCoords = new WorldCoords(
+			
+				mouseRelative: mRel,
+				cameraCentre: new Vector2(Camera.Main.X, Camera.Main.Y),
+				cameraBottomLeft: camBottomLeft,
+				cameraOffset: camBottomLeft,
+				cameraTopRight: new Vector2(Camera.Main.X + (RESOLUTION_X / 2), Camera.Main.Y + (RESOLUTION_Y / 2)),
+				mouseAbsolute: new Vector2(mRel.X + camBottomLeft.X, mRel.Y + camBottomLeft.Y)
+			);
 
 			if (PRINT_POSITIONS_ON_CLICK && InputManager.Mouse.IsInGameWindow() && InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton))
 			{
 				
 				var msg =
-/*$@"
-========================================
-CONSTANTS
-	- ✓ Resolution ........... {Constants.RESOLUTION_X},{Constants.RESOLUTION_Y}
-	- ✓ Stuff W & H ,,,,,,,,,, {Constants.STUFF_WIDTH},{Constants.STUFF_HEIGHT}
-	- ✓ Stuff Scale .......... {Constants.STUFF_SCALE}*/
 $@"
 CAMERA
 	- ✓ Camera (Centre)   {WorldCoords.CameraCentre}
@@ -394,14 +378,7 @@ PLAYER
 		}
 
 	}
-
-	// Not Implemented
-	public void Destroy()
-	{
-		throw new NotImplementedException();
-	}
-
-	public (int ChunkIndex, Point StuffPosition) StuffPositionForWorldCoord(Vector2 worldCoord)
+	public SandCoordinate StuffPositionForWorldCoord(Vector2 worldCoord)
 	{
 		int? chunkIndex = null;
 		Point? stuffPosition = null;
@@ -409,9 +386,9 @@ PLAYER
 		for (int i = 0; i < StuffCells.Length; i++)
 		{
 			var chunk = StuffCells[i];
-			if (worldCoord.X >= chunk.WorldSprite.Left && worldCoord.X <= chunk.WorldSprite.Right/* + RESOLUTION_X*/)
+			if (worldCoord.X >= chunk.Left && worldCoord.X <= chunk.Right)
 			{
-				if (worldCoord.Y >= chunk.WorldSprite.Bottom && worldCoord.Y < chunk.WorldSprite.Top/* + RESOLUTION_Y*/)
+				if (worldCoord.Y >= chunk.Bottom && worldCoord.Y < chunk.Top)
 				{
 					chunkIndex = i;
 					break;
@@ -462,26 +439,28 @@ PLAYER
 			var sdfsdf = "";
 		}
 
-		Console.WriteLine($"{nameof(StuffPositionForWorldCoord)} - chunkIndex={chunkIndex} stuffPosition={stuffPosition} (MAX={Constants.STUFF_CELL_WIDTH},{Constants.STUFF_CELL_HEIGHT})");
+		//Console.WriteLine($"{nameof(StuffPositionForWorldCoord)} - chunkIndex={chunkIndex} stuffPosition={stuffPosition} (MAX={Constants.STUFF_CELL_WIDTH},{Constants.STUFF_CELL_HEIGHT})");
 
-		return (
-			chunkIndex ?? throw new InvalidOperationException("chunkIndex not found"),
-			stuffPosition ?? throw new InvalidOperationException("stuffPosition not found")
-		);
+		return new SandCoordinate()
+		{
+			ChunkIndex = chunkIndex ?? throw new InvalidOperationException("chunkIndex not found"),
+			StuffPosition = stuffPosition ?? throw new InvalidOperationException("stuffPosition not found")
+		};
+
+		//return (
+		//	chunkIndex ?? throw new InvalidOperationException("chunkIndex not found"),
+		//	stuffPosition ?? throw new InvalidOperationException("stuffPosition not found")
+		//);
 	}
-
-	public WorldCoordsWrapper WorldCoords { get; private set; }
-	private const int PLAYER_MOVE_FACTOR = 15;
-	private const int GRAV_MAGNITUDE = 1;
 	public void ProcessControlsInput()
 	{
+		
+		var mousePosition = StuffPositionForWorldCoord(WorldCoords.MouseAbsolute);
 
-		AffectWorld();
+		AffectWorld(mousePosition);
 		AffectPlayer();
 
-
-
-		void AffectWorld()
+		void AffectWorld(SandCoordinate mousePos)
 		{
 			if (InputManager.Mouse.IsInGameWindow())
 			{
@@ -503,13 +482,13 @@ PLAYER
 
 				if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) /*|| InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)*/))
 				{
-					var (chunkIndex, stuffPosition) = StuffPositionForWorldCoord(WorldCoords.MouseAbsolute);
 
 					//Logger.Instance.LogInfo($"Placing Water @ Chunk Index {chunkIndex} @ Stuff Position {stuffPosition}");
 					//TODO stuff cell naive quick impl
 
-
-					StuffCells[chunkIndex].SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, stuffPosition.X, stuffPosition.Y, 15);
+					
+					StuffCells[mousePos.ChunkIndex].SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, mousePos.StuffPosition.X, mousePos.StuffPosition.Y, 15);
+					
 
 
 
@@ -613,21 +592,6 @@ PLAYER
 
 			Player.TurnDirectionFacing();
 		}
-
 	}
 
-	#endregion
-
-	#endregion
-
-}
-public struct WorldCoordsWrapper
-{
-	public Vector2 MouseRelative;
-	public Vector2 MouseAbsolute;
-
-	public Vector2 CameraCentre;
-	public Vector2 CameraBottomLeft;
-	public Vector2 CameraOffSet;
-	public Vector2 CameraTopRight;
 }

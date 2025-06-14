@@ -20,12 +20,14 @@ public class CheckerBoardBackground : IDrawableBatch
 
 		_sprite = SpriteManager.AddSprite(_texture);
 		_sprite.TextureAddressMode = TextureAddressMode.Wrap;
-		_sprite.TextureScale = 5;
+		_sprite.TextureScale = 1;
 		_sprite.Width = RESOLUTION_X;
 		_sprite.Height = RESOLUTION_Y;
 		_sprite.Z = Z_IND_BACKGROUND;
 		_sprite.Visible = SHOW_BACKGROUND;
 
+		_sprite.X = 0;
+		_sprite.Y = 0;
 		_sprite.LeftTextureCoordinate = 0;
 		_sprite.RightTextureCoordinate = RESOLUTION_X;
 		_sprite.TopTextureCoordinate = 0;

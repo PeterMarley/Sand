@@ -4,9 +4,6 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static Sand.Constants;
 using Color = Microsoft.Xna.Framework.Color;
 
@@ -16,22 +13,21 @@ public class StuffCell : IDrawableBatch
 {
 	private const int NOT_MOVED_DORMANT_TRIGGER = 10;
 
+	//===========================================
+	// CTOR
+	//===========================================
 	public StuffCell(int offset, StuffCellSetup setup = StuffCellSetup.Empty)
 	{
 		//========================================
 		// PREPARE THE WORLD DATA STRUCTURE
 		//========================================
 		Offset = offset;
-		World = new Stuff[STUFF_CELL_WIDTH, STUFF_CELL_HEIGHT];
+		CellMatrix = new Stuff[STUFF_CELL_WIDTH, STUFF_CELL_HEIGHT];
 
 		//========================================
-		// PREPARE THE SUBGRIDS FOR MULTITHREADING!
-		//				(OLDE GODS WONT YE SAVE US)
+		// PREPARE THE CHUNKS
 		//========================================
-
 		Chunks = [];
-
-		//const int chunksLong = STUFF_CELL_CHUNKS_LONG;
 
 		int chunkWidth = STUFF_CELL_WIDTH / STUFF_CELL_CHUNKS_LONG;
 		int chunkHeight = STUFF_CELL_HEIGHT / STUFF_CELL_CHUNKS_LONG;
@@ -59,6 +55,9 @@ public class StuffCell : IDrawableBatch
 			cursor = new Point(cursor.X, cursor.Y + chunkHeight);
 		}
 
+		//========================================
+		// INITIALISE THE STUFF IN THIS CELL
+		//========================================
 		switch (setup)
 		{
 			case StuffCellSetup.Empty:
@@ -115,98 +114,62 @@ public class StuffCell : IDrawableBatch
 				break;
 		}
 
-		if (WorldSprite == null)
-		{
+		//========================================
+		// PREPARE THE TEXTURE AND SPRITE
+		//========================================
+		WorldTexture = new Texture2D(FlatRedBallServices.GraphicsDevice, STUFF_CELL_WIDTH, STUFF_CELL_HEIGHT);
+		WorldTexture.SetData(GetColorData());
 
-			var wsWidth = Camera.Main.OrthogonalWidth;
-			var wsHeight = Camera.Main.OrthogonalHeight;
+		WorldSprite = SpriteManager.AddManualSprite(WorldTexture);
+		WorldSprite.Width = Camera.Main.OrthogonalWidth;
+		WorldSprite.Height = Camera.Main.OrthogonalHeight;
 
-			WorldTexture = new Texture2D(FlatRedBallServices.GraphicsDevice, STUFF_CELL_WIDTH, STUFF_CELL_HEIGHT);
-			WorldTexture.SetData(GetColorData());
+		WorldSprite.X += RESOLUTION_X / 2 + (offset * RESOLUTION_X);
+		WorldSprite.Y += RESOLUTION_Y / 2;
+		WorldSprite.Z = Z_IND_WORLD;
 
-			WorldSprite = SpriteManager.AddManualSprite(WorldTexture);
-			WorldSprite.Width = wsWidth;// RESOLUTION_X * 2;
-			WorldSprite.Height = wsHeight;// RESOLUTION_Y * 2;
-
-			WorldSprite.X += RESOLUTION_X / 2 + (offset * RESOLUTION_X);
-			WorldSprite.Y += RESOLUTION_Y / 2;
-
-		
-			WorldSprite.Z = Z_IND_WORLD;
-			
-
-			Camera.Main.Orthogonal = true;
-		}
-
+		//========================================
+		// ADD TO SPRITE MANAGER
+		//========================================
 		SpriteManager.AddDrawableBatch(this);
 	}
 
-	public int Offset { get; private set; }
+	//===========================================
+	// Fields / Properties
+	//===========================================
+	#region Fields / Properties
 
-	/// <summary>Outer array is X, inner array is Y.</summary>
-	//public Stuff[][] World { get; private set; }
-	private Stuff[,] World { get; /*private */set; }
-	public List<Chunk> Chunks { get; set; }
+	public int Offset { get; private set; }
+	public float Top => WorldSprite.Top;
+	public float Right => WorldSprite.Right;
+	public float Bottom => WorldSprite.Bottom;
+	public float Left => WorldSprite.Left;
+
+	/// <summary>1st index is X, 2nd index is Y.</summary>
+	private Stuff[,] CellMatrix { get; set; }
+	private List<Chunk> Chunks { get; set; }
 	private Texture2D WorldTexture { get; set; }
-	public Sprite WorldSprite { get; set; }
+	private Sprite WorldSprite { get; set; }
+
+	#endregion Fields / Properties
+
+	//===========================================
+	// IDrawableBatch
+	//===========================================
+	#region IDrawableBatch
 
 	public float X => Z_IND_WORLD;
-
 	public float Y => Z_IND_WORLD;
-
 	public float Z => Z_IND_WORLD;
-
 	public bool UpdateEveryFrame => true;
-
 	public void Draw(Camera camera)
 	{
-		//===================================================
-		// DRAW WORLD TEXTURE
-		//===================================================
-
-		// interate through the World and get the color data of all Stuffs there
-		var colorData = GetColorData();
-
-/*		if (WorldSprite == null)
-		{
-
-			var wsWidth = RESOLUTION_X * 2;
-			var wsHeight = RESOLUTION_Y * 2;
-
-			WorldTexture = new Texture2D(FlatRedBallServices.GraphicsDevice, STUFF_WIDTH, STUFF_HEIGHT);
-			WorldTexture.SetData(colorData);
-
-			WorldSprite = SpriteManager.AddManualSprite(WorldTexture);
-			WorldSprite.Width = RESOLUTION_X;// wsWidth;// RESOLUTION_X * 2;
-			WorldSprite.Height = RESOLUTION_Y;// wsHeight;// RESOLUTION_Y * 2;
-			WorldSprite.X += RESOLUTION_X / 2;
-			WorldSprite.Y += RESOLUTION_Y / 2;
-			WorldSprite.Z = Z_IND_WORLD;
-			WorldSprite.X = -5000;
-			WorldSprite.Y = -5000;
-
-
-			Camera.Main.Orthogonal = true;
-			Camera.Main.OrthogonalWidth = WorldSprite.Width;
-			Camera.Main.OrthogonalHeight = WorldSprite.Height;
-			Camera.Main.OrthogonalWidth = wsWidth;
-			Camera.Main.OrthogonalHeight = wsHeight;
-		}*/
-
 		if (SHOW_WORLD)
 		{
-			WorldTexture.SetData(colorData);
+			WorldTexture.SetData(GetColorData());
 			SpriteManager.ManualUpdate(WorldSprite);
 		}
-
-
-		//BgSpriteBatch.Draw(WorldTexture, new Rectangle(0,0, RESOLUTION_X, RESOLUTION_Y), Color.White);
-		// change tto
-		//BgSpriteBatch.Draw(WorldTexture, new Rectangle(0, 0, RESOLUTION_X, RESOLUTION_Y), null, Color.White, 0f, Vector2.Zero, SpriteEffects.None, 0.0f);
-
-
 	}
-
 	public void Update()
 	{
 		if (WorldSprite != null)
@@ -214,11 +177,16 @@ public class StuffCell : IDrawableBatch
 			WorldSprite.Visible = SHOW_WORLD;
 		}
 	}
-
 	public void Destroy()
 	{
-		//throw new NotImplementedException();
 	}
+
+	#endregion IDrawableBatch
+
+	//===========================================
+	// Add Stuff
+	//===========================================
+	#region Add Stuff
 
 	public void SafeAddStuffIfEmpty_InSquare(string stuffType, int x, int y, int length)
 	{
@@ -240,44 +208,28 @@ public class StuffCell : IDrawableBatch
 			}
 		}
 	}
-
 	public void ForceAddStuff(string stuffType, int x, int y)
 	{
 		if (x >= 0 && x < STUFF_CELL_WIDTH && y >= 0 && y < STUFF_CELL_HEIGHT)
 		{
 			var stuff = StuffFactory.Instance.Get(stuffType);
-			World[x, y] = stuff;//.SetPosition(x, y);
+			CellMatrix[x, y] = stuff;//.SetPosition(x, y);
 								//stuff.X = x;
 								//stuff.Y = y;
 		}
 	}
-
 	public void SafeAddStuffIfEmpty(string stuffType, int x, int y)
 	{
-		if (x >= 0 && x < STUFF_CELL_WIDTH && y >= 0 && y < STUFF_CELL_HEIGHT && World[x, y] == null)
+		if (x >= 0 && x < STUFF_CELL_WIDTH && y >= 0 && y < STUFF_CELL_HEIGHT && CellMatrix[x, y] == null)
 		{
 			var stuff = StuffFactory.Instance.Get(stuffType);
-			World[x, y] = stuff;//.SetPosition(x, y);
+			CellMatrix[x, y] = stuff;//.SetPosition(x, y);
 								//stuff.X = x;
 								//stuff.Y = y;
 		}
 	}
 
-	public struct PlayerCollisionResult
-	{
-		public bool AllowUp;
-		public bool AllowRight;
-		public bool AllowDown;
-		public bool AllowLeft;
-
-		public bool InLiquid;
-
-		public int MoveFactor;
-		public int GravMagnitude;
-
-		public int MoveLeftOffsetY;
-		public int MoveRightOffsetY;
-	}
+	#endregion Add Stuff
 
 	public PlayerCollisionResult Collision(Player player, int initialGravMagnitude, int initialMoveFactor) //player
 	{
@@ -313,9 +265,9 @@ public class StuffCell : IDrawableBatch
 				}
 
 				// if there is something here then stop
-				if (World[x, bottom] != null)
+				if (CellMatrix[x, bottom] != null)
 				{
-					if (World[x, bottom].Phase == Phase.Liquid)
+					if (CellMatrix[x, bottom].Phase == Phase.Liquid)
 					{
 						inLiquid = true;
 						adjustedMoveFactor = initialMoveFactor / 2;
@@ -325,7 +277,6 @@ public class StuffCell : IDrawableBatch
 						allowDown = false;
 						break;
 					}
-					//Logger.Instance.LogInfo($"Encountering {World[x][bottom].Phase} at bottom - move factor is {moveFactor}");
 				}
 			}
 		}
@@ -354,9 +305,9 @@ public class StuffCell : IDrawableBatch
 				}
 
 				// if there is something here then stop
-				if (World[x, top] != null)
+				if (CellMatrix[x, top] != null)
 				{
-					if (World[x, top].Phase == Phase.Liquid)
+					if (CellMatrix[x, top].Phase == Phase.Liquid)
 					{
 						inLiquid = true;
 						adjustedMoveFactor = initialMoveFactor / 2;
@@ -366,7 +317,6 @@ public class StuffCell : IDrawableBatch
 						allowUp = false;
 						break;
 					}
-					//Logger.Instance.LogInfo($"Encountering {World[x][top].Phase} at top - move factor is {moveFactor}");
 				}
 			}
 		}
@@ -399,15 +349,15 @@ public class StuffCell : IDrawableBatch
 				}
 
 				// if there is something here
-				if (World[left, y] != null)
+				if (CellMatrix[left, y] != null)
 				{
 					// if its a liquid, slow down
-					if (World[left, y] is { Phase: Phase.Liquid })
+					if (CellMatrix[left, y] is { Phase: Phase.Liquid })
 					{
 						inLiquid = true;
 						adjustedMoveFactor = initialMoveFactor / 2;
 					}
-					else if (World[left, y] is { Phase: Phase.Solid } or { Phase: Phase.Powder })
+					else if (CellMatrix[left, y] is { Phase: Phase.Solid } or { Phase: Phase.Powder })
 					{
 						//===========================
 						// WALK UPHILL LEFT
@@ -423,7 +373,7 @@ public class StuffCell : IDrawableBatch
 									break;
 								}
 
-								var stuff = World[left, y + yCursorOffset];
+								var stuff = CellMatrix[left, y + yCursorOffset];
 
 								// if the left blocker has space above, allow left, but require a single y coord offset of the height of a Stuff
 								if (stuff == null || stuff is { Phase: Phase.Liquid })
@@ -441,7 +391,6 @@ public class StuffCell : IDrawableBatch
 							}	
 						}
 					}
-					//Logger.Instance.LogInfo($"Encountering {World[left][y].Phase} at left - move factor is {moveFactor}");
 				}
 			
 			}
@@ -471,15 +420,15 @@ public class StuffCell : IDrawableBatch
 				}
 
 				// if there is something here
-				if (World[right, y] != null)
+				if (CellMatrix[right, y] != null)
 				{
 					// if its a liquid, slow down
-					if (World[right, y] is { Phase: Phase.Liquid })
+					if (CellMatrix[right, y] is { Phase: Phase.Liquid })
 					{
 						inLiquid = true;
 						adjustedMoveFactor = initialMoveFactor / 2;
 					}
-					else if (World[right, y] is { Phase: Phase.Solid } or { Phase: Phase.Powder })
+					else if (CellMatrix[right, y] is { Phase: Phase.Solid } or { Phase: Phase.Powder })
 					{
 						//===========================
 						// WALK UPHILL RIGHT
@@ -495,7 +444,7 @@ public class StuffCell : IDrawableBatch
 									break;
 								}
 
-								var stuff = World[right, y + yCursorOffset];
+								var stuff = CellMatrix[right, y + yCursorOffset];
 
 								// if the left blocker has space above, allow left, but require a single y coord offset of the height of a Stuff
 								if (stuff == null || stuff is { Phase: Phase.Liquid })
@@ -513,7 +462,6 @@ public class StuffCell : IDrawableBatch
 							}
 						}
 					}
-					//Logger.Instance.LogInfo($"Encountering {World[left][y].Phase} at left - move factor is {moveFactor}");
 				}
 			}
 		}
@@ -524,20 +472,19 @@ public class StuffCell : IDrawableBatch
 		}
 		#endregion
 
-		return new PlayerCollisionResult()
-		{
-			AllowUp = allowUp,
-			AllowRight = allowRight,
-			AllowDown = allowDown,
-			AllowLeft = allowLeft,
-			InLiquid = inLiquid,
-			MoveFactor = adjustedMoveFactor,
-			GravMagnitude = adjustedGravMagnitude,
-			MoveLeftOffsetY = moveLeftOffsetY,
-			MoveRightOffsetY = moveRightOffsetY
-		};
+		return new PlayerCollisionResult(
+		
+			allowUp: allowUp,
+			allowRight: allowRight,
+			allowDown: allowDown,
+			allowLeft: allowLeft,
+			inLiquid: inLiquid,
+			moveFactor: adjustedMoveFactor,
+			gravMagnitude: adjustedGravMagnitude,
+			moveLeftOffsetY: moveLeftOffsetY,
+			moveRightOffsetY: moveRightOffsetY
+		);
 	}
-
 	public Color[] GetColorData()
 	{
 		var colorData = new Color[STUFF_CELL_HEIGHT * STUFF_CELL_WIDTH];
@@ -547,27 +494,24 @@ public class StuffCell : IDrawableBatch
 		{
 			for (var x = 0; x < STUFF_CELL_WIDTH; x++)
 			{
-				colorData[colorIndex++] = World[x, y] == null ? Color.Transparent : World[x, y].Color;
+				colorData[colorIndex++] = CellMatrix[x, y] == null ? Color.Transparent : CellMatrix[x, y].Color;
 			}
 		}
 
 		return colorData;
 	}
-
 	public Stuff GetStuffAt(Point p)
 	{
 		return GetStuffAt(p.X, p.Y);
 	}
-
 	public Stuff GetStuffAt(int x, int y)
 	{
-		return World[x, y];
+		return CellMatrix[x, y];
 	}
-
 	public bool Move(Point from, Point to)
 	{
-		var stuffAtSource = World[from.X, from.Y];
-		var stuffAtTarget = World[to.X, to.Y];
+		var stuffAtSource = CellMatrix[from.X, from.Y];
+		var stuffAtTarget = CellMatrix[to.X, to.Y];
 
 		if (stuffAtSource == null) return true;
 
@@ -584,14 +528,6 @@ public class StuffCell : IDrawableBatch
 			{
 				stuffAtSource.Dormant = true;
 			}
-
-			//if (stuffAtTarget != null)
-			//{
-			//	if (stuffAtTarget.NotMovedCount > NOT_MOVED_DORMANT_TRIGGER)
-			//	{
-			//		stuffAtTarget.Dormant = true;
-			//	}
-			//}
 		}
 		else
 		{
@@ -617,8 +553,8 @@ public class StuffCell : IDrawableBatch
 			if (stuffTarget == null // nothing at target
 			|| stuffTarget is not { Phase: Phase.Solid or Phase.Powder }) // or thing at target is not a solid
 			{
-				World[to.X, to.Y] = stuffAtSource;
-				World[from.X, from.Y] = null;
+				CellMatrix[to.X, to.Y] = stuffAtSource;
+				CellMatrix[from.X, from.Y] = null;
 				didMove = true;
 			}
 
@@ -657,10 +593,10 @@ public class StuffCell : IDrawableBatch
 						for (var i = 0; !hasDisplaced && i < Randoms.Instance.Ind_leftRightMid.Length; i++)
 						{
 							var adjCursorX = waterColumnX + Randoms.Instance.Ind_leftRightMid[i];
-							if (adjCursorX >= 0 && adjCursorX < STUFF_CELL_WIDTH && World[adjCursorX, cursorY] == null)
+							if (adjCursorX >= 0 && adjCursorX < STUFF_CELL_WIDTH && CellMatrix[adjCursorX, cursorY] == null)
 							{
 								// move this displaced liquid to here
-								World[adjCursorX, cursorY] = stuffTarget;//.SetPosition(adjCursorX, cursorY); ;
+								CellMatrix[adjCursorX, cursorY] = stuffTarget;//.SetPosition(adjCursorX, cursorY); ;
 								hasDisplaced = true;// BREAKS both loops
 								stuffAtTarget.Dormant = false;
 							}
@@ -678,56 +614,47 @@ public class StuffCell : IDrawableBatch
 
 		bool MoveLiquid(Point from, Point to)
 		{
-			var stuffSource = World[from.X, from.Y];
-			var stuffTarget = World[to.X, to.Y];
+			var stuffSource = CellMatrix[from.X, from.Y];
+			var stuffTarget = CellMatrix[to.X, to.Y];
 			// if not stuff at target fall to here and finish
 			if (stuffTarget == null)
 			{
 				// update world
-				World[to.X, to.Y] = stuffSource;
-				World[from.X, from.Y] = null;
+				CellMatrix[to.X, to.Y] = stuffSource;
+				CellMatrix[from.X, from.Y] = null;
 				return true;
 			}
 
 			return false;
 		}
 	}
-
 	public List<Chunk> GetChunksToUpdate()
 	{
 		var chunksToUpdate = new List<Chunk>();
 
-		try
+		#region Every other chunk, oscillating first chunk position
+
+		// choose which chunks to update
+		var currentFrame = TimeManager.CurrentFrame;
+		var alteratingSeed = currentFrame % 2 == 0;
+
+		for (int iChunk = 0; iChunk < Chunks.Count; iChunk++)
 		{
-			#region Every other chunk, oscillating first chunk position
-
-			// choose which chunks to update
-			var currentFrame = TimeManager.CurrentFrame;
-			var alteratingSeed = currentFrame % 2 == 0;
-
-			for (int iChunk = 0; iChunk < Chunks.Count; iChunk++)
+			// this if is the gate deciding which chunks are to be updated this Update invocation
+			if (alteratingSeed)// every other chunk
 			{
-				// this if is the gate deciding which chunks are to be updated this Update invocation
-				if (alteratingSeed)// every other chunk
-				{
-					chunksToUpdate.Add(Chunks[iChunk]);
-					alteratingSeed = false;
-				}
-				else
-				{
-					alteratingSeed = true;
-				}
+				chunksToUpdate.Add(Chunks[iChunk]);
+				alteratingSeed = false;
 			}
+			else
+			{
+				alteratingSeed = true;
+			}
+		}
 
-			#endregion
-		}
-		catch (Exception ex)
-		{
-			throw;
-		}
+		#endregion
 
 		return chunksToUpdate;
 	}
-
 
 }

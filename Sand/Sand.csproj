@@ -41,11 +41,14 @@
     <Compile Include="Models\Stuff\ChunkManager.cs" />
     <Compile Include="Models\World\CheckerBoardBackground.cs" />
     <Compile Include="Models\World\Chunk.cs" />
+    <Compile Include="Models\World\PlayerCollisionResult.cs" />
+    <Compile Include="Models\World\SandCoordinate.cs" />
     <Compile Include="Models\World\StuffCell.cs" />
     <Compile Include="Models\World\DrawableWorld.cs" />
     <Compile Include="Models\Player\Player.cs" />
     <Compile Include="Models\Stuff\Stuff.cs" />
     <Compile Include="Models\World\StuffCellSetup.cs" />
+    <Compile Include="Models\World\WorldCoords.cs" />
     <Compile Include="Services\FastRandomBoolGenerator.cs" />
     <Compile Include="Services\ConfigService.cs" />
     <Compile Include="Services\Randoms.cs" />

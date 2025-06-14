@@ -105,12 +105,12 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 		_tLoadMaterials = Task.Run(StuffFactory.Instance.LoadMaterialsAsync);
 
-		var wsWidth = RESOLUTION_X * 2;
-		var wsHeight = RESOLUTION_Y * 2;
+		//var wsWidth = RESOLUTION_X * 2;
+		//var wsHeight = RESOLUTION_Y * 2;
 
 		Camera.Main.Orthogonal = true;
-		Camera.Main.OrthogonalWidth = wsWidth;
-		Camera.Main.OrthogonalHeight = wsHeight;
+		Camera.Main.OrthogonalWidth = RESOLUTION_X;
+		Camera.Main.OrthogonalHeight = RESOLUTION_Y;
 
 		base.Initialize();
 	}
