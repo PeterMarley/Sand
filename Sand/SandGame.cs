@@ -132,7 +132,10 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		}
 		else if (!didPrep)
 		{
-			World = new DrawableWorld(StuffCellSetup.StoneAroundEdges2);
+			//World = new DrawableWorld(StuffCellSetup.StoneAroundEdges2);
+			World = new DrawableWorld(StuffCellSetup.StoneAroundEdgesWithLateralHoles);
+
+
 
 			//SpriteManager.AddDrawableBatch(_world);
 			didPrep = true;

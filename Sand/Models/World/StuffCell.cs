@@ -89,6 +89,26 @@ public class StuffCell : IDrawableBatch
 					}
 				}
 				break;
+			case StuffCellSetup.StoneAroundEdgesWithLateralHoles:
+				int yExcStart = STUFF_CELL_HEIGHT / 3;
+				int yExcEnd = (STUFF_CELL_HEIGHT / 3) * 2;
+
+				for (int x = 0; x < STUFF_CELL_WIDTH; x++)
+				{
+					for (int y = 0; y < STUFF_CELL_HEIGHT; y++)
+					{
+						if (x == 0 || x == STUFF_CELL_WIDTH - 1 // if at far left or right
+						|| y == 0 || y == STUFF_CELL_HEIGHT - 1) // if at far top or bottom
+						{
+							if (!(y > yExcStart && y < yExcEnd))
+							{
+								ForceAddStuff(Stuffs.BASIC_STONE, x, y);
+							}
+							
+						}
+					}
+				}
+				break;
 			case StuffCellSetup.WaterBottomHalf:
 				for (int x = 0; x < STUFF_CELL_WIDTH; x++)
 				{
