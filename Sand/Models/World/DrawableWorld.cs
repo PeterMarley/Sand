@@ -50,9 +50,8 @@ public class DrawableWorld
 	}
 
 	//===========================================
-	// Moving Stuff
+	// Doing Stuff
 	//===========================================
-
 	private void ApplyGravity(StuffCell cell, int xIndex, int yIndex)
 	{
 		var stuff = cell.GetStuffAt(xIndex, yIndex);
@@ -279,10 +278,14 @@ PLAYER
 		}
 
 	}
-	public SandCoordinate StuffPositionForWorldCoord(Vector2 worldCoord)
+	public SandCoordinate Convert(Vector2 worldCoord)
 	{
 		int? chunkIndex = null;
 		Point? stuffPosition = null;
+
+		//======================================================
+		// GET THE CHUNK INDEX OF THIS WORLD COORDINDATE
+		//======================================================
 
 		for (int i = 0; i < StuffCells.Length; i++)
 		{
@@ -297,66 +300,39 @@ PLAYER
 			}
 		}
 
+		//======================================================
+		// GET THE STUFF RELATIVE COORDINATE INSIDE THE CELL
+		//======================================================
+
 		if (chunkIndex.HasValue)
 		{
 			var offset = StuffCells[chunkIndex.Value].Offset;
 
-			// get origin of cell
-			var originX = 0;
-			var originY = 0; // bottom left
+			// get absolute coordinate or cell origin (bottom left)
+			Point cellOrigin = new(offset * RESOLUTION_X, 0);
 
-			// offset this origin by the number or RESOLUTION_X's * OFFSET
-			var originXOffset = originX + (offset * RESOLUTION_X);
-			Point cellOrigin = new(originXOffset, originY);
-
-			// now get the distance between the origin and the coord
-			var positionRelativeToOrigin_X = worldCoord.X - cellOrigin.X;
-			var positionRelativeToOrigin_Y = worldCoord.Y - cellOrigin.Y;
-
-			var stuffX = (int)(positionRelativeToOrigin_X / STUFF_TO_PIXEL_SCALE);
-			var stuffY = (int)(positionRelativeToOrigin_Y / STUFF_TO_PIXEL_SCALE);
-
-			stuffPosition = new Point(stuffX, stuffY);
-
-			/*			var tX = worldCoord.X;
-						//for (int i = 0; i <= chunkIndex; i++)
-						//{
-						var adj = RESOLUTION_X * offset;
-						//tX += (RESOLUTION_X * i) - (RESOLUTION_X * StuffCells[chunkIndex.Value].Offset);
-						tX += adj;
-
-						//}
-						var temp = new Vector2(tX, worldCoord.Y);
-
-						var spX = 1;
-
-						// the temp now describes
-
-
-						var spY = 1;
-
-						stuffPosition = new Point((int)(temp.X / STUFF_SCALE), (int)(temp.Y / STUFF_SCALE));
-						//var stuffPosition = new Point(STUFF_WIDTH / 2, STUFF_HEIGHT / 2);*/
-			var sdfsdf = "";
+			// get the internal cell stuff coord of the world coord arg
+			stuffPosition = new Point(
+				(int)((worldCoord.X - cellOrigin.X) / STUFF_TO_PIXEL_SCALE),
+				(int)((worldCoord.Y - cellOrigin.Y) / STUFF_TO_PIXEL_SCALE)
+			);
 		}
 
 		//Console.WriteLine($"{nameof(StuffPositionForWorldCoord)} - chunkIndex={chunkIndex} stuffPosition={stuffPosition} (MAX={Constants.STUFF_CELL_WIDTH},{Constants.STUFF_CELL_HEIGHT})");
 
+		//======================================================
+		// BUNDLE AND RETURN
+		//======================================================
+
 		return new SandCoordinate()
 		{
-			ChunkIndex = chunkIndex ?? throw new InvalidOperationException("chunkIndex not found"),
-			StuffPosition = stuffPosition ?? throw new InvalidOperationException("stuffPosition not found")
+			ChunkIndex		= chunkIndex	?? throw new InvalidOperationException("chunkIndex not found"),
+			StuffPosition	= stuffPosition	?? throw new InvalidOperationException("stuffPosition not found")
 		};
-
-		//return (
-		//	chunkIndex ?? throw new InvalidOperationException("chunkIndex not found"),
-		//	stuffPosition ?? throw new InvalidOperationException("stuffPosition not found")
-		//);
 	}
 	public void ProcessControlsInput()
 	{
-		
-		var mousePosition = StuffPositionForWorldCoord(WorldCoords.MouseAbsolute);
+		var mousePosition = Convert(WorldCoords.MouseAbsolute);
 
 		AffectWorld(mousePosition);
 		AffectPlayer(mousePosition);
