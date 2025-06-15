@@ -6,11 +6,11 @@ public class Constants
 	//	DIMENSIONS										|
 	//---------------------------------------------------
 	/// <summary>Window resolution X</summary>
-	public const int RESOLUTION_X = 1500;//1500;
+	public const int RESOLUTION_X = 1500;
 	/// <summary>Window resolution Y</summary>
-	public const int RESOLUTION_Y = 800;//800;
+	public const int RESOLUTION_Y = 800;
 	/// <summary>This many pixels per <see cref="Sand.Stuff"/></summary>
-	public const int STUFF_TO_PIXEL_SCALE = 4;//5;
+	public const int STUFF_TO_PIXEL_SCALE = 4;
 	/// <summary><see cref="Sand.StuffCell"/>'s are is this many <see cref="Sand.Stuff"/> wide</summary>
 	public const int STUFF_CELL_WIDTH = RESOLUTION_X / STUFF_TO_PIXEL_SCALE;
 	/// <summary><see cref="Sand.StuffCell"/>'s are is this many <see cref="Sand.Stuff"/> high</summary>
@@ -39,31 +39,23 @@ public class Constants
 	//===================================================
 	//	DEBUG											|
 	//===================================================
-	/// <summary>Controls whether dormant colours are shown in CMYK</summary>]
+	/// <summary>Controls whether dormant <see cref="Sand.Stuff"/> is highlighted in CMYK colours</summary>]
 	public const bool SHOW_STUFF_DORMANCY_COLORS = false;
-	/// <summary>Controls the player's hitbox is highlighted</summary>]
 	public const bool SHOW_PLAYER_HITBOX = true;
-
-	//===================================================
-	// VISUAL ELEMENT Z INDICES
-	//===================================================
-	public const float Z_IND_BACKGROUND = -10f;
-	public const float Z_IND_WORLD = 0f;
-	public const float Z_IND_PLAYER = 10f;
-
 	public const bool SHOW_BACKGROUND = true;
 	public const bool SHOW_WORLD = true;
 	public const bool SHOW_PLAYER = true;
 
-}
+	//===================================================
+	// VISUAL ELEMENT Z INDICES
+	//===================================================
+	/// <summary>z-index of the background</summary>]
+	public const float Z_IND_BACKGROUND = -10f;
+	/// <summary>z-index of the <see cref="Sand.Stuff"/> in the world</summary>]
+	public const float Z_IND_WORLD = 0f;
+	/// <summary>z-index of the <see cref="Sand.Player"/></summary>]
+	public const float Z_IND_PLAYER = 10f;
 
-public class Stuffs
-{
-	public const string BASIC_SAND = "BasicSand";
-	public const string BASIC_WATER = "BasicWater";
-	public const string BASIC_STONE = "BasicStone";
-	public const string BASIC_LAVA = "BasicLava";
-	public const string BASIC_LAVA2 = "BasicLava2";
 
-	//public const string FLAT_WATER = "FlatWater";
+
 }

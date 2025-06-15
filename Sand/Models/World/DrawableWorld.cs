@@ -1,24 +1,13 @@
 ﻿using FlatRedBall;
-using FlatRedBall.Content.Math.Splines;
-using FlatRedBall.Graphics;
-using FlatRedBall.Graphics.Animation;
 using FlatRedBall.Input;
-using FlatRedBall.Math.Geometry;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Sand.Extensions;
-using Sand.Models.Stuff;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using static FlatRedBall.Input.Mouse;
 using static Sand.Constants;
 using Point = System.Drawing.Point;
 
 namespace Sand;
-
 
 public class DrawableWorld
 {
@@ -341,12 +330,12 @@ PLAYER
 		{
 			if (InputManager.Mouse.IsInGameWindow())
 			{
-				if (InputManager.Keyboard.KeyDown(Keys.Z))
+				if (InputManager.Keyboard.KeyDown(Keys.Left))
 				{
 					Camera.Main.X -= 5 * STUFF_TO_PIXEL_SCALE;
 				}
 
-				if (InputManager.Keyboard.KeyDown(Keys.C))
+				if (InputManager.Keyboard.KeyDown(Keys.Right))
 				{
 					Camera.Main.X += 5 * STUFF_TO_PIXEL_SCALE;
 				}
@@ -370,23 +359,6 @@ PLAYER
 				{
 					StuffCells[mousePos.ChunkIndex].SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_LAVA2, mousePos.StuffPosition.X, mousePos.StuffPosition.Y, 10);
 				}
-
-				/*// place stuff at bottom left of player
-				if (InputManager.Keyboard.KeyDown(Keys.E))
-				{
-					*//*var (top, right, bottom, left) = Player.GetPositionStuff(); *//*NumberExtensions.ToStuffCoord(Player.Sprite);*//*
-
-					//StuffCell.ForceAddStuff_InSquare(Stuffs.BASIC_STONE, left, bottom, 2);
-
-					//TODO stuff cell naive quick impl
-					StuffCells[1].ForceAddStuff_InSquare(Stuffs.BASIC_STONE, left, bottom, 2);*//*
-					var (top, right, bottom, left) = Player.GetPositionStuff(); *//*NumberExtensions.ToStuffCoord(Player.Sprite);*//*
-
-					//StuffCell.ForceAddStuff_InSquare(Stuffs.BASIC_STONE, left, bottom, 2);
-
-					//TODO stuff cell naive quick impl
-					StuffCells[1].ForceAddStuff_InSquare(Stuffs.BASIC_STONE, left, bottom, 2);
-				}*/
 			}
 		}
 		void AffectPlayer(SandCoordinate mousePos)
@@ -442,10 +414,10 @@ PLAYER
 				Player.Y += moveRightOffsetY;
 			}
 
-			if (InputManager.Keyboard.KeyPushed(Keys.Q))
-			{
-				Player.PrintPosition();
-			}
+			//if (InputManager.Keyboard.KeyPushed(Keys.Q))
+			//{
+			//	Player.PrintPosition();
+			//}
 
 			Player.TurnDirectionFacing();
 		}

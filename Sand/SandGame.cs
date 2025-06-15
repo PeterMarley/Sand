@@ -2,7 +2,6 @@ using FlatRedBall;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using FlatRedBall.Input;
-using static FlatRedBall.Input.Mouse;
 using System.Threading.Tasks;
 using static Sand.Constants;
 using System.Diagnostics;

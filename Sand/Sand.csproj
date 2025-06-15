@@ -35,12 +35,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\Constants.cs" />
+    <Compile Include="Data\Stuffs.cs" />
     <Compile Include="Extensions\ArrayExtensions.cs" />
     <Compile Include="Extensions\NumberExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Models\Stuff\ChunkManager.cs" />
     <Compile Include="Models\World\CheckerBoardBackground.cs" />
     <Compile Include="Models\World\Chunk.cs" />
+    <Compile Include="Models\World\Edges.cs" />
     <Compile Include="Models\World\PlayerCollisionResult.cs" />
     <Compile Include="Models\World\SandCoordinate.cs" />
     <Compile Include="Models\World\StuffCell.cs" />
