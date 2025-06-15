@@ -41,7 +41,7 @@ public class StuffCell : IDrawableBatch
 			for (int chunkCol = 0; chunkCol < STUFF_CELL_CHUNKS_LONG; chunkCol++)
 			{
 				// create new chunk
-				Chunks.Add(new Chunk(cursor, chunkWidth, chunkHeight));
+				Chunks.Add(new StuffCellChunk(cursor, chunkWidth, chunkHeight));
 
 				leftToRight = !leftToRight;
 
@@ -147,7 +147,7 @@ public class StuffCell : IDrawableBatch
 
 	/// <summary>1st index is X, 2nd index is Y.</summary>
 	private Stuff[,] CellMatrix { get; set; }
-	private List<Chunk> Chunks { get; set; }
+	private List<StuffCellChunk> Chunks { get; set; }
 	private Texture2D WorldTexture { get; set; }
 	private Sprite WorldSprite { get; set; }
 
@@ -634,9 +634,9 @@ public class StuffCell : IDrawableBatch
 			return false;
 		}
 	}
-	public List<Chunk> GetChunksToUpdate()
+	public List<StuffCellChunk> GetChunksToUpdate()
 	{
-		var chunksToUpdate = new List<Chunk>();
+		var chunksToUpdate = new List<StuffCellChunk>();
 
 		#region Every other chunk, oscillating first chunk position
 

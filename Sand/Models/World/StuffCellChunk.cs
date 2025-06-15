@@ -4,7 +4,7 @@ using static Sand.Constants;
 
 namespace Sand;
 
-public class Chunk 
+public class StuffCellChunk 
 {
 	private readonly int _width;
 	private readonly int _height;
@@ -18,9 +18,7 @@ public class Chunk
 	/// >=====================/
 	/// </code></summary>
 	public List<Point> Points_BottomLeftToTopRight_AlternatingRowDirection { get; private init; }
-
-
-	public Chunk(Point origin, int chunkWidth, int chunkHeight)
+	public StuffCellChunk(Point origin, int chunkWidth, int chunkHeight)
 	{
 		_width = chunkWidth;
 		_height = chunkHeight;

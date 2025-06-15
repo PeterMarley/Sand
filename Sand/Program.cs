@@ -17,28 +17,8 @@ namespace Sand
 
 			try
 			{
-				using (var sandGame = new SandGame())
-				{
-					var byEditor = args.Contains("LaunchedByEditor");
-
-					if (byEditor)
-					{
-						try
-						{
-							sandGame.Run();
-						}
-						catch (Exception e)
-						{
-							System.IO.File.WriteAllText("CrashInfo.txt", e.ToString());
-							throw;
-						}
-					}
-					else
-					{
-						sandGame.Run();
-					}
-
-				}
+				using var sandGame = new SandGame();
+				sandGame.Run();
 			}
 			catch (Exception ex)
 			{

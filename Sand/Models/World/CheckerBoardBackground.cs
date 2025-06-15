@@ -5,20 +5,15 @@ using static Sand.Constants;
 
 namespace Sand;
 
-
-
-//========================================
-// IDrawableBatch
-//========================================
 public class CheckerBoardBackground : IDrawableBatch
 {
 	private Sprite _sprite;
 	public CheckerBoardBackground()
 	{
 
-		_texture = FlatRedBallServices.Load<Texture2D>("Content/TextureImages/Checkerboard_BG_8x8.png");
+		var texture = FlatRedBallServices.Load<Texture2D>("Content/TextureImages/Checkerboard_BG_8x8.png");
 
-		_sprite = SpriteManager.AddSprite(_texture);
+		_sprite = SpriteManager.AddSprite(texture);
 		_sprite.TextureAddressMode = TextureAddressMode.Wrap;
 		_sprite.TextureScale = 1;
 		_sprite.Width = RESOLUTION_X;
@@ -37,28 +32,11 @@ public class CheckerBoardBackground : IDrawableBatch
 	}
 
 	public float X => 0;
-
 	public float Y => 0;
-
 	public float Z => 0;
-
 	public bool UpdateEveryFrame => true;
-
-	private Texture2D _texture { get; set; }
-
-	public void Destroy()
-	{
-		//throw new NotImplementedException();
-	}
-
-	public void Draw(Camera camera)
-	{
-		//throw new NotImplementedException();
-	}
-
-	public void Update()
-	{
-		//throw new NotImplementedException();
-	}
+	public void Destroy() { }
+	public void Draw(Camera camera) { }
+	public void Update() { }
 }
 

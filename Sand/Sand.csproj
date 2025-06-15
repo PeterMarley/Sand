@@ -41,8 +41,7 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Models\Stuff\ChunkManager.cs" />
     <Compile Include="Models\World\CheckerBoardBackground.cs" />
-    <Compile Include="Models\World\Chunk.cs" />
-    <Compile Include="Models\World\Edges.cs" />
+    <Compile Include="Models\World\StuffCellChunk.cs" />
     <Compile Include="Models\World\PlayerCollisionResult.cs" />
     <Compile Include="Models\World\SandCoordinate.cs" />
     <Compile Include="Models\World\StuffCell.cs" />
