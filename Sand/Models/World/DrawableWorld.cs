@@ -26,15 +26,11 @@ public class DrawableWorld
 	private const int GRAV_MAGNITUDE = 1;
 
 	//========================================
-	// The World
+	// Fields / Properties
 	//========================================
+	public WorldCoords WorldCoords { get; private set; }
 	private StuffCell[] StuffCells { get; set; }
 	private CheckerBoardBackground Background { get; set; }
-	public WorldCoords WorldCoords { get; private set; }
-
-	//========================================
-	// The Player
-	//========================================
 	private Player Player { get; set; }
 
 
@@ -42,39 +38,23 @@ public class DrawableWorld
 	// CTOR
 	//===========================================
 	public DrawableWorld(StuffCellSetup worldSetup)
-	{
-		PrepareBackground();
-		PrepareWorld(worldSetup);
-		PreparePlayer();
-
-		void PrepareBackground()
-		{
-			Background = new CheckerBoardBackground();
-		}
-		void PrepareWorld(StuffCellSetup worldSetup)
-		{
-			StuffCells =
-			[
-				new StuffCell(-1, worldSetup),
-				new StuffCell(0, worldSetup),
-				new StuffCell(1, worldSetup)
-			];
-		}
-		void PreparePlayer()
-		{
-			Player = new Player();
-
-		}
+	{		
+		Background = new CheckerBoardBackground();
+		Player = new Player();
+		StuffCells =
+		[
+			new StuffCell(-1, worldSetup),
+			new StuffCell(0, worldSetup),
+			new StuffCell(1, worldSetup)
+		];
 	}
 
 	//===========================================
 	// Moving Stuff
 	//===========================================
-	#region Moving Stuff
 
-	public void ApplyGravity(StuffCell cell, int xIndex, int yIndex)
+	private void ApplyGravity(StuffCell cell, int xIndex, int yIndex)
 	{
-		//TODO stuff cell naive quick impl
 		var stuff = cell.GetStuffAt(xIndex, yIndex);
 
 		switch (stuff.Phase)
@@ -94,21 +74,21 @@ public class DrawableWorld
 				return;
 			}
 
-			//==================================================================
-			//Check 2 spots below left and right, if all are filled then move on
-			//==================================================================
-
 			// if bottom row outside array range just continue as this Stuff cant fall anywhere
 			var rowBelowIndex = yIndex - 1;
 			if (rowBelowIndex < 0) return;
 
+			//==================================================================
+			//Check 3 spots: below left and right. If all are filled then move on.
+			//==================================================================
+
 			// check directly below
-			if ((rowBelowIndex - 2 >= 0 && Move(cell, new(xIndex, yIndex), new(xIndex, rowBelowIndex - 2)) || (rowBelowIndex - 1 >= 0 && Move(cell, new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)))))
+			if ((rowBelowIndex - 2 >= 0 && cell.Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 2)) || (rowBelowIndex - 1 >= 0 && cell.Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)))))
 			{
 				return;
 			}
 
-			// check below and left (but alterate sides randomly)
+			// check below-left and below-right (alterating sides randomly)
 			bool leftSide = FastRandomBoolGenerator.Instance.Next();
 			int colLeftIndex = xIndex - 1;
 			int colRightIndex = xIndex + 1;
@@ -118,7 +98,7 @@ public class DrawableWorld
 				if (leftSide)
 				{
 					// check below and left
-					if (colLeftIndex >= 0 && Move(cell, new(xIndex, yIndex), new(colLeftIndex, rowBelowIndex)))
+					if (colLeftIndex >= 0 && cell.Move(new(xIndex, yIndex), new(colLeftIndex, rowBelowIndex)))
 					{
 						return;
 						//break;
@@ -127,7 +107,7 @@ public class DrawableWorld
 				else
 				{
 					// check below and right
-					if (colRightIndex < STUFF_CELL_WIDTH && Move(cell, new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
+					if (colRightIndex < STUFF_CELL_WIDTH && cell.Move(new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
 					{
 						return;
 						//break;
@@ -137,40 +117,37 @@ public class DrawableWorld
 			}
 
 			// check directly below
-			if (Move(cell, new(xIndex, yIndex), new(xIndex, rowBelowIndex)))
+			if (cell.Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex)))
 			{
 				return;
 			}
 
 		}
-
 		void ApplyGravityPhaseLiquid(StuffCell cell, Stuff stuff, int xIndex, int yIndex)
 		{
-
-
-			//-----------------------------------------------------------------
-			//Check 2 spots below left and right
-			//-----------------------------------------------------------------
-
 			// if bottom row outside array range just continue as this Stuff cant fall anywhere
 			var rowBelowIndex = yIndex - 1;
 			if (rowBelowIndex < 0) return;
 
+			//==================================================================
+			//Check 3 spots: below left and right. If all are filled then move on.
+			//==================================================================
+
 			// if dormant, and theres nothing below, finish
-			//TODO stuff cell naive quick impl
-			if (stuff.CheckDormancy() && StuffCells[1].GetStuffAt(xIndex, rowBelowIndex) != null) // this is not null check basically enables erroneously dormant stuff to right itself
+			if (stuff.CheckDormancy() && cell.GetStuffAt(xIndex, rowBelowIndex) != null) // this is not null check basically enables erroneously dormant stuff to right itself
 			{
 				return;
 			}
 
 			// check directly below
-			if ((rowBelowIndex - 2 >= 0 && Move(cell, new(xIndex, yIndex), new(xIndex, rowBelowIndex - 2)) || (rowBelowIndex - 1 >= 0 && Move(cell, new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)))))
+			if ((rowBelowIndex - 2 >= 0 && cell.Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 2)) || (rowBelowIndex - 1 >= 0 && cell.Move(new(xIndex, yIndex), new(xIndex, rowBelowIndex - 1)))))
 			{
 				return;
 			}
+
+			// check below-left and below-right (alterating sides randomly)
 			bool leftFirst = FastRandomBoolGenerator.Instance.Next();
 			bool leftSide = leftFirst;
-			// check below and left (but alterate sides randomly)
 			int colLeftIndex = xIndex - 1;
 			int colRightIndex = xIndex + 1;
 
@@ -179,7 +156,7 @@ public class DrawableWorld
 				if (leftSide)
 				{
 					// check below and left
-					if (colLeftIndex >= 0 && Move(cell, new(xIndex, yIndex), new(colLeftIndex, rowBelowIndex)))
+					if (colLeftIndex >= 0 && cell.Move(new(xIndex, yIndex), new(colLeftIndex, rowBelowIndex)))
 					{
 						break;
 					}
@@ -187,7 +164,7 @@ public class DrawableWorld
 				else
 				{
 					// check below and right
-					if (colRightIndex < STUFF_CELL_WIDTH && Move(cell, new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
+					if (colRightIndex < STUFF_CELL_WIDTH && cell.Move(new(xIndex, yIndex), new(colRightIndex, rowBelowIndex)))
 					{
 						break;
 					}
@@ -195,15 +172,15 @@ public class DrawableWorld
 				leftSide = !leftSide;
 			}
 
+			//==================================================================
+			//Check 2 spots directly left and right - represent fluidic flow
+			//==================================================================
+
 			if (TimeManager.CurrentFrame % 1 == 0)
 			{
 				colLeftIndex--;
 				colRightIndex++;
 				leftSide = leftFirst;
-
-				//-----------------------------------------------------------------
-				//Check 2 spots directly left and right - represent fluidic flow
-				//-----------------------------------------------------------------
 
 				// check direct lateral movements
 				for (var lateralFlowAttempts = 2; lateralFlowAttempts > 0; lateralFlowAttempts--)
@@ -211,7 +188,7 @@ public class DrawableWorld
 					if (leftSide)
 					{
 						// check left
-						if (colLeftIndex >= 0 && Move(cell, new(xIndex, yIndex), new(colLeftIndex, yIndex)))
+						if (colLeftIndex >= 0 && cell.Move(new(xIndex, yIndex), new(colLeftIndex, yIndex)))
 						{
 							break;
 						}
@@ -219,7 +196,7 @@ public class DrawableWorld
 					else
 					{
 						// check right
-						if (colRightIndex < STUFF_CELL_WIDTH && Move(cell, new(xIndex, yIndex), new(colRightIndex, yIndex)))
+						if (colRightIndex < STUFF_CELL_WIDTH && cell.Move(new(xIndex, yIndex), new(colRightIndex, yIndex)))
 						{
 							break;
 						}
@@ -227,62 +204,8 @@ public class DrawableWorld
 					leftSide = !leftSide;
 				}
 			}
-
-			////====================================================================
-			//// check left below and right, if all same phase then set as dormant
-			////====================================================================
-
-			//// the col left right and row below indices all checked to be valid at this point
-
-			//bool leftDormancyCondition = false;
-			//bool rightDormancyCondition = colRightIndex < STUFF_WIDTH;
-			//bool belowleftDormancyCondition = rowBelowIndex >= 0;
-
-			//var a = World[xIndex];
-			//var b = World[xIndex][yIndex];
-			//var c = World[xIndex][yIndex];
-
-			//try
-			//{
-			//	if (World[colLeftIndex][yIndex] != null && World[colLeftIndex][yIndex].Name == stuff.Name)
-			//	{
-			//		leftDormancyCondition = true;
-			//	}
-
-			//	// if directly right is not empty and is same phase then set dormancy check
-			//	if (World[colRightIndex][yIndex] != null && World[colRightIndex][yIndex].Name == stuff.Name)
-			//	{
-			//		rightDormancyCondition = true;
-			//	}
-
-			//	// if directly left is not empty and is same phase then set dormancy check
-			//	if (World[xIndex][rowBelowIndex] != null && World[xIndex][rowBelowIndex].Name == stuff.Name)
-			//	{
-			//		belowleftDormancyCondition = true;
-			//	}
-
-			//	// if directly below is not empty and is same phase then set dormancy check
-			//	if (leftDormancyCondition && rightDormancyCondition && belowleftDormancyCondition)
-			//	{
-			//		stuff.Dormant = true;
-			//	}
-			//}
-			//catch (Exception checkingAdjacentEx)
-			//{
-			//	throw;
-			//}
-
-
 		}
 	}
-	public bool Move(StuffCell cell, Point from, Point to)
-	{
-		//TODO stuff cell naive quick impl
-		return cell.Move(from, to);
-	}
-
-	#endregion Moving Stuff
-
 	public void Update()
 	{
 		SetupWorldCoords();
@@ -290,17 +213,16 @@ public class DrawableWorld
 
 		void SetupWorldCoords()
 		{
-			var camBottomLeft = new Vector2((Camera.Main.X - Camera.Main.OrthogonalWidth / 2)/* - (RESOLUTION_X / 2)*/, (Camera.Main.Y - Camera.Main.OrthogonalHeight / 2)/* - (RESOLUTION_Y / 2)*/);
-			var mRel = new Vector2(InputManager.Mouse.X, RESOLUTION_Y - InputManager.Mouse.Y);
+			var camBottomLeft = new Vector2((Camera.Main.X - Camera.Main.OrthogonalWidth / 2), (Camera.Main.Y - Camera.Main.OrthogonalHeight / 2));
+			var mouseRelative = new Vector2(InputManager.Mouse.X, RESOLUTION_Y - InputManager.Mouse.Y);
 
 			WorldCoords = new WorldCoords(
-			
-				mouseRelative: mRel,
-				cameraCentre: new Vector2(Camera.Main.X, Camera.Main.Y),
-				cameraBottomLeft: camBottomLeft,
-				cameraOffset: camBottomLeft,
-				cameraTopRight: new Vector2(Camera.Main.X + (RESOLUTION_X / 2), Camera.Main.Y + (RESOLUTION_Y / 2)),
-				mouseAbsolute: new Vector2(mRel.X + camBottomLeft.X, mRel.Y + camBottomLeft.Y)
+				mouseRelative: mouseRelative,
+				mouseAbsolute: new Vector2(mouseRelative.X + camBottomLeft.X, mouseRelative.Y + camBottomLeft.Y),
+				camCentre: new Vector2(Camera.Main.X, Camera.Main.Y),
+				camBottomLeft: camBottomLeft,
+				camOffset: camBottomLeft,
+				camTopRight: new Vector2(Camera.Main.X + (RESOLUTION_X / 2), Camera.Main.Y + (RESOLUTION_Y / 2))
 			);
 
 			if (PRINT_POSITIONS_ON_CLICK && InputManager.Mouse.IsInGameWindow() && InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton))
@@ -319,20 +241,12 @@ PLAYER
 	- ✓ Player Absolute   {Player.X},{Player.Y}
 ========================================
 ";
-
 				Logger.Instance.LogInfo(msg);
 
 			}
 		}
 		void ProcessChunks()
 		{
-
-			/*		if (TimeManager.CurrentFrame % _FRAME_COUNT_BETWEEN_UPDATE != 0)
-					{
-						return;
-					}
-			*/
-			int i = 0;
 			foreach (var cell in StuffCells)
 			{
 				var p = new Point();
@@ -342,38 +256,25 @@ PLAYER
 					//=======================================================
 					// New version of world update loop (utilising chunks)
 					//=======================================================
-					// choose which chunks to update
-					//var chunksToUpdate = StuffCell.GetChunksToUpdate();
-					//TODO stuff cell naive quick impl
-					var chunksToUpdate = cell.GetChunksToUpdate();
-
-					foreach (var chunk in chunksToUpdate)
+					
+					foreach (var chunk in cell.GetChunksToUpdate())
 					{
 						foreach (var point in chunk.Points_BottomLeftToTopRight_AlternatingRowDirection)
 						{
-							var xIndex = point.X;
-							var yIndex = point.Y;
-
-							// make point viewable to scope that encloses the try catch for error logging
 							p = point;
 
-							// if something here then apply gravity **NOTE** dormancy is checked in apply gravity
-
-							//if (StuffCell.GetStuffAt(point) != null)
-							//TODO stuff cell naive quick impl
 							if (cell.GetStuffAt(point) != null)
 							{
-								ApplyGravity(cell, xIndex, yIndex);
+								ApplyGravity(cell, point.X, point.Y);
 							}
 						}
 					}
 				}
-				catch (Exception updateException)
+				catch (Exception chunkException)
 				{
-					Logger.Instance.LogError(updateException, $"(x,y)=({p.X},{p.Y}), (maxX, maxY)=({STUFF_CELL_WIDTH - 1},{STUFF_CELL_HEIGHT - 1})");
+					Logger.Instance.LogError(chunkException, $"(x,y)=({p.X},{p.Y}), (maxX, maxY)=({STUFF_CELL_WIDTH - 1},{STUFF_CELL_HEIGHT - 1})");
 					throw;
 				}
-				i++;
 			}
 		}
 
@@ -458,18 +359,12 @@ PLAYER
 		var mousePosition = StuffPositionForWorldCoord(WorldCoords.MouseAbsolute);
 
 		AffectWorld(mousePosition);
-		AffectPlayer();
+		AffectPlayer(mousePosition);
 
 		void AffectWorld(SandCoordinate mousePos)
 		{
 			if (InputManager.Mouse.IsInGameWindow())
 			{
-				// get x and y of ??? something, unsure
-				var x = InputManager.Mouse.X / STUFF_TO_PIXEL_SCALE;
-				var y = (FlatRedBallServices.GraphicsDevice.Viewport.Height - InputManager.Mouse.Y) / STUFF_TO_PIXEL_SCALE;
-
-				// get mouse pointer 
-
 				if (InputManager.Keyboard.KeyDown(Keys.Z))
 				{
 					Camera.Main.X -= 5 * STUFF_TO_PIXEL_SCALE;
@@ -480,65 +375,52 @@ PLAYER
 					Camera.Main.X += 5 * STUFF_TO_PIXEL_SCALE;
 				}
 
-				if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) /*|| InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)*/))
+				if ((InputManager.Mouse.ButtonPushed(MouseButtons.LeftButton) || InputManager.Mouse.ButtonDown(MouseButtons.LeftButton)))
 				{
-
-					//Logger.Instance.LogInfo($"Placing Water @ Chunk Index {chunkIndex} @ Stuff Position {stuffPosition}");
-					//TODO stuff cell naive quick impl
-
-					
 					StuffCells[mousePos.ChunkIndex].SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_WATER, mousePos.StuffPosition.X, mousePos.StuffPosition.Y, 15);
-					
-
-
-
-					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_WATER, x, y);
-
 				}
 
 				if ((InputManager.Mouse.ButtonPushed(MouseButtons.RightButton) || InputManager.Mouse.ButtonDown(MouseButtons.RightButton)))
 				{
-					//TODO stuff cell naive quick impl
-					StuffCells[1].SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, x, y, 10);
-					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
+					StuffCells[mousePos.ChunkIndex].SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_SAND, mousePos.StuffPosition.X, mousePos.StuffPosition.Y, 15);
 				}
 
 				if ((InputManager.Mouse.ButtonPushed(MouseButtons.MiddleButton) || InputManager.Mouse.ButtonDown(MouseButtons.MiddleButton)))
 				{
-					//TODO stuff cell naive quick impl
-					StuffCells[1].ForceAddStuff_InSquare(Stuffs.BASIC_STONE, x, y, 10);
-					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
+					StuffCells[mousePos.ChunkIndex].SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_STONE, mousePos.StuffPosition.X, mousePos.StuffPosition.Y, 10);
 				}
 
 				if ((InputManager.Mouse.ButtonPushed(MouseButtons.XButton1) || InputManager.Mouse.ButtonDown(MouseButtons.XButton1)))
 				{
-					//TODO stuff cell naive quick impl
-					StuffCells[1].ForceAddStuff_InSquare(Stuffs.BASIC_LAVA2, x, y, 2);
-					//_world.SafeAddStuffIfEmpty(Stuffs.BASIC_SAND, x, y);
+					StuffCells[mousePos.ChunkIndex].SafeAddStuffIfEmpty_InSquare(Stuffs.BASIC_LAVA2, mousePos.StuffPosition.X, mousePos.StuffPosition.Y, 10);
 				}
 
-				// place stuff at bottom left of player
+				/*// place stuff at bottom left of player
 				if (InputManager.Keyboard.KeyDown(Keys.E))
 				{
-					var (top, right, bottom, left) = Player.GetPositionStuff(); /*NumberExtensions.ToStuffCoord(Player.Sprite);*/
+					*//*var (top, right, bottom, left) = Player.GetPositionStuff(); *//*NumberExtensions.ToStuffCoord(Player.Sprite);*//*
+
+					//StuffCell.ForceAddStuff_InSquare(Stuffs.BASIC_STONE, left, bottom, 2);
+
+					//TODO stuff cell naive quick impl
+					StuffCells[1].ForceAddStuff_InSquare(Stuffs.BASIC_STONE, left, bottom, 2);*//*
+					var (top, right, bottom, left) = Player.GetPositionStuff(); *//*NumberExtensions.ToStuffCoord(Player.Sprite);*//*
 
 					//StuffCell.ForceAddStuff_InSquare(Stuffs.BASIC_STONE, left, bottom, 2);
 
 					//TODO stuff cell naive quick impl
 					StuffCells[1].ForceAddStuff_InSquare(Stuffs.BASIC_STONE, left, bottom, 2);
-				}
+				}*/
 			}
 		}
-		void AffectPlayer()
+		void AffectPlayer(SandCoordinate mousePos)
 		{
 
 			// TODO current => same for each cell
 			//	   eventual => pinpoint where the player is and do all cells as needed
-			/*foreach (var stuffCell in StuffCells)
-			{*/
-			//TODO stuff cell naive quick impl
-			var stuffCell = StuffCells[1];
-			var collision = stuffCell.Collision(Player, GRAV_MAGNITUDE, PLAYER_MOVE_FACTOR);
+			
+			var cell = StuffCells[mousePos.ChunkIndex];
+			var collision = cell.Collision(Player, GRAV_MAGNITUDE, PLAYER_MOVE_FACTOR);
 
 			var allowUp = collision.AllowUp;
 			var allowRight = collision.AllowRight;
@@ -583,7 +465,6 @@ PLAYER
 				Player.X += moveFactor;
 				Player.Y += moveRightOffsetY;
 			}
-			/*}*/
 
 			if (InputManager.Keyboard.KeyPushed(Keys.Q))
 			{
