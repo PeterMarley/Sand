@@ -2,6 +2,7 @@
 using FlatRedBall.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Sand.Services;
 using System;
 using static FlatRedBall.Input.Mouse;
 using static Sand.Constants;
@@ -18,7 +19,7 @@ public class DrawableWorld
 	// Fields / Properties
 	//========================================
 	public WorldCoords WorldCoords { get; private set; }
-	private StuffCell[] StuffCells { get; set; }
+	public StuffCell[] StuffCells { get; private set; }
 	private CheckerBoardBackground Background { get; set; }
 	private Player Player { get; set; }
 
@@ -267,64 +268,13 @@ PLAYER
 		}
 
 	}
-	public SandCoordinate Convert(Vector2 worldCoord)
-	{
-		int? chunkIndex = null;
-		Point? stuffPosition = null;
-
-		//======================================================
-		// GET THE CHUNK INDEX OF THIS WORLD COORDINDATE
-		//======================================================
-
-		for (int i = 0; i < StuffCells.Length; i++)
-		{
-			var chunk = StuffCells[i];
-			if (worldCoord.X >= chunk.Left && worldCoord.X <= chunk.Right)
-			{
-				if (worldCoord.Y >= chunk.Bottom && worldCoord.Y < chunk.Top)
-				{
-					chunkIndex = i;
-					break;
-				}
-			}
-		}
-
-		//======================================================
-		// GET THE STUFF RELATIVE COORDINATE INSIDE THE CELL
-		//======================================================
-
-		if (chunkIndex.HasValue)
-		{
-			var offset = StuffCells[chunkIndex.Value].Offset;
-
-			// get absolute coordinate or cell origin (bottom left)
-			Point cellOrigin = new(offset * RESOLUTION_X, 0);
-
-			// get the internal cell stuff coord of the world coord arg
-			stuffPosition = new Point(
-				(int)((worldCoord.X - cellOrigin.X) / STUFF_TO_PIXEL_SCALE),
-				(int)((worldCoord.Y - cellOrigin.Y) / STUFF_TO_PIXEL_SCALE)
-			);
-		}
-
-		//Console.WriteLine($"{nameof(StuffPositionForWorldCoord)} - chunkIndex={chunkIndex} stuffPosition={stuffPosition} (MAX={Constants.STUFF_CELL_WIDTH},{Constants.STUFF_CELL_HEIGHT})");
-
-		//======================================================
-		// BUNDLE AND RETURN
-		//======================================================
-
-		return new SandCoordinate()
-		{
-			ChunkIndex		= chunkIndex	?? throw new InvalidOperationException("chunkIndex not found"),
-			StuffPosition	= stuffPosition	?? throw new InvalidOperationException("stuffPosition not found")
-		};
-	}
 	public void ProcessControlsInput()
 	{
-		var mousePosition = Convert(WorldCoords.MouseAbsolute);
+		var mousePosition = CoordManager.Convert(WorldCoords.MouseAbsolute);
+		var playerPosition = CoordManager.Convert(new Vector2(Player.Hitbox.X, Player.Hitbox.Y));
 
 		AffectWorld(mousePosition);
-		AffectPlayer(mousePosition);
+		AffectPlayer(playerPosition);
 
 		void AffectWorld(SandCoordinate mousePos)
 		{
@@ -361,13 +311,13 @@ PLAYER
 				}
 			}
 		}
-		void AffectPlayer(SandCoordinate mousePos)
+		void AffectPlayer(SandCoordinate playerPos)
 		{
-
 			// TODO current => same for each cell
 			//	   eventual => pinpoint where the player is and do all cells as needed
-			
-			var cell = StuffCells[mousePos.ChunkIndex];
+
+
+			var cell = StuffCells[playerPos.ChunkIndex];
 			var collision = cell.Collision(Player, GRAV_MAGNITUDE, PLAYER_MOVE_FACTOR);
 
 			var allowUp = collision.AllowUp;

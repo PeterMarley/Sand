@@ -1,6 +1,7 @@
 ﻿using FlatRedBall;
 using FlatRedBall.Graphics;
 using Microsoft.Xna.Framework.Graphics;
+using Sand.Services;
 using System.Collections.Generic;
 using System.Drawing;
 using static Sand.Constants;
@@ -230,10 +231,16 @@ public class StuffCell : IDrawableBatch
 
 	#endregion Add Stuff
 
-	public PlayerCollisionResult Collision(Player player, int initialGravMagnitude, int initialMoveFactor) //player
+	public PlayerCollisionResult Collision(Player player, int initialGravMagnitude, int initialMoveFactor)
 	{
 
-		var (top, right, bottom, left) = player.GetPositionStuff();
+		var (bottomLeft, topRight) = CoordManager.Corners(player.Hitbox);
+
+		var top = topRight.StuffPosition.Y;
+		var right = topRight.StuffPosition.X;
+		var bottom = bottomLeft.StuffPosition.Y;
+		var left = bottomLeft.StuffPosition.X;
+
 
 		var adjustedGravMagnitude = initialGravMagnitude;
 		var adjustedMoveFactor = initialMoveFactor;

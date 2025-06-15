@@ -35,6 +35,14 @@ public class Player
 	private const float FRACTION_OF_SPRITE_VISIBLE = 0.5f;
 
 	public AxisAlignedRectangle Hitbox { get; private set; }
+	//public Edges<float> HitboxEdges 
+	//{
+	//	get
+	//	{
+	//		var s = NumberExtensions.ToStuffCoord(Hitbox);
+	//		return new Edges<float>(top: s.top, right: s.right, bottom: s.bottom, left: s.left);
+	//	}
+	//}
 
 
 	//===================================================
@@ -159,18 +167,11 @@ public class Player
 
 	}
 
-	public (int top, int right, int bottom, int left) GetPositionStuff()
-	{
-		/*		return NumberExtensions.ToStuffCoord(Sprite);
-		 *		
-		*/
-		return GetHitboxBounds();
-}
-
-	public (int top, int right, int bottom, int left) GetHitboxBounds()
-	{
-		return NumberExtensions.ToStuffCoord(Hitbox);
-	}
+	//public Edges<float> GetHitboxBounds()
+	//{
+	//	var s = NumberExtensions.ToStuffCoord(Hitbox);
+	//	return new Edges<float>(top: s.top, right: s.right, bottom: s.bottom, left: s.left);
+	//}
 
 	//public float x => Sprite.X;
 	#region Dimensions

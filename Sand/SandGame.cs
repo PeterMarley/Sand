@@ -13,7 +13,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 {
 	GraphicsDeviceManager graphics;
 
-	private DrawableWorld _world;
+	public static DrawableWorld World { get; private set; }
 	private Task _tLoadMaterials;
 	public SandGame() : base()
 	{
@@ -132,7 +132,7 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 		}
 		else if (!didPrep)
 		{
-			_world = new DrawableWorld(StuffCellSetup.StoneAroundEdges2);
+			World = new DrawableWorld(StuffCellSetup.StoneAroundEdges2);
 
 			//SpriteManager.AddDrawableBatch(_world);
 			didPrep = true;
@@ -149,10 +149,10 @@ public partial class SandGame : Microsoft.Xna.Framework.Game
 
 		//if (TimeManager.CurrentFrame % FRAME_COUNT_BETWEEN_UPDATE == 0)
 		//{
-		_world.Update();
+		World.Update();
 		//}
 
-		_world.ProcessControlsInput();
+		World.ProcessControlsInput();
 
 
 		base.Update(gameTime);
